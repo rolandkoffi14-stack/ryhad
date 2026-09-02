@@ -1,0 +1,281 @@
+// Schéma de référence Prisma / PostgreSQL — RyHaD Tic-Medic (Cotonou, Bénin)
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                    String   @id @default(cuid())
+  email                 String   @unique
+  passwordHash          String
+  role                  StaffRole
+  assignableAsTechnician Boolean @default(false) // pertinent uniquement pour ADMIN — permet à l'unique compte admin d'apparaître dans la liste des techniciens assignables
+  firstName             String
+  lastName              String
+  phone                 String?
+  isActive              Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  interventionsAssignees Intervention[] @relation("TechnicienAssigne")
+  historique            HistoriqueTicket[]
+}
+
+enum StaffRole {
+  RECEPTIONNISTE
+  TECHNICIEN
+  ADMIN
+}
+
+model Client {
+  id            String       @id @default(cuid())
+  type          ClientType   // PARTICULIER | ENTREPRISE
+  nom           String       // nom complet ou raison sociale
+  contactNom    String?      // personne de contact si ENTREPRISE
+  telephone     String
+  email         String?
+  adresse       String?
+  createdAt     DateTime     @default(now())
+  interventions Intervention[]
+  contrats      Contract[]
+  demandes      DemandeCommerciale[]
+}
+
+enum ClientType {
+  PARTICULIER
+  ENTREPRISE
+}
+
+model Contract {
+  id                  String    @id @default(cuid())
+  clientId            String
+  dateDebut           DateTime
+  dateFin             DateTime?
+  periodicite         Periodicite // MENSUEL | TRIMESTRIEL | ANNUEL
+  montantMainOeuvre   Int         // FCFA, par période
+  equipementsCouverts String      // description libre ou "tout le parc"
+  statut              ContractStatus @default(ACTIF)
+  client              Client      @relation(fields: [clientId], references: [id])
+  visitesPlanifiees   VisitePlanifiee[]
+  interventions       Intervention[]
+  facturesPeriodiques FinancialDocument[]
+}
+
+enum Periodicite {
+  MENSUEL
+  TRIMESTRIEL
+  ANNUEL
+}
+
+enum ContractStatus {
+  ACTIF
+  EXPIRE
+  RESILIE
+}
+
+model VisitePlanifiee {
+  id            String       @id @default(cuid())
+  contractId    String
+  datePrevue    DateTime
+  statut        VisiteStatus @default(PLANIFIEE)
+  interventionId String?     // renseigné une fois la visite transformée en ticket réel
+  contract      Contract     @relation(fields: [contractId], references: [id])
+}
+
+enum VisiteStatus {
+  PLANIFIEE
+  EFFECTUEE
+  EN_RETARD
+}
+
+model Intervention {
+  id                String              @id @default(cuid())
+  numero            String              @unique // référence lisible client, ex. "INT-2026-0042"
+  clientId          String
+  contractId        String?             // renseigné uniquement si type = CONTRACTUEL
+  type              InterventionType    // PONCTUEL | CONTRACTUEL — détermine le parcours de statuts autorisé, voir 2.1
+  typeMateriel      TypeMateriel
+  panneDeclaree     String
+  modeIntervention  ModeIntervention    // DEPOT_ATELIER | DOMICILE
+  statut            InterventionStatut  @default(NOUVEAU)
+  montantDiagnostic Int?                // FCFA, uniquement parcours PONCTUEL
+  montantMainOeuvre Int?                // FCFA, main d'œuvre chiffrée obligatoire pour devis
+  libelleMainOeuvre String?             // libellé de la main d'œuvre de réparation
+  diagnosticTechnicien String?
+  technicienAssigneId String?
+  dateCreation      DateTime            @default(now())
+  dateCloture       DateTime?
+  client            Client              @relation(fields: [clientId], references: [id])
+  contract          Contract?           @relation(fields: [contractId], references: [id])
+  technicienAssigne User?               @relation("TechnicienAssigne", fields: [technicienAssigneId], references: [id])
+  piecesUtilisees   PieceUtilisee[]
+  piecesJointes     PieceJointe[]
+  historique        HistoriqueTicket[]
+  documents         FinancialDocument[]
+}
+
+enum InterventionType {
+  PONCTUEL
+  CONTRACTUEL
+}
+
+enum TypeMateriel {
+  PC_PORTABLE
+  PC_BUREAU
+  TV
+  VIDEOPROJECTEUR
+  APPAREIL_MEDICAL
+  EQUIPEMENT_RESEAU
+  EQUIPEMENT_TOPOGRAPHIE
+  CAMERA_VIDEOSURVEILLANCE
+  AUTRE
+}
+
+enum ModeIntervention {
+  DEPOT_ATELIER
+  DOMICILE
+}
+
+// Union des deux parcours — la validation applicative restreint les transitions
+// autorisées selon `type` (voir 2.1), la base reste un seul modèle partagé.
+enum InterventionStatut {
+  NOUVEAU
+  FRAIS_DIAGNOSTIC_ENCAISSE // parcours PONCTUEL uniquement
+  EN_DIAGNOSTIC             // parcours PONCTUEL uniquement
+  DIAGNOSTIC_TERMINE        // parcours PONCTUEL & CONTRACTUEL (avec pièces) : technicien a fini diag -> génère devis
+  DEVIS_ENVOYE              // parcours PONCTUEL uniquement : envoyé au client
+  DEVIS_ACCEPTE             // parcours PONCTUEL uniquement : client accepte -> génère facture réparation
+  DEVIS_REFUSE              // parcours PONCTUEL uniquement : client refuse le devis
+  EN_REPARATION             // parcours PONCTUEL uniquement : facture réparation encaissée
+  EN_INTERVENTION           // parcours CONTRACTUEL uniquement (maintenance directe sans pièce)
+  TERMINE                   // commun aux deux parcours : tests OK
+  LIVRE_CLOTURE             // parcours PONCTUEL uniquement (livré au client)
+  CLOTURE                   // parcours CONTRACTUEL uniquement (clôture intervention)
+}
+
+model PieceUtilisee {
+  id             String       @id @default(cuid())
+  interventionId String
+  designation    String
+  quantite       Int
+  prixUnitaire   Int          // FCFA
+  intervention   Intervention @relation(fields: [interventionId], references: [id])
+}
+
+model PieceJointe {
+  id             String       @id @default(cuid())
+  interventionId String
+  url            String
+  type           PieceJointeType
+  uploadedAt     DateTime     @default(now())
+  intervention   Intervention @relation(fields: [interventionId], references: [id])
+}
+
+enum PieceJointeType {
+  PHOTO_DEPOT       // photo du matériel/de la panne à la soumission (site public)
+  PHOTO_AVANT
+  PHOTO_APRES
+  AUTRE
+}
+
+model HistoriqueTicket {
+  id             String       @id @default(cuid())
+  interventionId String
+  auteurId       String?      // null si action automatique (ex. création depuis le site)
+  action         String       // ex. "Statut changé : Nouveau → En diagnostic"
+  note           String?
+  createdAt      DateTime     @default(now())
+  intervention   Intervention @relation(fields: [interventionId], references: [id])
+  auteur         User?        @relation(fields: [auteurId], references: [id])
+}
+
+// Demandes de vente / location / formation — volontairement hors du modèle
+// Intervention pour ne pas complexifier sa machine à états avec des statuts
+// de réparation qui n'ont pas de sens pour une demande commerciale.
+model DemandeCommerciale {
+  id                    String              @id @default(cuid())
+  clientId              String?             // peut être null si visiteur non identifié — coordonnées alors dans description
+  typeDemande           TypeDemandeCommerciale
+  description           String
+  statut                DemandeStatut       @default(NOUVEAU)
+  lignesCotation        String?             // JSON contenant [{ designation, quantite, prixUnitaire }]
+  montantTotal          Int?                // Total en FCFA
+  notesInternes         String?             // Notes de suivi
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @default(now()) @updatedAt
+  client                Client?             @relation(fields: [clientId], references: [id])
+  documents             FinancialDocument[]
+}
+
+enum TypeDemandeCommerciale {
+  VENTE_MATERIEL
+  LOCATION_VIDEOPROJECTEUR
+  FORMATION
+  AUTRE
+}
+
+enum DemandeStatut {
+  NOUVEAU
+  EN_COURS
+  DEVIS_ENVOYE
+  DEVIS_ACCEPTE
+  DEVIS_REFUSE
+  FACTURE_PAYEE
+  TRAITE
+  CLOS
+}
+
+model FinancialDocument {
+  id                    String              @id @default(cuid())
+  numero                String              @unique // ex. "DEV-2026-0001", "FAC-2026-0001"
+  type                  DocumentType        // DEVIS | FACTURE
+  typeFacture           FactureType?        // DIAGNOSTIC | REPARATION | CONTRAT | COMMERCIALE (si type == FACTURE)
+  interventionId        String?             // null pour FACTURE de contrat / commerciale
+  contractId            String?             // renseigné pour FACTURE de contrat
+  demandeCommercialeId  String?             // renseigné pour devis ou facture commerciale
+  montant               Int                 // FCFA
+  statutPaiement        StatutPaiement      @default(EN_ATTENTE)
+  modePaiement          String?             // ESPECES | MTN_MOMO | MOOV_MONEY | CARTE_BANCAIRE | VIREMENT | CHEQUE
+  referencePaiement     String?             // Réf transaction, n° chèque, etc.
+  datePaiement          DateTime?
+  dateEmission          DateTime            @default(now())
+  pdfUrl                String?
+  intervention          Intervention?       @relation(fields: [interventionId], references: [id])
+  contract              Contract?           @relation(fields: [contractId], references: [id])
+  demandeCommerciale    DemandeCommerciale? @relation(fields: [demandeCommercialeId], references: [id])
+}
+
+enum DocumentType {
+  DEVIS
+  FACTURE
+  RECU_DIAGNOSTIC     // Rétrocompatibilité
+  FACTURE_PERIODIQUE  // Rétrocompatibilité
+}
+
+enum FactureType {
+  DIAGNOSTIC          // Frais de diagnostic initial (5.000 FCFA)
+  REPARATION          // Réparation & clôture d'intervention
+  CONTRAT             // Facture périodique de contrat de maintenance
+  COMMERCIALE         // Vente matériel, location, formation
+}
+
+enum StatutPaiement {
+  PAYE
+  EN_ATTENTE
+  PARTIEL
+  REFUSE
+  ANNULE
+}
+
+// Stock de pièces — optionnel MVP (section 4.6 du cahier des charges), modélisé
+// dès maintenant pour ne pas casser le schéma si activé en cours de route.
+model Piece {
+  id           String  @id @default(cuid())
+  nom          String
+  quantiteStock Int    @default(0)
+  seuilAlerte  Int     @default(5)
+}

@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-blue: #1E4D8B;
+    --brand-blue-dark: #153663;
+    --brand-blue-light: #EBF2FA;
+    --brand-green: #2CA58D;
+    --brand-green-dark: #217C6A;
+    --brand-green-light: #EAF6F4;
+    --brand-slate: #F4F6F8;
+    --brand-dark: #1C222B;
+    --brand-red: #E2574C;
+  }
+
+  body {
+    @apply bg-white text-[#1C222B] antialiased;
+    font-family: var(--font-montserrat), Montserrat, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-montserrat), Montserrat, sans-serif;
+    @apply font-bold text-brand-dark tracking-tight;
+  }
+}
+
+/* Custom UI utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.subtle-shadow {
+  box-shadow: 0 4px 20px -2px rgba(30, 77, 139, 0.06), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+}
+
+.card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px -4px rgba(30, 77, 139, 0.12), 0 4px 10px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F4F6F8;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
