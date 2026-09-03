@@ -12,6 +12,8 @@ import {
   ArrowRight,
   ArrowLeft,
   Sparkles,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 export function ResetPasswordForm() {
@@ -21,6 +23,8 @@ export function ResetPasswordForm() {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -58,7 +62,7 @@ export function ResetPasswordForm() {
     }
 
     if (password !== confirmPassword) {
-      setError("Les deux mots de passe ne sont pas identiques.");
+      setError("Les deux mots de passe ne correspondent pas.");
       return;
     }
 
@@ -77,7 +81,7 @@ export function ResetPasswordForm() {
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        throw new Error(data.message || "Erreur lors de la réinitialisation du mot de passe.");
+        throw new Error(data.message || "Échec de la réinitialisation du mot de passe.");
       }
 
       setIsSuccess(true);
@@ -90,25 +94,23 @@ export function ResetPasswordForm() {
     }
   };
 
-  if (!token) {
+  if (!token && !isSuccess) {
     return (
-      <div className="bg-white rounded-3xl p-8 border border-brand-red/30 subtle-shadow text-center space-y-4">
-        <div className="w-14 h-14 bg-brand-red-light text-brand-red rounded-full flex items-center justify-center mx-auto">
-          <AlertCircle className="w-7 h-7" />
+      <div className="bg-white rounded-3xl p-8 border border-gray-200 subtle-shadow text-center space-y-4">
+        <div className="w-12 h-12 bg-brand-red-light text-brand-red rounded-full flex items-center justify-center mx-auto">
+          <AlertCircle className="w-6 h-6" />
         </div>
-        <h2 className="text-base font-extrabold text-brand-dark">Lien Invalide ou Manquant</h2>
-        <p className="text-xs text-gray-500 max-w-sm mx-auto">
-          Ce lien de réinitialisation ne contient pas de jeton valide. Veuillez refaire une demande de mot de passe oublié.
+        <h2 className="text-base font-bold text-brand-dark">Lien invalide ou incomplet</h2>
+        <p className="text-xs text-gray-500">
+          Le jeton de réinitialisation est absent de l&apos;adresse web. Veuillez vérifier le lien reçu dans votre messagerie.
         </p>
-        <div className="pt-2">
-          <Link
-            href="/mot-de-passe-oublie"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:underline"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Refaire une demande de réinitialisation</span>
-          </Link>
-        </div>
+        <Link
+          href="/login"
+          className="inline-flex items-center justify-center gap-2 text-xs font-bold text-brand-blue hover:underline pt-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Retourner à la page de connexion</span>
+        </Link>
       </div>
     );
   }
@@ -142,13 +144,21 @@ export function ResetPasswordForm() {
         <div className="relative">
           <KeyRound className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             required
-            placeholder="••••••••••••"
+            placeholder="Mot de passe"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
+            className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            tabIndex={-1}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
+          >
+            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
         </div>
       </div>
 
@@ -157,13 +167,21 @@ export function ResetPasswordForm() {
         <div className="relative">
           <KeyRound className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
-            type="password"
+            type={showConfirmPassword ? "text" : "password"}
             required
-            placeholder="••••••••••••"
+            placeholder="Confirmer le mot de passe"
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
+            className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
           />
+          <button
+            type="button"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            tabIndex={-1}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
+          >
+            {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
         </div>
       </div>
 
@@ -192,11 +210,11 @@ export function ResetPasswordForm() {
           </div>
           <div className={`flex items-center gap-1.5 ${passwordCriteria.hasSpecial ? "text-brand-green font-bold" : "text-gray-400"}`}>
             {passwordCriteria.hasSpecial ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
-            <span>Un symbole spécial</span>
+            <span>Un symbole spécial (@, #, $, !...)</span>
           </div>
           <div className={`flex items-center gap-1.5 ${passwordCriteria.match ? "text-brand-green font-bold" : "text-gray-400"}`}>
             {passwordCriteria.match ? <CheckCircle2 className="w-3.5 h-3.5" /> : <XCircle className="w-3.5 h-3.5" />}
-            <span>Mots de passe identiques</span>
+            <span>Correspondance exacte</span>
           </div>
         </div>
       </div>
@@ -219,13 +237,12 @@ export function ResetPasswordForm() {
         )}
       </button>
 
-      <div className="text-center pt-2 border-t border-gray-100">
+      <div className="text-center pt-2">
         <Link
           href="/login"
-          className="inline-flex items-center gap-1 text-xs font-bold text-gray-500 hover:text-brand-blue transition-colors"
+          className="text-xs font-bold text-gray-500 hover:text-brand-blue transition-colors"
         >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          <span>Annuler et retourner à la connexion</span>
+          Annuler et retourner à la connexion
         </Link>
       </div>
     </form>

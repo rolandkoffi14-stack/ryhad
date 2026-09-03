@@ -898,7 +898,7 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
             <div className="space-y-3">
               <textarea
                 rows={6}
-                placeholder="Saisissez le diagnostic précis : composants testés, tensions mesurées, panne identifiée, réparations à effectuer..."
+                placeholder="Rapport de diagnostic technique"
                 value={diagnostic}
                 onChange={(e) => setDiagnostic(e.target.value)}
                 className="w-full p-3.5 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-brand-blue outline-none leading-relaxed bg-brand-slate/30"
@@ -983,14 +983,14 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
                     <input
                       type="text"
-                      placeholder="Libellé (ex: Main d'œuvre réparation, micro-soudure...)"
+                      placeholder="Libellé de la main d'œuvre"
                       value={libelleMO}
                       onChange={(e) => setLibelleMO(e.target.value)}
                       className="sm:col-span-8 p-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-brand-blue outline-none bg-white font-medium"
                     />
                     <input
                       type="number"
-                      placeholder="Montant FCFA *"
+                      placeholder="Montant"
                       min={0}
                       step={500}
                       value={montantMO}
@@ -1080,14 +1080,14 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-2">
                   <input
                     type="text"
-                    placeholder="Désignation pièce (ex: Dalle LCD 15.6, Batterie...)"
+                    placeholder="Désignation"
                     value={newPiece.designation}
                     onChange={(e) => setNewPiece({ ...newPiece, designation: e.target.value })}
                     className="sm:col-span-6 p-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-brand-blue outline-none"
                   />
                   <input
                     type="number"
-                    placeholder="Qté"
+                    placeholder="Quantité"
                     min={1}
                     value={newPiece.quantite}
                     onChange={(e) =>
@@ -1097,7 +1097,7 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
                   />
                   <input
                     type="number"
-                    placeholder="P.U (FCFA)"
+                    placeholder="Prix unitaire"
                     min={0}
                     step={500}
                     value={newPiece.prixUnitaire || ""}

@@ -297,7 +297,7 @@ export function ContractManager({ contracts, clients }: Props) {
             <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Rechercher entreprise, matériel couvert, périodicité..."
+              placeholder="Rechercher un contrat..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -602,7 +602,7 @@ export function ContractManager({ contracts, clients }: Props) {
                 <textarea
                   required
                   rows={3}
-                  placeholder="Ex: Parc de 15 PC portables Dell + 1 Serveur Windows + Réseau local & Caméras..."
+                  placeholder="Liste des équipements couverts"
                   value={formData.equipementsCouverts}
                   onChange={(e) =>
                     setFormData({ ...formData, equipementsCouverts: e.target.value })

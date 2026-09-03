@@ -214,7 +214,7 @@ export function InterventionRequestForm({ initialType }: Props) {
             <input
               type="text"
               required
-              placeholder="ex: M. Sylvain Hounnou / Clinique X"
+              placeholder="Nom ou raison sociale"
               value={formData.nom}
               onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
               className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"
@@ -223,12 +223,12 @@ export function InterventionRequestForm({ initialType }: Props) {
 
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1">
-              Numéro de Téléphone (Bénin / International) *
+              Numéro de Téléphone *
             </label>
             <input
               type="tel"
               required
-              placeholder="+229 01 90 88 13 14"
+              placeholder="Numéro de téléphone"
               value={formData.telephone}
               onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
               className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"
@@ -246,7 +246,7 @@ export function InterventionRequestForm({ initialType }: Props) {
             </label>
             <input
               type="email"
-              placeholder="votre.email@domaine.bj"
+              placeholder="Email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"
@@ -255,11 +255,11 @@ export function InterventionRequestForm({ initialType }: Props) {
 
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1">
-              Quartier / Adresse à Cotonou
+              Adresse ou Quartier
             </label>
             <input
               type="text"
-              placeholder="ex: Gbégamey, Haie Vive, Akpakpa..."
+              placeholder="Adresse"
               value={formData.adresse}
               onChange={(e) => setFormData({ ...formData, adresse: e.target.value })}
               className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"
@@ -309,12 +309,12 @@ export function InterventionRequestForm({ initialType }: Props) {
 
         <div>
           <label className="block text-xs font-bold text-gray-700 mb-1">
-            Description détaillée de la panne / Comportement anormal *
+            Description de la panne *
           </label>
           <textarea
             rows={4}
             required
-            placeholder="Décrivez précisément ce qui se passe : voyant clignotant, écran noir, fumée, surchauffe, message d'erreur, liquide renversé..."
+            placeholder="Description de la panne constatée"
             value={formData.panneDeclaree}
             onChange={(e) => setFormData({ ...formData, panneDeclaree: e.target.value })}
             className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"

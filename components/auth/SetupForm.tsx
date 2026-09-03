@@ -13,6 +13,8 @@ import {
   AlertCircle,
   ArrowRight,
   Sparkles,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 export function SetupForm() {
@@ -24,6 +26,8 @@ export function SetupForm() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [assignableAsTechnician, setAssignableAsTechnician] = useState(true);
 
   const [loading, setLoading] = useState(false);
@@ -127,7 +131,7 @@ export function SetupForm() {
             <input
               type="text"
               required
-              placeholder="ex: Roland"
+              placeholder="Prénom"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
@@ -142,7 +146,7 @@ export function SetupForm() {
             <input
               type="text"
               required
-              placeholder="ex: KOFFI"
+              placeholder="Nom"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
@@ -153,13 +157,13 @@ export function SetupForm() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1.5">Adresse Email Principale *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1.5">Adresse Email *</label>
           <div className="relative">
             <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="email"
               required
-              placeholder="admin@ryhad.bj"
+              placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
@@ -168,12 +172,12 @@ export function SetupForm() {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1.5">Téléphone Direct</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1.5">Numéro de Téléphone</label>
           <div className="relative">
             <Phone className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="tel"
-              placeholder="+229 01 90 88 13 14"
+              placeholder="Numéro de téléphone"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
@@ -188,13 +192,21 @@ export function SetupForm() {
           <div className="relative">
             <KeyRound className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
-              placeholder="••••••••••••"
+              placeholder="Mot de passe"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
         </div>
 
@@ -203,13 +215,21 @@ export function SetupForm() {
           <div className="relative">
             <KeyRound className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               required
-              placeholder="••••••••••••"
+              placeholder="Confirmer le mot de passe"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
             />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              tabIndex={-1}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
+            >
+              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
         </div>
 

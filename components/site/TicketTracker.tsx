@@ -168,7 +168,7 @@ export function TicketTracker({ initialNumero }: Props) {
             <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Numéro (ex: INT-2026-0001)"
+              placeholder="Numéro de suivi"
               value={numero}
               onChange={(e) => setNumero(e.target.value)}
               className="w-full pl-11 pr-4 py-3 text-xs sm:text-sm font-semibold tracking-wider uppercase rounded-xl border-0 focus:ring-2 focus:ring-brand-blue outline-none text-brand-dark"
@@ -178,7 +178,7 @@ export function TicketTracker({ initialNumero }: Props) {
             <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="4 ch. tél (ex: 1314)"
+              placeholder="4 chiffres téléphone"
               value={phoneSuffix}
               maxLength={10}
               onChange={(e) => setPhoneSuffix(e.target.value)}
@@ -336,7 +336,7 @@ export function TicketTracker({ initialNumero }: Props) {
               <form onSubmit={handleUnlock} className="flex flex-col sm:flex-row items-center gap-2 pt-1 max-w-md">
                 <input
                   type="text"
-                  placeholder="4 derniers chiffres (ex: 1314)"
+                  placeholder="4 chiffres téléphone"
                   value={phoneSuffix}
                   maxLength={10}
                   onChange={(e) => setPhoneSuffix(e.target.value)}

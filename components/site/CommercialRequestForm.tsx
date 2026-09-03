@@ -171,7 +171,7 @@ export function CommercialRequestForm({ initialType }: Props) {
           <input
             type="text"
             required
-            placeholder="ex: M. Sylvain Hounnou"
+            placeholder="Nom et prénom"
             value={formData.nom}
             onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
             className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"
@@ -185,7 +185,7 @@ export function CommercialRequestForm({ initialType }: Props) {
           <input
             type="tel"
             required
-            placeholder="+229 01 90 88 13 14"
+            placeholder="Numéro de téléphone"
             value={formData.telephone}
             onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
             className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"
@@ -200,7 +200,7 @@ export function CommercialRequestForm({ initialType }: Props) {
           </label>
           <input
             type="email"
-            placeholder="contact@societe.bj"
+            placeholder="Email"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"
@@ -213,7 +213,7 @@ export function CommercialRequestForm({ initialType }: Props) {
           </label>
           <input
             type="text"
-            placeholder="ex: Cabinet d'avocats ABC"
+            placeholder="Nom de l'entreprise"
             value={formData.entreprise}
             onChange={(e) => setFormData({ ...formData, entreprise: e.target.value })}
             className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"
@@ -229,7 +229,7 @@ export function CommercialRequestForm({ initialType }: Props) {
         <textarea
           rows={4}
           required
-          placeholder="Précisez la quantité, les caractéristiques souhaitées, la date d'événement pour une location, ou les modules attendus pour une formation..."
+          placeholder="Détails de votre demande"
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
           className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"

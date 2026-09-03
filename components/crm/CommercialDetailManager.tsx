@@ -510,7 +510,7 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                 <input
                   type="text"
                   required
-                  placeholder="Désignation (ex: Vidéoprojecteur Epson 3500 lumens, Onduleur 1500VA...)"
+                  placeholder="Désignation"
                   value={newLine.designation}
                   onChange={(e) => setNewLine({ ...newLine, designation: e.target.value })}
                   className="sm:col-span-6 px-3.5 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-brand-blue outline-none"
@@ -519,7 +519,7 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                   type="number"
                   min={1}
                   required
-                  placeholder="Qté"
+                  placeholder="Quantité"
                   value={newLine.quantite}
                   onChange={(e) =>
                     setNewLine({ ...newLine, quantite: parseInt(e.target.value, 10) || 1 })
@@ -531,7 +531,7 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                   min={0}
                   step={500}
                   required
-                  placeholder="P.U (FCFA)"
+                  placeholder="Prix unitaire"
                   value={newLine.prixUnitaire || ""}
                   onChange={(e) =>
                     setNewLine({ ...newLine, prixUnitaire: parseInt(e.target.value, 10) || 0 })
@@ -625,7 +625,7 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
             </h3>
             <textarea
               rows={3}
-              placeholder="Consignez les détails d'appels, accords particuliers, modalités de livraison..."
+              placeholder="Notes et observations"
               value={notesInternes}
               onChange={(e) => setNotesInternes(e.target.value)}
               className="w-full p-3 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-brand-blue outline-none"

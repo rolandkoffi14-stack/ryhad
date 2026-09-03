@@ -197,7 +197,7 @@ export function PaymentConfirmationModal({
             </label>
             <input
               type="text"
-              placeholder="Ex: TRX-9812903, Chèque N° 0048192..."
+              placeholder="Référence de paiement"
               value={reference}
               onChange={(e) => setReference(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none"

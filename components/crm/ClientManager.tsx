@@ -287,7 +287,7 @@ export function ClientManager({ clients, userRole }: Props) {
             <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Rechercher par nom, téléphone, contact, ville..."
+              placeholder="Rechercher un client..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -543,7 +543,7 @@ export function ClientManager({ clients, userRole }: Props) {
                 <input
                   type="text"
                   required
-                  placeholder={formData.type === ClientType.ENTREPRISE ? "Ex: Clinique Mahouna, SOBEBRA..." : "Ex: Jean-Luc Mensah"}
+                  placeholder={formData.type === ClientType.ENTREPRISE ? "Raison sociale" : "Nom et prénom"}
                   value={formData.nom}
                   onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-blue outline-none"
@@ -555,7 +555,7 @@ export function ClientManager({ clients, userRole }: Props) {
                   <label className="font-bold text-gray-700 block mb-1">Personne de Contact Référente</label>
                   <input
                     type="text"
-                    placeholder="Ex: M. Agossou (Responsable IT)"
+                    placeholder="Nom du contact"
                     value={formData.contactNom}
                     onChange={(e) => setFormData({ ...formData, contactNom: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-blue outline-none"
@@ -566,12 +566,12 @@ export function ClientManager({ clients, userRole }: Props) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="font-bold text-gray-700 block mb-1">
-                    Téléphone (WhatsApp) <span className="text-brand-red">*</span>
+                    Téléphone <span className="text-brand-red">*</span>
                   </label>
                   <input
                     type="tel"
                     required
-                    placeholder="+229 01 90 00 00"
+                    placeholder="Numéro de téléphone"
                     value={formData.telephone}
                     onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-blue outline-none"
@@ -581,7 +581,7 @@ export function ClientManager({ clients, userRole }: Props) {
                   <label className="font-bold text-gray-700 block mb-1">Adresse Email</label>
                   <input
                     type="email"
-                    placeholder="contact@client.bj"
+                    placeholder="Email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-blue outline-none"
@@ -590,10 +590,10 @@ export function ClientManager({ clients, userRole }: Props) {
               </div>
 
               <div>
-                <label className="font-bold text-gray-700 block mb-1">Adresse / Quartier / Ville</label>
+                <label className="font-bold text-gray-700 block mb-1">Adresse</label>
                 <input
                   type="text"
-                  placeholder="Ex: Cotonou, Gbégamey, Haie Vive, Akpakpa..."
+                  placeholder="Adresse"
                   value={formData.adresse}
                   onChange={(e) => setFormData({ ...formData, adresse: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-blue outline-none"

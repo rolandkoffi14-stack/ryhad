@@ -142,7 +142,7 @@ export function DashboardRecentTicketsTable({ tickets, userRole }: Props) {
           <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Rechercher par n° ticket, client, appareil, panne..."
+            placeholder="Rechercher une intervention..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);

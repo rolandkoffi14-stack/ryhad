@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Lock, Mail, KeyRound, ShieldCheck, CheckCircle2, AlertCircle } from "lucide-react";
+import { Lock, Mail, KeyRound, ShieldCheck, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export function LoginForm() {
   const router = useRouter();
@@ -15,6 +15,7 @@ export function LoginForm() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,7 +37,6 @@ export function LoginForm() {
         setLoading(false);
       } else {
         setIsSuccess(true);
-        // Transition directe avec actualisation de session
         window.location.href = callbackUrl;
       }
     } catch (err: any) {
@@ -75,13 +75,13 @@ export function LoginForm() {
 
       <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-8 border border-gray-200 subtle-shadow space-y-5">
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1.5">Adresse Email Staff *</label>
+          <label className="block text-xs font-bold text-gray-700 mb-1.5">Adresse Email *</label>
           <div className="relative">
             <Mail className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="email"
               required
-              placeholder="ex: admin@ryhad.bj"
+              placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
@@ -102,13 +102,21 @@ export function LoginForm() {
           <div className="relative">
             <KeyRound className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               required
-              placeholder="••••••••••••"
+              placeholder="Mot de passe"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
         </div>
 

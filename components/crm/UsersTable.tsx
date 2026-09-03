@@ -148,7 +148,7 @@ export function UsersTable({ users }: Props) {
           <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Rechercher par nom, email, téléphone..."
+            placeholder="Rechercher un utilisateur..."
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);

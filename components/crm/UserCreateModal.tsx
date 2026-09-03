@@ -14,7 +14,8 @@ import {
   XCircle,
   AlertCircle,
   RefreshCw,
-  Sparkles,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { StaffRole } from "@prisma/client";
 
@@ -32,6 +33,7 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
   const [role, setRole] = useState<StaffRole>(StaffRole.TECHNICIEN);
   const [assignableAsTechnician, setAssignableAsTechnician] = useState(true);
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +61,7 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
     // Mélange
     const shuffled = pass.split("").sort(() => 0.5 - Math.random()).join("");
     setPassword(shuffled);
+    setShowPassword(true); // Afficher en clair le mot de passe généré
   };
 
   const passwordCriteria = useMemo(() => {
@@ -155,7 +158,7 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors"
+            className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -184,7 +187,7 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
                 <input
                   type="text"
                   required
-                  placeholder="ex: Jean"
+                  placeholder="Prénom"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
@@ -198,7 +201,7 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
                 <input
                   type="text"
                   required
-                  placeholder="ex: DOSSOU"
+                  placeholder="Nom"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
@@ -215,7 +218,7 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
                 <input
                   type="email"
                   required
-                  placeholder="j.dossou@ryhad.bj"
+                  placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
@@ -228,7 +231,7 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
                 <Phone className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="tel"
-                  placeholder="+229 97 00 00 00"
+                  placeholder="Numéro de téléphone"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
@@ -306,13 +309,21 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
             <div className="relative">
               <KeyRound className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
-                type="text"
+                type={showPassword ? "text" : "password"}
                 required
-                placeholder="••••••••••••"
+                placeholder="Mot de passe"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue font-mono outline-none"
+                className="w-full pl-9 pr-10 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue font-mono outline-none"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                tabIndex={-1}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none cursor-pointer"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
 
             <div className="bg-brand-slate p-2.5 rounded-xl border border-gray-200">
@@ -331,26 +342,39 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
                 </div>
                 <div className={`flex items-center gap-1 ${passwordCriteria.hasSpecial ? "text-brand-green font-bold" : "text-gray-400"}`}>
                   {passwordCriteria.hasSpecial ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                  <span>Un caractère spécial</span>
+                  <span>Un symbole (@, #...)</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2.5 pt-4 border-t border-gray-100">
+          <div className="flex items-center gap-2 p-2.5 rounded-xl bg-gray-50 border border-gray-200">
+            <input
+              type="checkbox"
+              id="assignable-collab"
+              checked={assignableAsTechnician}
+              onChange={(e) => setAssignableAsTechnician(e.target.checked)}
+              className="w-3.5 h-3.5 rounded text-brand-blue focus:ring-brand-blue border-gray-300 cursor-pointer"
+            />
+            <label htmlFor="assignable-collab" className="text-[11px] text-gray-700 cursor-pointer select-none">
+              Peut être assigné à des tickets d&apos;intervention en atelier
+            </label>
+          </div>
+
+          <div className="pt-2 flex items-center justify-end gap-2 border-t border-gray-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-bold text-gray-500 hover:text-gray-700 cursor-pointer"
+              className="px-4 py-2 rounded-xl text-xs font-bold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
             >
               Annuler
             </button>
             <button
               type="submit"
               disabled={loading || !isPasswordValid}
-              className="px-5 py-2.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-xs rounded-xl shadow-sm transition-all disabled:opacity-50 cursor-pointer"
+              className="px-5 py-2 rounded-xl text-xs font-bold bg-brand-blue hover:bg-brand-blue-dark text-white shadow transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
             >
-              {loading ? "Création en cours..." : "Créer le Collaborateur"}
+              {loading ? "Création en cours..." : "Créer le collaborateur"}
             </button>
           </div>
         </form>

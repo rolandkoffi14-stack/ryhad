@@ -204,7 +204,7 @@ export function TicketFormContractuel({ contracts, technicians, initialContractI
         <textarea
           rows={4}
           required
-          placeholder="Ex: Panne de connexion réseau au 2ème étage, bruit anormal sur le serveur, imprimante bloquée..."
+          placeholder="Description de la panne constatée"
           value={formData.panneDeclaree}
           onChange={(e) => setFormData({ ...formData, panneDeclaree: e.target.value })}
           className="w-full p-3.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none leading-relaxed bg-brand-slate/20 font-medium"

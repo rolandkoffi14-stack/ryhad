@@ -151,7 +151,7 @@ export default function ContactPage() {
                     <input
                       type="text"
                       required
-                      placeholder="ex: Jean Dossou"
+                      placeholder="Nom"
                       value={formData.nom}
                       onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
                       className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"
@@ -165,7 +165,7 @@ export default function ContactPage() {
                     <input
                       type="tel"
                       required
-                      placeholder="+229 01 90 88 13 14"
+                      placeholder="Numéro de téléphone"
                       value={formData.telephone}
                       onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
                       className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"
@@ -180,7 +180,7 @@ export default function ContactPage() {
                     </label>
                     <input
                       type="email"
-                      placeholder="nom@exemple.com"
+                      placeholder="Email"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"
@@ -212,7 +212,7 @@ export default function ContactPage() {
                   <textarea
                     rows={4}
                     required
-                    placeholder="Précisez votre demande ou décrivez votre besoin..."
+                    placeholder="Message"
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"

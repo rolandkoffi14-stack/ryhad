@@ -233,7 +233,7 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
         <textarea
           rows={3}
           required
-          placeholder="Détaillez le comportement anormal constaté, messages d'erreur, accessoires déposés (chargeur, télécommande)..."
+          placeholder="Description de la panne constatée"
           value={formData.panneDeclaree}
           onChange={(e) => setFormData({ ...formData, panneDeclaree: e.target.value })}
           className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"
@@ -350,12 +350,12 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
 
                 <div>
                   <label className="block text-[11px] font-bold text-gray-700 mb-1">
-                    Téléphone (WhatsApp) *
+                    Téléphone *
                   </label>
                   <input
                     type="tel"
                     required
-                    placeholder="+229 01 90 88 13 14"
+                    placeholder="Numéro de téléphone"
                     value={newClient.telephone}
                     onChange={(e) =>
                       setNewClient({ ...newClient, telephone: e.target.value })
@@ -372,7 +372,7 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Jean Houndété ou Société ABC"
+                  placeholder="Nom ou raison sociale"
                   value={newClient.nom}
                   onChange={(e) => setNewClient({ ...newClient, nom: e.target.value })}
                   className="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none font-medium"
@@ -382,11 +382,11 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-gray-700 mb-1">
-                    Adresse / Quartier
+                    Adresse
                   </label>
                   <input
                     type="text"
-                    placeholder="Ex: Gbégamey, Cotonou"
+                    placeholder="Adresse"
                     value={newClient.adresse}
                     onChange={(e) =>
                       setNewClient({ ...newClient, adresse: e.target.value })
@@ -397,11 +397,11 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
 
                 <div>
                   <label className="block text-[11px] font-bold text-gray-700 mb-1">
-                    Email (Optionnel)
+                    Email
                   </label>
                   <input
                     type="email"
-                    placeholder="client@gmail.com"
+                    placeholder="Email"
                     value={newClient.email}
                     onChange={(e) =>
                       setNewClient({ ...newClient, email: e.target.value })
