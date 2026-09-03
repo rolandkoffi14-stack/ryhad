@@ -62,7 +62,7 @@ export function Header() {
                 </span>
               </div>
               <p className="text-[10px] text-gray-500 font-medium tracking-wide uppercase">
-                Maintenance & Ingénierie Tech • Cotonou
+                Maintenance & Ingénierie Tech
               </p>
             </div>
           </Link>
