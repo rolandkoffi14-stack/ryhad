@@ -17,7 +17,7 @@ import {
   Building2,
 } from "lucide-react";
 import { DashboardRecentTicketsTable } from "@/components/crm/DashboardRecentTicketsTable";
-import { InterventionStatut, InterventionType, ContractStatus, StaffRole } from "@prisma/client";
+import { InterventionStatut, InterventionType, ContractStatus, StaffRole, DocumentType, StatutPaiement } from "@prisma/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -74,7 +74,10 @@ export default async function CrmDashboardPage() {
           where: { statut: "NOUVEAU" },
         }),
         db.financialDocument.aggregate({
-          where: { statutPaiement: "PAYE" },
+          where: {
+            type: { not: DocumentType.DEVIS },
+            statutPaiement: StatutPaiement.PAYE,
+          },
           _sum: { montant: true },
         }),
       ]);
