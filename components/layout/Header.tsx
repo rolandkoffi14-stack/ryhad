@@ -33,14 +33,6 @@ export function Header() {
               <Search className="w-3 h-3 text-brand-green" />
               <span>Suivi réparation</span>
             </Link>
-            <span className="text-gray-600">|</span>
-            <Link
-              href="/crm"
-              className="flex items-center gap-1 text-gray-400 hover:text-brand-green transition-colors"
-            >
-              <Shield className="w-3 h-3" />
-              <span>Espace Staff</span>
-            </Link>
           </div>
         </div>
       </div>

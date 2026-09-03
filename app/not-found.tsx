@@ -34,13 +34,13 @@ export default function NotFound() {
             className="inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-3 rounded-xl text-xs font-bold shadow transition-all"
           >
             <Home className="w-4 h-4 text-brand-green" />
-            <span>Accueil Vitrine</span>
+            <span>Retour à l&apos;accueil</span>
           </Link>
           <Link
-            href="/crm"
+            href="/contact"
             className="inline-flex items-center justify-center gap-2 bg-brand-slate hover:bg-gray-200 text-brand-dark px-5 py-3 rounded-xl text-xs font-bold transition-all border border-gray-200"
           >
-            <span>Espace CRM</span>
+            <span>Nous contacter</span>
           </Link>
         </div>
       </div>

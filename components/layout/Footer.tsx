@@ -141,11 +141,6 @@ export function Footer() {
                   Qui sommes-nous ?
                 </Link>
               </li>
-              <li>
-                <Link href="/crm" className="text-brand-green hover:underline">
-                  Espace Gestion / CRM Staff
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -188,10 +183,6 @@ export function Footer() {
           <div className="flex items-center gap-4">
             <Link href="/mentions-legales" className="hover:text-gray-400">
               Mentions Légales & Confidentialité
-            </Link>
-            <span>•</span>
-            <Link href="/crm" className="hover:text-gray-400">
-              Connexion CRM
             </Link>
           </div>
         </div>
