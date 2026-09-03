@@ -34,6 +34,8 @@ export async function GET(
     }
 
     const { numero } = await params;
+    const url = new URL(request.url);
+    const phoneInput = url.searchParams.get("phone") || url.searchParams.get("phoneSuffix") || "";
 
     if (!numero) {
       return NextResponse.json({ success: false, message: "Numéro de ticket requis" }, { status: 400 });
@@ -45,6 +47,7 @@ export async function GET(
         client: {
           select: {
             nom: true,
+            telephone: true,
           },
         },
         piecesUtilisees: true,
@@ -68,6 +71,14 @@ export async function GET(
 
     const statusInfo = getPublicStatusInfo(intervention.statut, { isPaid: isRepPaid });
 
+    // Vérification du contrôle propriétaire par les 4 derniers chiffres du téléphone
+    const cleanClientPhone = (intervention.client.telephone || "").replace(/\D/g, "");
+    const cleanInputPhone = phoneInput.replace(/\D/g, "");
+    const isUnlocked =
+      cleanInputPhone.length >= 4 &&
+      cleanClientPhone.length >= 4 &&
+      cleanClientPhone.endsWith(cleanInputPhone.slice(-4));
+
     // Trouver le devis actif si existant
     const devisDoc = intervention.documents.find((d) => d.type === DocumentType.DEVIS);
 
@@ -78,25 +89,29 @@ export async function GET(
         numero: intervention.numero,
         type: intervention.type,
         typeMateriel: intervention.typeMateriel,
-        panneDeclaree: intervention.panneDeclaree,
+        isUnlocked,
+        // Données protégées uniquement disponibles après confirmation du téléphone
+        panneDeclaree: isUnlocked ? intervention.panneDeclaree : "Description protégée (saisissez votre téléphone)",
         modeIntervention: intervention.modeIntervention,
         clientNom: maskClientName(intervention.client.nom),
         dateCreation: intervention.dateCreation,
         dateCloture: intervention.dateCloture,
         statut: intervention.statut,
         statusInfo,
-        devis: devisDoc
+        devis: isUnlocked && devisDoc
           ? {
               numero: devisDoc.numero,
               montant: devisDoc.montant,
               statutPaiement: devisDoc.statutPaiement,
             }
           : null,
-        pieces: intervention.piecesUtilisees.map((p) => ({
-          designation: p.designation,
-          quantite: p.quantite,
-          prixUnitaire: p.prixUnitaire,
-        })),
+        pieces: isUnlocked
+          ? intervention.piecesUtilisees.map((p) => ({
+              designation: p.designation,
+              quantite: p.quantite,
+              prixUnitaire: p.prixUnitaire,
+            }))
+          : [],
       },
     });
   } catch (error) {
@@ -124,17 +139,37 @@ export async function POST(
 
     const { numero } = await params;
     const body = await request.json();
-    const { action } = body;
+    const { action, phoneSuffix, phone } = body;
+
+    const phoneInput = (phoneSuffix || phone || "").replace(/\D/g, "");
 
     const intervention = await db.intervention.findUnique({
       where: { numero: numero.toUpperCase().trim() },
       include: {
+        client: true,
         documents: true,
       },
     });
 
     if (!intervention) {
       return NextResponse.json({ success: false, message: "Dossier introuvable." }, { status: 404 });
+    }
+
+    // Contrôle d'autorisation propriétaire avant d'accepter/refuser le devis
+    const cleanClientPhone = (intervention.client.telephone || "").replace(/\D/g, "");
+    const isOwner =
+      phoneInput.length >= 4 &&
+      cleanClientPhone.length >= 4 &&
+      cleanClientPhone.endsWith(phoneInput.slice(-4));
+
+    if (!isOwner) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Vérification requise : veuillez fournir les 4 derniers chiffres de votre numéro de téléphone pour valider cette décision.",
+        },
+        { status: 403 }
+      );
     }
 
     if (intervention.statut !== InterventionStatut.DEVIS_ENVOYE) {
@@ -180,7 +215,7 @@ export async function POST(
             create: [
               {
                 action: "Devis accepté en ligne par le client",
-                note: `Le client a validé le devis en ligne. Facture ${docNum} émise en attente de règlement.`,
+                note: `Le client a validé le devis en ligne (Téléphone vérifié). Facture ${docNum} émise en attente de règlement.`,
               },
             ],
           },
@@ -212,7 +247,7 @@ export async function POST(
             create: [
               {
                 action: "Devis décliné en ligne par le client",
-                note: "Le client a refusé la proposition de devis en ligne.",
+                note: "Le client a refusé la proposition de devis en ligne (Téléphone vérifié).",
               },
             ],
           },
@@ -224,6 +259,8 @@ export async function POST(
         message: "Votre décision a été transmise à notre atelier. Votre matériel est disponible pour retrait.",
       });
     }
+
+    return NextResponse.json({ success: false, message: "Action non valide." }, { status: 400 });
 
   } catch (error: any) {
     console.error("Erreur action client suivi public:", error);

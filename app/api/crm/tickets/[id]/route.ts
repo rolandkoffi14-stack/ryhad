@@ -5,6 +5,16 @@ import { getStatutsAutorises } from "@/lib/interventions/statut-transitions";
 import { generateDocumentNumber } from "@/lib/documents/numbering";
 import { formatFCFA } from "@/lib/format";
 import {
+  ticketUpdateStatusSchema,
+  ticketUpdateDiagnosticSchema,
+  ticketUpdateMainOeuvreSchema,
+  ticketAddPieceSchema,
+  ticketDeletePieceSchema,
+  ticketReassignTechSchema,
+  ticketEncaisserDiagSchema,
+  ticketEncaisserRepSchema,
+} from "@/lib/validations";
+import {
   InterventionStatut,
   DocumentType,
   FactureType,
@@ -51,12 +61,13 @@ export async function PATCH(
     const isAssignedTech = currentTicket.technicienAssigneId === userId;
     const isTechRestricted = userRole === StaffRole.TECHNICIEN && currentTicket.technicienAssigneId && !isAssignedTech;
 
-    const { actionType, newStatut, diagnosticTechnicien, technicienAssigneId, newPiece, pieceId } = body;
+    const actionType = body.actionType;
 
     // --------------------------------------------------------------------------
     // ACTION : Encaissement de la facture de DIAGNOSTIC (5.000 FCFA)
     // --------------------------------------------------------------------------
     if (actionType === "encaisser_diagnostic") {
+      const validated = ticketEncaisserDiagSchema.parse(body);
       if (userRole === StaffRole.TECHNICIEN) {
         return NextResponse.json(
           { success: false, message: "Seule la réception ou l'administration peut encaisser un règlement." },
@@ -70,8 +81,8 @@ export async function PATCH(
           d.type === DocumentType.RECU_DIAGNOSTIC
       );
 
-      const modePaiement = body.modePaiement || "ESPECES";
-      const referencePaiement = body.referencePaiement || null;
+      const modePaiement = validated.modePaiement || "ESPECES";
+      const referencePaiement = validated.referencePaiement || null;
 
       if (diagDoc) {
         await db.financialDocument.update({
@@ -129,6 +140,7 @@ export async function PATCH(
     // ACTION : Encaissement de la facture de RÉPARATION
     // --------------------------------------------------------------------------
     if (actionType === "encaisser_reparation") {
+      const validated = ticketEncaisserRepSchema.parse(body);
       if (userRole === StaffRole.TECHNICIEN) {
         return NextResponse.json(
           { success: false, message: "Seule la réception ou l'administration peut encaisser un règlement." },
@@ -147,8 +159,8 @@ export async function PATCH(
         );
       }
 
-      const modePaiement = body.modePaiement || "ESPECES";
-      const referencePaiement = body.referencePaiement || null;
+      const modePaiement = validated.modePaiement || "ESPECES";
+      const referencePaiement = validated.referencePaiement || null;
 
       await db.financialDocument.update({
         where: { id: repDoc.id },
@@ -181,7 +193,10 @@ export async function PATCH(
     // --------------------------------------------------------------------------
     // ACTION : Mise à jour de statut avec validation stricte & automatismes
     // --------------------------------------------------------------------------
-    if (actionType === "update_status" && newStatut) {
+    if (actionType === "update_status") {
+      const validated = ticketUpdateStatusSchema.parse(body);
+      const newStatut = validated.newStatut;
+
       if (isTechRestricted) {
         return NextResponse.json(
           { success: false, message: "Accès refusé : ce dossier est assigné à un autre technicien." },
@@ -383,7 +398,10 @@ export async function PATCH(
     // --------------------------------------------------------------------------
     // ACTION : Mise à jour du diagnostic technicien (TECHNICIEN & ADMIN, uniquement EN_DIAGNOSTIC)
     // --------------------------------------------------------------------------
-    if (actionType === "update_diagnostic" && diagnosticTechnicien !== undefined) {
+    if (actionType === "update_diagnostic") {
+      const validated = ticketUpdateDiagnosticSchema.parse(body);
+      const diagnosticTechnicien = validated.diagnosticTechnicien;
+
       if (userRole === StaffRole.RECEPTIONNISTE) {
         return NextResponse.json(
           {
@@ -440,6 +458,7 @@ export async function PATCH(
     // ACTION : Mise à jour de la Main d'œuvre de réparation (OBLIGATOIRE EN PONCTUEL)
     // --------------------------------------------------------------------------
     if (actionType === "update_main_oeuvre") {
+      const validated = ticketUpdateMainOeuvreSchema.parse(body);
       if (userRole === StaffRole.RECEPTIONNISTE) {
         return NextResponse.json(
           { success: false, message: "Action réservée aux techniciens et administrateurs." },
@@ -469,8 +488,7 @@ export async function PATCH(
         );
       }
 
-      const { montantMainOeuvre, libelleMainOeuvre } = body;
-      const montant = parseInt(montantMainOeuvre, 10);
+      const montant = parseInt(String(validated.montantMainOeuvre), 10);
 
       if (isNaN(montant) || montant < 0) {
         return NextResponse.json(
@@ -479,7 +497,7 @@ export async function PATCH(
         );
       }
 
-      const libelle = (libelleMainOeuvre && libelleMainOeuvre.trim()) || "Main d'œuvre réparation & tests";
+      const libelle = (validated.libelleMainOeuvre && validated.libelleMainOeuvre.trim()) || "Main d'œuvre réparation & tests";
 
       await db.intervention.update({
         where: { id },
@@ -503,7 +521,10 @@ export async function PATCH(
     // --------------------------------------------------------------------------
     // ACTION : Ajout d'une pièce détachée (FACULTATIF)
     // --------------------------------------------------------------------------
-    if (actionType === "add_piece" && newPiece) {
+    if (actionType === "add_piece") {
+      const validated = ticketAddPieceSchema.parse(body);
+      const newPiece = validated.newPiece;
+
       if (userRole === StaffRole.RECEPTIONNISTE) {
         return NextResponse.json(
           {
@@ -537,8 +558,8 @@ export async function PATCH(
         );
       }
 
-      const quantite = parseInt(newPiece.quantite, 10) || 1;
-      const prixUnitaire = parseInt(newPiece.prixUnitaire, 10) || 0;
+      const quantite = parseInt(String(newPiece.quantite), 10) || 1;
+      const prixUnitaire = parseInt(String(newPiece.prixUnitaire), 10) || 0;
 
       await db.pieceUtilisee.create({
         data: {
@@ -562,7 +583,10 @@ export async function PATCH(
     // --------------------------------------------------------------------------
     // ACTION : Suppression d'une ligne du devis
     // --------------------------------------------------------------------------
-    if (actionType === "delete_piece" && pieceId) {
+    if (actionType === "delete_piece") {
+      const validated = ticketDeletePieceSchema.parse(body);
+      const pieceId = validated.pieceId;
+
       if (userRole === StaffRole.RECEPTIONNISTE) {
         return NextResponse.json(
           { success: false, message: "Action réservée aux techniciens et administrateurs." },
@@ -610,6 +634,7 @@ export async function PATCH(
     // ACTION : Réassignation de technicien (RÉCEPTION & ADMIN)
     // --------------------------------------------------------------------------
     if (actionType === "reassign_technician") {
+      const validated = ticketReassignTechSchema.parse(body);
       if (userRole === StaffRole.TECHNICIEN) {
         return NextResponse.json(
           { success: false, message: "Les techniciens ne peuvent pas réassigner les dossiers." },
@@ -617,7 +642,7 @@ export async function PATCH(
         );
       }
 
-      const { technicienId } = body;
+      const technicienId = validated.technicienId;
       const techUser = technicienId ? await db.user.findUnique({ where: { id: technicienId } }) : null;
 
       await db.intervention.update({
@@ -639,8 +664,13 @@ export async function PATCH(
       return NextResponse.json({ success: true, message: "Technicien assigné" });
     }
 
+    return NextResponse.json({ success: false, message: "Action non reconnue" }, { status: 400 });
+
   } catch (error: any) {
     console.error("Erreur mise à jour ticket:", error);
+    if (error.name === "ZodError") {
+      return NextResponse.json({ success: false, errors: error.errors }, { status: 400 });
+    }
     const userMessage =
       error.message && !error.message.includes("prisma") && !error.message.includes("invocation") && !error.message.includes("SELECT")
         ? error.message

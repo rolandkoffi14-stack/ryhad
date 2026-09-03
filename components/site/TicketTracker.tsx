@@ -19,6 +19,7 @@ import {
   XCircle,
   Receipt,
   Sparkles,
+  Lock,
 } from "lucide-react";
 import { formatFCFA } from "@/lib/format";
 import { format } from "date-fns";
@@ -47,6 +48,7 @@ interface TicketData {
   dateCreation: string;
   dateCloture: string | null;
   statut: string;
+  isUnlocked: boolean;
   statusInfo: {
     label: string;
     description: string;
@@ -65,20 +67,24 @@ interface Props {
 export function TicketTracker({ initialNumero }: Props) {
   const router = useRouter();
   const [numero, setNumero] = useState(initialNumero || "");
+  const [phoneSuffix, setPhoneSuffix] = useState("");
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [ticket, setTicket] = useState<TicketData | null>(null);
 
-  const fetchTicket = async (numToSearch: string) => {
+  const fetchTicket = async (numToSearch: string, phoneCode: string = phoneSuffix) => {
     if (!numToSearch.trim()) return;
     setLoading(true);
     setError(null);
     setActionSuccess(null);
 
     try {
-      const res = await fetch(`/api/suivi/${encodeURIComponent(numToSearch.trim())}`);
+      const url = `/api/suivi/${encodeURIComponent(numToSearch.trim())}${
+        phoneCode ? `?phone=${encodeURIComponent(phoneCode.trim())}` : ""
+      }`;
+      const res = await fetch(url);
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -104,11 +110,22 @@ export function TicketTracker({ initialNumero }: Props) {
     e.preventDefault();
     if (!numero.trim()) return;
     router.push(`/suivi/${numero.toUpperCase().trim()}`);
-    fetchTicket(numero);
+    fetchTicket(numero, phoneSuffix);
+  };
+
+  const handleUnlock = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!numero.trim() || !phoneSuffix.trim()) return;
+    fetchTicket(numero, phoneSuffix);
   };
 
   const handleClientAction = async (action: "accept_devis" | "refuse_devis") => {
     if (!ticket) return;
+    if (!phoneSuffix.trim()) {
+      setError("Veuillez saisir les 4 derniers chiffres de votre téléphone pour confirmer votre accord.");
+      return;
+    }
+
     setActionLoading(true);
     setError(null);
     setActionSuccess(null);
@@ -117,15 +134,15 @@ export function TicketTracker({ initialNumero }: Props) {
       const res = await fetch(`/api/suivi/${encodeURIComponent(ticket.numero)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, phoneSuffix }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
         throw new Error(data.message || "Erreur lors de l'enregistrement de votre décision.");
       }
       setActionSuccess(data.message);
-      // Recharger les données du ticket
-      await fetchTicket(ticket.numero);
+      // Recharger les données du ticket déverrouillé
+      await fetchTicket(ticket.numero, phoneSuffix);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -145,16 +162,27 @@ export function TicketTracker({ initialNumero }: Props) {
   return (
     <div className="space-y-8">
       {/* Barre de recherche */}
-      <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
+      <form onSubmit={handleSearch} className="max-w-2xl mx-auto space-y-2">
         <div className="bg-white p-2 rounded-2xl border border-gray-200 subtle-shadow flex flex-col sm:flex-row items-center gap-2">
           <div className="relative flex-1 w-full">
             <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Ex: INT-2026-0001"
+              placeholder="Numéro (ex: INT-2026-0001)"
               value={numero}
               onChange={(e) => setNumero(e.target.value)}
               className="w-full pl-11 pr-4 py-3 text-xs sm:text-sm font-semibold tracking-wider uppercase rounded-xl border-0 focus:ring-2 focus:ring-brand-blue outline-none text-brand-dark"
+            />
+          </div>
+          <div className="relative w-full sm:w-44">
+            <Phone className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder="4 ch. tél (ex: 1314)"
+              value={phoneSuffix}
+              maxLength={10}
+              onChange={(e) => setPhoneSuffix(e.target.value)}
+              className="w-full pl-9 pr-3 py-3 text-xs font-semibold rounded-xl border border-gray-100 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-brand-blue outline-none text-brand-dark"
             />
           </div>
           <button
@@ -166,12 +194,15 @@ export function TicketTracker({ initialNumero }: Props) {
               <span>Recherche...</span>
             ) : (
               <>
-                <span>Consulter le statut</span>
+                <span>Consulter</span>
                 <ArrowRight className="w-4 h-4 text-brand-green" />
               </>
             )}
           </button>
         </div>
+        <p className="text-[11px] text-gray-500 text-center">
+          💡 Les 4 derniers chiffres du téléphone du client permettent de déverrouiller le devis chiffré et l&apos;accord en ligne.
+        </p>
       </form>
 
       {/* Message d'erreur ou succès */}
@@ -202,6 +233,17 @@ export function TicketTracker({ initialNumero }: Props) {
                 <span className="text-xs font-bold bg-brand-blue-light text-brand-blue px-2 py-0.5 rounded">
                   {ticket.type === "CONTRACTUEL" ? "Contrat Entreprise" : "Particulier / Ponctuel"}
                 </span>
+                {ticket.isUnlocked ? (
+                  <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                    <span>Dossier Déverrouillé</span>
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded flex items-center gap-1">
+                    <Lock className="w-3 h-3 text-gray-500" />
+                    <span>Vue Publique</span>
+                  </span>
+                )}
               </div>
               <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-blue tracking-tight">
                 {ticket.numero}
@@ -279,8 +321,40 @@ export function TicketTracker({ initialNumero }: Props) {
             </p>
           </div>
 
-          {/* SECTION D'ACCORD DU CLIENT SUR LE DEVIS (Si DEVIS_ENVOYE) */}
-          {ticket.statut === "DEVIS_ENVOYE" && ticket.devis && (
+          {/* INVITATION AU DÉVERROUILLAGE SÉCURISÉ (Si non déverrouillé) */}
+          {!ticket.isUnlocked && (
+            <div className="p-5 sm:p-6 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-3">
+              <div className="flex items-center gap-2.5 text-amber-900">
+                <Lock className="w-5 h-5 text-amber-600 shrink-0" />
+                <h4 className="font-extrabold text-xs sm:text-sm">
+                  Confidentialité du devis et des pièces
+                </h4>
+              </div>
+              <p className="text-xs text-amber-800 leading-relaxed">
+                Pour des raisons de sécurité et de confidentialité, les montants chiffrés, pièces et boutons d&apos;accord sont protégés. Saisissez les 4 derniers chiffres de votre numéro de téléphone pour déverrouiller l&apos;accès complet :
+              </p>
+              <form onSubmit={handleUnlock} className="flex flex-col sm:flex-row items-center gap-2 pt-1 max-w-md">
+                <input
+                  type="text"
+                  placeholder="4 derniers chiffres (ex: 1314)"
+                  value={phoneSuffix}
+                  maxLength={10}
+                  onChange={(e) => setPhoneSuffix(e.target.value)}
+                  className="w-full px-4 py-2.5 text-xs font-semibold rounded-xl border border-amber-300 bg-white focus:ring-2 focus:ring-amber-500 outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={loading || !phoneSuffix.trim()}
+                  className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-5 rounded-xl text-xs transition-all shrink-0 disabled:opacity-50"
+                >
+                  Déverrouiller
+                </button>
+              </form>
+            </div>
+          )}
+
+          {/* SECTION D'ACCORD DU CLIENT SUR LE DEVIS (Si DEVIS_ENVOYE & Déverrouillé) */}
+          {ticket.isUnlocked && ticket.statut === "DEVIS_ENVOYE" && ticket.devis && (
             <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-brand-blue/30 space-y-6 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-blue/10">
                 <div className="flex items-start gap-3">
@@ -365,13 +439,15 @@ export function TicketTracker({ initialNumero }: Props) {
             </div>
           )}
 
-          {/* Détail de la panne déclarée */}
-          <div className="p-4 rounded-xl bg-brand-slate border border-gray-100 text-xs space-y-1">
-            <span className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">
-              Problème signalé au dépôt :
-            </span>
-            <p className="text-gray-700 italic">&ldquo;{ticket.panneDeclaree}&rdquo;</p>
-          </div>
+          {/* Détail de la panne déclarée (uniquement si déverrouillé) */}
+          {ticket.isUnlocked && (
+            <div className="p-4 rounded-xl bg-brand-slate border border-gray-100 text-xs space-y-1">
+              <span className="font-bold text-gray-500 uppercase tracking-wider text-[10px]">
+                Problème signalé au dépôt :
+              </span>
+              <p className="text-gray-700 italic">&ldquo;{ticket.panneDeclaree}&rdquo;</p>
+            </div>
+          )}
 
           {/* Contact d'assistance */}
           <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">

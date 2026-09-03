@@ -79,3 +79,74 @@ export const ticketContractuelCrmSchema = z.object({
   modeIntervention: z.nativeEnum(ModeIntervention),
   technicienAssigneId: z.string().optional(),
 });
+
+// ============================================================================
+// 19. POLITIQUE DE ROBUSTESSE DES MOTS DE PASSE (STAFF)
+// ============================================================================
+export const strongPasswordSchema = z
+  .string()
+  .min(10, "Le mot de passe doit comporter au moins 10 caractères")
+  .regex(/[A-Z]/, "Le mot de passe doit contenir au moins une lettre majuscule")
+  .regex(/[a-z]/, "Le mot de passe doit contenir au moins une lettre minuscule")
+  .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre")
+  .regex(/[^A-Za-z0-9]/, "Le mot de passe doit contenir au moins un caractère spécial (!@#$%^&*...)");
+
+export const userCreateSchema = z.object({
+  firstName: z.string().min(2, "Prénom requis"),
+  lastName: z.string().min(2, "Nom requis"),
+  email: z.string().email("Adresse email valide requise"),
+  password: strongPasswordSchema,
+  phone: z.string().optional().nullable(),
+  role: z.nativeEnum(StaffRole),
+  assignableAsTechnician: z.boolean().default(false),
+});
+
+// ============================================================================
+// 7. SCHÉMAS DE VALIDATION SERVEUR DES MUTATIONS DE TICKETS (CRM)
+// ============================================================================
+export const ticketUpdateStatusSchema = z.object({
+  actionType: z.literal("update_status"),
+  newStatut: z.string().min(1, "Nouveau statut requis"),
+});
+
+export const ticketUpdateDiagnosticSchema = z.object({
+  actionType: z.literal("update_diagnostic"),
+  diagnosticTechnicien: z.string().min(3, "Rapport technique trop court (min 3 caractères)"),
+});
+
+export const ticketUpdateMainOeuvreSchema = z.object({
+  actionType: z.literal("update_main_oeuvre"),
+  montantMainOeuvre: z.union([z.number().min(0), z.string().regex(/^\d+$/)]),
+  libelleMainOeuvre: z.string().optional(),
+});
+
+export const ticketAddPieceSchema = z.object({
+  actionType: z.literal("add_piece"),
+  newPiece: z.object({
+    designation: z.string().min(2, "Désignation de pièce requise"),
+    quantite: z.union([z.number().min(1), z.string()]),
+    prixUnitaire: z.union([z.number().min(0), z.string()]),
+  }),
+});
+
+export const ticketDeletePieceSchema = z.object({
+  actionType: z.literal("delete_piece"),
+  pieceId: z.string().min(1, "Identifiant de pièce requis"),
+});
+
+export const ticketReassignTechSchema = z.object({
+  actionType: z.literal("reassign_technician"),
+  technicienId: z.string().nullable().optional(),
+});
+
+export const ticketEncaisserDiagSchema = z.object({
+  actionType: z.literal("encaisser_diagnostic"),
+  modePaiement: z.string().optional(),
+  referencePaiement: z.string().nullable().optional(),
+});
+
+export const ticketEncaisserRepSchema = z.object({
+  actionType: z.literal("encaisser_reparation"),
+  modePaiement: z.string().optional(),
+  referencePaiement: z.string().nullable().optional(),
+});
