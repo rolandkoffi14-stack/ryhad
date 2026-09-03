@@ -49,6 +49,34 @@ export function UsersTable({ users }: Props) {
   const [quickViewData, setQuickViewData] = useState<QuickViewData | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [sendingAccessId, setSendingAccessId] = useState<string | null>(null);
+
+  const handleSendAccess = async (u: UserItem) => {
+    if (
+      !confirm(
+        `Envoyer un email avec lien d'accès et réinitialisation de mot de passe à ${u.firstName} ${u.lastName} (${u.email}) ?`
+      )
+    ) {
+      return;
+    }
+
+    setSendingAccessId(u.id);
+    try {
+      const res = await fetch(`/api/crm/utilisateurs/${u.id}/send-access`, {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.message || "Erreur lors de l'envoi de l'email d'accès.");
+      } else {
+        alert(data.message || `Email d'accès envoyé avec succès à ${u.email} !`);
+      }
+    } catch (err) {
+      alert("Erreur de communication avec le serveur.");
+    } finally {
+      setSendingAccessId(null);
+    }
+  };
 
   const getRoleBadge = (role: StaffRole) => {
     switch (role) {
@@ -261,6 +289,20 @@ export function UsersTable({ users }: Props) {
 
                 <td className="px-5 py-3.5 text-right">
                   <div className="flex items-center justify-end gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleSendAccess(u)}
+                      disabled={sendingAccessId === u.id || !u.isActive}
+                      title={u.isActive ? "Envoyer / Renvoyer le lien d'accès et réinitialisation par email" : "Compte désactivé"}
+                      className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-blue hover:border-brand-blue hover:bg-brand-blue/5 transition-all shadow-2xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {sendingAccessId === u.id ? (
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-brand-blue" />
+                      ) : (
+                        <Mail className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => handleToggleActive(u)}

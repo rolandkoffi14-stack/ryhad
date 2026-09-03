@@ -37,7 +37,7 @@ export async function sendInterventionNotification({
     const trackingLink = `${appUrl}/suivi/${numeroTicket}`;
 
     // 1. Notification à l'atelier RyHaD Tic-Medic
-    await resend.emails.send({
+    const atelierRes = await resend.emails.send({
       from: emailFrom,
       to: workshopEmail,
       subject: `🚨 Nouveau Ticket Reçu : ${numeroTicket} (${clientNom})`,
@@ -57,9 +57,13 @@ export async function sendInterventionNotification({
       `,
     });
 
+    if (atelierRes.error) {
+      console.error("[RESEND ERROR] Envoi notification atelier:", atelierRes.error);
+    }
+
     // 2. Email de confirmation au client (si email fourni)
     if (clientEmail) {
-      await resend.emails.send({
+      const clientRes = await resend.emails.send({
         from: emailFrom,
         to: clientEmail,
         subject: `Prise en charge de votre matériel — Dossier N° ${numeroTicket}`,
@@ -85,6 +89,10 @@ export async function sendInterventionNotification({
           </div>
         `,
       });
+
+      if (clientRes.error) {
+        console.error("[RESEND ERROR] Envoi confirmation client:", clientRes.error);
+      }
     }
 
     return { success: true };
@@ -202,7 +210,7 @@ export async function sendPasswordResetEmail({
   }
 
   try {
-    await resend.emails.send({
+    const res = await resend.emails.send({
       from: emailFrom,
       to: email,
       subject: "🔒 Réinitialisation de votre mot de passe — RyHaD Tic-Medic",
@@ -235,6 +243,12 @@ export async function sendPasswordResetEmail({
         </div>
       `,
     });
+
+    if (res.error) {
+      console.error("[RESEND ERROR] Erreur envoi réinitialisation mot de passe:", res.error);
+      return { success: false, error: res.error };
+    }
+
     return { success: true };
   } catch (error) {
     console.error("Erreur envoi email réinitialisation Resend:", error);
@@ -309,7 +323,7 @@ export async function sendWelcomeUserEmail({
       TECHNICIEN: "Technicien d'Atelier",
     };
 
-    await resend.emails.send({
+    const res = await resend.emails.send({
       from: emailFrom,
       to: email,
       subject: "🎉 Bienvenue dans l'équipe RyHaD Tic-Medic — Vos accès CRM",
@@ -340,6 +354,12 @@ export async function sendWelcomeUserEmail({
         </div>
       `,
     });
+
+    if (res.error) {
+      console.error("[RESEND ERROR] Erreur envoi email bienvenue:", res.error);
+      return { success: false, error: res.error };
+    }
+
     return { success: true };
   } catch (error) {
     console.error("Erreur email bienvenue Resend:", error);
