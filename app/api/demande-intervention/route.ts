@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { interventionRequestSchema } from "@/lib/validations";
 import { generateInterventionNumber } from "@/lib/documents/numbering";
 import { sendInterventionNotification } from "@/lib/services/email";
+import { notifyNewInterventionToStaff } from "@/lib/services/notifications";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { InterventionType, InterventionStatut, PieceJointeType, ClientType, ContractStatus } from "@prisma/client";
 
@@ -90,7 +91,15 @@ export async function POST(request: Request) {
       },
     });
 
-    // 5. Envoi des notifications emails (Atelier & Client)
+    // 5. Envoi des notifications (In-App + Push + Email aux comptes ADMIN/RECEPTION et email au client)
+    notifyNewInterventionToStaff({
+      numero: intervention.numero,
+      typeMateriel: intervention.typeMateriel,
+      panneDeclaree: intervention.panneDeclaree,
+      clientNom: client.nom,
+      clientTelephone: client.telephone,
+    }).catch((err) => console.error("Staff notification background error:", err));
+
     sendInterventionNotification({
       numeroTicket: intervention.numero,
       clientNom: client.nom,
@@ -98,7 +107,7 @@ export async function POST(request: Request) {
       clientTelephone: client.telephone,
       typeMateriel: intervention.typeMateriel,
       panneDeclaree: intervention.panneDeclaree,
-    }).catch((err) => console.error("Email notification background error:", err));
+    }).catch((err) => console.error("Client email notification background error:", err));
 
     return NextResponse.json(
       {

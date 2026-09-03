@@ -790,30 +790,43 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
             <div className="text-gray-600 font-medium">{ticket.client.telephone}</div>
             {ticket.client.adresse && <div className="text-gray-500">{ticket.client.adresse}</div>}
 
-            {ticket.client.telephone && (
-              <div className="pt-2 flex flex-wrap items-center gap-1.5">
-                <a
-                  href={`https://wa.me/${ticket.client.telephone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                    `Bonjour ${ticket.client.nom}, votre dossier (${ticket.numero}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} a bien été enregistré chez RyHaD Tic-Medic.\nSuivez l'avancement technique et vos documents en direct sur : https://ryhad.bj/suivi/${ticket.numero}`
-                  )}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  title="Envoyer le lien de suivi sur WhatsApp"
-                  className="inline-flex items-center gap-1 bg-[#25D366]/10 hover:bg-[#25D366] text-[#128C7E] hover:text-white font-extrabold px-2.5 py-1 rounded-lg text-[10px] transition-all border border-[#25D366]/30 shadow-2xs"
-                >
-                  <MessageCircle className="w-3 h-3" />
-                  <span>WhatsApp Suivi</span>
-                </a>
-                <a
-                  href={`tel:${ticket.client.telephone}`}
-                  title="Appeler le client"
-                  className="inline-flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-2.5 py-1 rounded-lg text-[10px] transition-all border border-gray-200"
-                >
-                  <Phone className="w-3 h-3 text-gray-500" />
-                  <span>Appeler</span>
-                </a>
-              </div>
-            )}
+            {ticket.client.telephone && (() => {
+              const appBaseUrl = typeof window !== "undefined" ? window.location.origin : "https://ryhad.bj";
+              let waText = `Bonjour ${ticket.client.nom},\n\n`;
+
+              if (devisDoc && (ticket.statut === InterventionStatut.DIAGNOSTIC_TERMINE || ticket.statut === InterventionStatut.DEVIS_ENVOYE)) {
+                waText += `Votre devis de réparation RyHaD Tic-Medic est disponible :\n📄 Devis N° : ${devisDoc.numero}\n💰 Montant estimé : ${formatFCFA(devisDoc.montant)}\n⚙️ Matériel : ${ticket.typeMateriel.replace(/_/g, " ")}\n\n👉 Télécharger votre devis PDF officiel :\n${appBaseUrl}/api/documents/${devisDoc.numero}/pdf\n\n🔍 Ou suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou`;
+              } else if (repDoc && ticket.statut === InterventionStatut.DEVIS_ACCEPTE) {
+                waText += `Votre facture de réparation N° ${repDoc.numero} (${formatFCFA(repDoc.montant)}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} chez RyHaD Tic-Medic est disponible.\n\n👉 Télécharger votre facture PDF :\n${appBaseUrl}/api/documents/${repDoc.numero}/pdf\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}`;
+              } else if (ticket.statut === InterventionStatut.TERMINE) {
+                waText += `Bonne nouvelle ! Votre ${ticket.typeMateriel.replace(/_/g, " ")} (Dossier ${ticket.numero}) est réparé et disponible à notre atelier de Gbégamey pour retrait.\n\n🔍 Suivre votre dossier :\n${appBaseUrl}/suivi/${ticket.numero}`;
+              } else {
+                waText += `Votre dossier (${ticket.numero}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} a bien été enregistré chez RyHaD Tic-Medic.\n\n🔍 Suivez l'avancement technique et vos documents en direct sur :\n${appBaseUrl}/suivi/${ticket.numero}`;
+              }
+
+              return (
+                <div className="pt-2 flex flex-wrap items-center gap-1.5">
+                  <a
+                    href={`https://wa.me/${ticket.client.telephone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(waText)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="Envoyer le récapitulatif avec lien PDF direct sur WhatsApp"
+                    className="inline-flex items-center gap-1 bg-[#25D366]/10 hover:bg-[#25D366] text-[#128C7E] hover:text-white font-extrabold px-2.5 py-1 rounded-lg text-[10px] transition-all border border-[#25D366]/30 shadow-2xs"
+                  >
+                    <MessageCircle className="w-3 h-3" />
+                    <span>WhatsApp {devisDoc ? "Devis PDF" : "Suivi"}</span>
+                  </a>
+                  <a
+                    href={`tel:${ticket.client.telephone}`}
+                    title="Appeler le client"
+                    className="inline-flex items-center gap-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-2.5 py-1 rounded-lg text-[10px] transition-all border border-gray-200"
+                  >
+                    <Phone className="w-3 h-3 text-gray-500" />
+                    <span>Appeler</span>
+                  </a>
+                </div>
+              );
+            })()}
           </div>
 
           <div className="space-y-1 p-4 rounded-xl bg-brand-slate/60 border border-gray-100">
@@ -1225,6 +1238,19 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
                         <span className={`text-[9px] px-2 py-0.5 rounded border ${badgeClass}`}>
                           {badgeLabel}
                         </span>
+                        {ticket.client.telephone && (
+                          <a
+                            href={`https://wa.me/${ticket.client.telephone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                              `Bonjour ${ticket.client.nom},\n\nVoici votre ${label} RyHaD Tic-Medic :\n📄 Réf : ${doc.numero}\n💰 Montant : ${formatFCFA(doc.montant)}\n\n👉 Télécharger votre document PDF :\n${typeof window !== "undefined" ? window.location.origin : "https://ryhad.bj"}/api/documents/${doc.numero}/pdf\n\n🔍 Suivi de votre dossier : ${typeof window !== "undefined" ? window.location.origin : "https://ryhad.bj"}/suivi/${ticket.numero}`
+                            )}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            title="Partager ce document sur WhatsApp"
+                            className="p-1 rounded bg-white hover:bg-[#25D366] hover:text-white text-[#128C7E] border border-gray-200 transition-all inline-flex items-center shadow-xs"
+                          >
+                            <MessageCircle className="w-3 h-3" />
+                          </a>
+                        )}
                         <a
                           href={`/api/documents/${doc.numero}/pdf`}
                           target="_blank"

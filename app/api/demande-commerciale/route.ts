@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { commercialRequestSchema } from "@/lib/validations";
-import { sendCommercialNotification } from "@/lib/services/email";
+import { notifyNewCommercialRequestToStaff } from "@/lib/services/notifications";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { DemandeStatut, ClientType } from "@prisma/client";
 
@@ -51,14 +51,14 @@ export async function POST(request: Request) {
       },
     });
 
-    // 3. Envoi de notification email à l'atelier
-    sendCommercialNotification({
+    // 3. Envoi des notifications In-App + Web Push + Email aux administrateurs et réceptionnistes
+    notifyNewCommercialRequestToStaff({
+      id: demande.id,
       nom: validatedData.nom,
       telephone: validatedData.telephone,
-      email: validatedData.email,
       typeDemande: validatedData.typeDemande,
       description: validatedData.description,
-    }).catch((err) => console.error("Commercial email error:", err));
+    }).catch((err) => console.error("Commercial notification error:", err));
 
     return NextResponse.json(
       {

@@ -6,6 +6,8 @@ import { Search, LogOut, Menu } from "lucide-react";
 import { SessionUser } from "@/lib/auth";
 import { StaffRole } from "@prisma/client";
 
+import { NotificationBell } from "@/components/crm/NotificationBell";
+
 interface Props {
   user: SessionUser;
   onMenuToggle?: () => void;
@@ -55,8 +57,11 @@ export function CrmHeader({ user, onMenuToggle }: Props) {
         </div>
       </div>
 
-      {/* Profil utilisateur */}
-      <div className="flex items-center gap-4">
+      {/* Actions & Profil utilisateur */}
+      <div className="flex items-center gap-3">
+        {/* Cloche de notifications In-App & Web Push */}
+        <NotificationBell />
+
         <div className="relative">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}

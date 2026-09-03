@@ -23,6 +23,8 @@ model User {
   createdAt             DateTime @default(now())
   interventionsAssignees Intervention[] @relation("TechnicienAssigne")
   historique            HistoriqueTicket[]
+  notifications         Notification[]
+  pushSubscriptions     PushSubscription[]
 
   @@index([role, isActive])
 }
@@ -324,3 +326,45 @@ model Piece {
   quantiteStock Int    @default(0)
   seuilAlerte  Int     @default(5)
 }
+
+// ------------------------------------------------------------------------------
+// Centre de Notifications In-App & Web Push
+// ------------------------------------------------------------------------------
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  titre     String
+  message   String
+  type      NotificationType @default(SYSTEME)
+  lien      String?          // URL de redirection directe au clic
+  estLu     Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, estLu])
+  @@index([createdAt])
+}
+
+enum NotificationType {
+  TICKET_CREE
+  TICKET_ASSIGNE
+  STATUT_CHANGE
+  DEVIS_ACCEPTE
+  DEVIS_REFUSE
+  FACTURE_PAYEE
+  DEMANDE_COMMERCIALE
+  SYSTEME
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+

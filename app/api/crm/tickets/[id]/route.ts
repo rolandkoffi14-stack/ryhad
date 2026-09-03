@@ -22,6 +22,12 @@ import {
   StaffRole,
   InterventionType,
 } from "@prisma/client";
+import {
+  notifyTechAssigned,
+  notifyStatusChangeToStaff,
+  sendClientQuoteEmail,
+  sendClientReadyForPickupEmail,
+} from "@/lib/services/notifications";
 
 export async function PATCH(
   request: Request,
@@ -392,6 +398,44 @@ export async function PATCH(
         },
       });
 
+      // 1. Notification In-App + Web Push au personnel concerné
+      notifyStatusChangeToStaff({
+        ticketId: currentTicket.id,
+        numero: currentTicket.numero,
+        nouveauStatut: newStatut,
+        clientNom: currentTicket.client.nom,
+        technicienAssigneId: currentTicket.technicienAssigneId,
+      }).catch((err) => console.error("Erreur notification status change:", err));
+
+      // 2. Notification Email au client si un devis vient d'être généré/envoyé
+      if (
+        (newStatut === InterventionStatut.DIAGNOSTIC_TERMINE || newStatut === InterventionStatut.DEVIS_ENVOYE) &&
+        currentTicket.client.email
+      ) {
+        const devisDoc = currentTicket.documents.find((d) => d.type === DocumentType.DEVIS);
+        const montantDevis = devisDoc?.montant || ((currentTicket.montantMainOeuvre || 0) + currentTicket.piecesUtilisees.reduce((acc, p) => acc + p.quantite * p.prixUnitaire, 0));
+        if (devisDoc || createdDocNumero) {
+          sendClientQuoteEmail({
+            clientEmail: currentTicket.client.email,
+            clientNom: currentTicket.client.nom,
+            numeroTicket: currentTicket.numero,
+            numeroDevis: createdDocNumero || devisDoc?.numero || "DEV-DEVIS",
+            montantTotal: montantDevis,
+            typeMateriel: currentTicket.typeMateriel,
+          }).catch((err) => console.error("Erreur envoi email devis client:", err));
+        }
+      }
+
+      // 3. Notification Email au client si la réparation est terminée et prête pour retrait
+      if (newStatut === InterventionStatut.TERMINE && currentTicket.client.email) {
+        sendClientReadyForPickupEmail({
+          clientEmail: currentTicket.client.email,
+          clientNom: currentTicket.client.nom,
+          numeroTicket: currentTicket.numero,
+          typeMateriel: currentTicket.typeMateriel,
+        }).catch((err) => console.error("Erreur envoi email retrait client:", err));
+      }
+
       return NextResponse.json({ success: true, message: "Statut mis à jour avec succès" });
     }
 
@@ -661,6 +705,18 @@ export async function PATCH(
           },
         },
       });
+
+      if (technicienId && techUser) {
+        notifyTechAssigned({
+          id: currentTicket.id,
+          numero: currentTicket.numero,
+          typeMateriel: currentTicket.typeMateriel,
+          panneDeclaree: currentTicket.panneDeclaree,
+          clientNom: currentTicket.client.nom,
+          technicienAssigneId: technicienId,
+        }).catch((err) => console.error("Erreur notification assignation technicien:", err));
+      }
+
       return NextResponse.json({ success: true, message: "Technicien assigné" });
     }
 
