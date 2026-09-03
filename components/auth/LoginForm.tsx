@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Lock, Mail, KeyRound, ArrowRight, ShieldCheck, Wrench, User, AlertCircle } from "lucide-react";
+import { Lock, Mail, KeyRound, ShieldCheck, CheckCircle2, AlertCircle } from "lucide-react";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/crm";
+  const isSetupSuccess = searchParams.get("setup") === "success";
+  const isResetSuccess = searchParams.get("reset") === "success";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +36,7 @@ export function LoginForm() {
         setLoading(false);
       } else {
         setIsSuccess(true);
-        // Utiliser window.location.href pour une transition nette avec prise en compte immédiate des cookies de session
+        // Transition directe avec actualisation de session
         window.location.href = callbackUrl;
       }
     } catch (err: any) {
@@ -42,14 +45,27 @@ export function LoginForm() {
     }
   };
 
-  const handleQuickFill = (quickEmail: string, quickPass: string) => {
-    setEmail(quickEmail);
-    setPassword(quickPass);
-    setError(null);
-  };
-
   return (
     <div className="w-full max-w-md space-y-6">
+      {/* Alertes de succès */}
+      {isSetupSuccess && (
+        <div className="p-4 rounded-2xl bg-brand-green/10 border border-brand-green/30 text-brand-green-dark text-xs flex items-start gap-2.5 animate-fade-in">
+          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-brand-green" />
+          <span>
+            <strong>Initialisation réussie !</strong> Votre compte Administrateur est prêt. Connectez-vous ci-dessous.
+          </span>
+        </div>
+      )}
+
+      {isResetSuccess && (
+        <div className="p-4 rounded-2xl bg-brand-green/10 border border-brand-green/30 text-brand-green-dark text-xs flex items-start gap-2.5 animate-fade-in">
+          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-brand-green" />
+          <span>
+            <strong>Mot de passe modifié !</strong> Vous pouvez désormais vous connecter avec votre nouveau mot de passe.
+          </span>
+        </div>
+      )}
+
       {error && (
         <div className="p-4 rounded-xl bg-brand-red-light border border-brand-red/30 text-brand-red text-xs flex items-start gap-2.5">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
@@ -74,7 +90,15 @@ export function LoginForm() {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-gray-700 mb-1.5">Mot de Passe *</label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-bold text-gray-700">Mot de Passe *</label>
+            <Link
+              href="/mot-de-passe-oublie"
+              className="text-[11px] font-bold text-brand-blue hover:underline"
+            >
+              Mot de passe oublié ?
+            </Link>
+          </div>
           <div className="relative">
             <KeyRound className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -111,7 +135,6 @@ export function LoginForm() {
           )}
         </button>
       </form>
-
     </div>
   );
 }

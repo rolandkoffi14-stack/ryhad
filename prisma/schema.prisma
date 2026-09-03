@@ -33,6 +33,16 @@ enum StaffRole {
   ADMIN
 }
 
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
 model Client {
   id            String       @id @default(cuid())
   type          ClientType   // PARTICULIER | ENTREPRISE

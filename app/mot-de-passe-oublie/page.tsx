@@ -1,32 +1,24 @@
 import { Suspense } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { redirect } from "next/navigation";
-import { prisma } from "@/lib/db";
-import { LoginForm } from "@/components/auth/LoginForm";
-import { ShieldCheck, ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
+import { ArrowLeft, KeyRound } from "lucide-react";
 
 export const metadata = {
-  title: "Connexion Staff & CRM | RyHaD Tic-Medic",
+  title: "Mot de passe oublié | RyHaD Tic-Medic",
 };
 
-export const dynamic = "force-dynamic";
-
-export default async function LoginPage() {
-  const userCount = await prisma.user.count();
-  if (userCount === 0) {
-    redirect("/setup");
-  }
+export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen bg-brand-slate flex flex-col justify-between p-4 sm:p-8">
       {/* Header Retour */}
       <div className="max-w-md mx-auto w-full flex items-center justify-between">
         <Link
-          href="/"
+          href="/login"
           className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-brand-blue transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Retour au site vitrine</span>
+          <span>Retour à la connexion</span>
         </Link>
       </div>
 
@@ -45,22 +37,22 @@ export default async function LoginPage() {
           </div>
           <div>
             <h1 className="text-2xl font-extrabold text-brand-dark tracking-tight">
-              RyHaD Tic-Medic
+              Mot de Passe Oublié
             </h1>
             <p className="text-xs text-gray-500 mt-1">
-              Espace d&apos;administration & outil de gestion d&apos;atelier (Gbégamey, Cotonou)
+              Récupération sécurisée d&apos;accès staff (RyHaD Tic-Medic)
             </p>
           </div>
         </div>
 
         <Suspense fallback={<div className="p-8 text-center text-xs text-gray-400">Chargement...</div>}>
-          <LoginForm />
+          <ForgotPasswordForm />
         </Suspense>
       </div>
 
       {/* Footer */}
       <div className="max-w-md mx-auto w-full text-center text-[11px] text-gray-400">
-        RyHaD Tic-Medic • +229 01 90 88 13 14 • ryhadticmedic@gmail.com
+        RyHaD Tic-Medic • Gbégamey, Cotonou, Bénin • +229 01 90 88 13 14
       </div>
     </div>
   );

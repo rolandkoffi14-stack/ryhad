@@ -1,10 +1,26 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { UserCog, ShieldCheck, User, Wrench, CheckCircle2, Lock, Search, Eye, Mail, Phone } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  UserCog,
+  ShieldCheck,
+  User,
+  Wrench,
+  CheckCircle2,
+  Lock,
+  Search,
+  Eye,
+  Mail,
+  Phone,
+  UserPlus,
+  Power,
+  RefreshCw,
+} from "lucide-react";
 import { StaffRole } from "@prisma/client";
 import { PaginationControls } from "@/components/crm/PaginationControls";
 import { QuickViewModal, QuickViewData } from "@/components/crm/QuickViewModal";
+import { UserCreateModal } from "@/components/crm/UserCreateModal";
 
 interface UserItem {
   id: string;
@@ -22,14 +38,17 @@ interface Props {
 }
 
 export function UsersTable({ users }: Props) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("ALL");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Quick View Modal
+  // Modals state
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [quickViewData, setQuickViewData] = useState<QuickViewData | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
   const getRoleBadge = (role: StaffRole) => {
     switch (role) {
@@ -95,9 +114,35 @@ export function UsersTable({ users }: Props) {
     setIsQuickViewOpen(true);
   };
 
+  const handleToggleActive = async (u: UserItem) => {
+    const action = u.isActive ? "désactiver" : "activer";
+    if (!confirm(`Êtes-vous sûr de vouloir ${action} le compte de ${u.firstName} ${u.lastName} ?`)) {
+      return;
+    }
+
+    setUpdatingId(u.id);
+    try {
+      const res = await fetch(`/api/crm/utilisateurs/${u.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: !u.isActive }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.message || "Erreur lors de la modification du statut.");
+      } else {
+        router.refresh();
+      }
+    } catch (e: any) {
+      alert("Erreur de communication avec le serveur.");
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   return (
     <div className="bg-white rounded-3xl border border-gray-200 subtle-shadow overflow-hidden flex flex-col">
-      {/* Filtres & Recherche */}
+      {/* Filtres, Recherche & Bouton Ajouter */}
       <div className="p-4 sm:p-5 border-b border-gray-100 bg-brand-slate/40 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -113,31 +158,42 @@ export function UsersTable({ users }: Props) {
           />
         </div>
 
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 text-xs">
-          {[
-            { id: "ALL", label: "Tous" },
-            { id: StaffRole.ADMIN, label: "Admins" },
-            { id: StaffRole.RECEPTIONNISTE, label: "Réceptionnistes" },
-            { id: StaffRole.TECHNICIEN, label: "Techniciens" },
-          ].map((tab) => {
-            const isActive = roleFilter === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => {
-                  setRoleFilter(tab.id);
-                  setCurrentPage(1);
-                }}
-                className={`px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 ${
-                  isActive
-                    ? "bg-brand-blue text-white shadow-2xs"
-                    : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+        <div className="flex items-center gap-3 justify-between lg:justify-end flex-wrap">
+          <div className="flex items-center gap-1.5 overflow-x-auto text-xs">
+            {[
+              { id: "ALL", label: "Tous" },
+              { id: StaffRole.ADMIN, label: "Admins" },
+              { id: StaffRole.RECEPTIONNISTE, label: "Réceptionnistes" },
+              { id: StaffRole.TECHNICIEN, label: "Techniciens" },
+            ].map((tab) => {
+              const isActive = roleFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setRoleFilter(tab.id);
+                    setCurrentPage(1);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 cursor-pointer ${
+                    isActive
+                      ? "bg-brand-blue text-white shadow-2xs"
+                      : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsCreateModalOpen(true)}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>Nouveau Collaborateur</span>
+          </button>
         </div>
       </div>
 
@@ -150,6 +206,7 @@ export function UsersTable({ users }: Props) {
               <th className="px-5 py-3.5">Contact</th>
               <th className="px-5 py-3.5">Rôle RBAC</th>
               <th className="px-5 py-3.5">Assignable</th>
+              <th className="px-5 py-3.5">Statut</th>
               <th className="px-5 py-3.5 text-right">Actions</th>
             </tr>
           </thead>
@@ -188,13 +245,41 @@ export function UsersTable({ users }: Props) {
                   )}
                 </td>
 
+                <td className="px-5 py-3.5">
+                  {u.isActive ? (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full border border-brand-green/20">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-green" />
+                      Actif
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                      Désactivé
+                    </span>
+                  )}
+                </td>
+
                 <td className="px-5 py-3.5 text-right">
                   <div className="flex items-center justify-end gap-1.5">
                     <button
                       type="button"
+                      onClick={() => handleToggleActive(u)}
+                      disabled={updatingId === u.id}
+                      title={u.isActive ? "Désactiver le compte" : "Activer le compte"}
+                      className={`p-1.5 rounded-xl border transition-all shadow-2xs cursor-pointer ${
+                        u.isActive
+                          ? "border-gray-200 bg-white text-gray-400 hover:text-brand-red hover:border-brand-red hover:bg-brand-red-light"
+                          : "border-brand-green/30 bg-brand-green/10 text-brand-green hover:bg-brand-green/20"
+                      }`}
+                    >
+                      <Power className="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
+                      type="button"
                       onClick={() => handleOpenQuickView(u)}
                       title="Aperçu collaborateur"
-                      className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-blue hover:border-brand-blue hover:bg-brand-blue/5 transition-all shadow-2xs"
+                      className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-blue hover:border-brand-blue hover:bg-brand-blue/5 transition-all shadow-2xs cursor-pointer"
                     >
                       <Eye className="w-3.5 h-3.5" />
                     </button>
@@ -205,7 +290,7 @@ export function UsersTable({ users }: Props) {
 
             {paginatedUsers.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
+                <td colSpan={6} className="px-6 py-12 text-center text-gray-400">
                   Aucun collaborateur trouvé.
                 </td>
               </tr>
@@ -229,6 +314,12 @@ export function UsersTable({ users }: Props) {
         isOpen={isQuickViewOpen}
         onClose={() => setIsQuickViewOpen(false)}
         data={quickViewData}
+      />
+
+      <UserCreateModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onUserCreated={() => router.refresh()}
       />
     </div>
   );

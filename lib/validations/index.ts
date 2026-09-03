@@ -150,3 +150,25 @@ export const ticketEncaisserRepSchema = z.object({
   modePaiement: z.string().optional(),
   referencePaiement: z.string().nullable().optional(),
 });
+
+// ============================================================================
+// 8. SCHÉMAS D'AUTHENTIFICATION, SETUP & RÉINITIALISATION DE MOT DE PASSE
+// ============================================================================
+export const setupAdminSchema = z.object({
+  firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
+  lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
+  email: z.string().email("Adresse email valide requise"),
+  password: strongPasswordSchema,
+  phone: z.string().optional().nullable(),
+  assignableAsTechnician: z.boolean().default(true),
+});
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Veuillez saisir une adresse email valide"),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(10, "Jeton de réinitialisation invalide ou manquant"),
+  password: strongPasswordSchema,
+});
+

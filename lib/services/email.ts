@@ -137,3 +137,167 @@ export async function sendCommercialNotification(data: {
     return { success: false, error };
   }
 }
+
+/**
+ * Envoie un email sécurisé de réinitialisation de mot de passe (valable 30 min)
+ */
+export async function sendPasswordResetEmail({
+  email,
+  firstName,
+  resetUrl,
+}: {
+  email: string;
+  firstName: string;
+  resetUrl: string;
+}) {
+  if (!resend) {
+    console.log(`[EMAIL DEV MODE] Lien de réinitialisation pour ${email} : ${resetUrl}`);
+    return { success: true, mocked: true };
+  }
+
+  try {
+    await resend.emails.send({
+      from: emailFrom,
+      to: email,
+      subject: "🔒 Réinitialisation de votre mot de passe — RyHaD Tic-Medic",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 25px;">
+            <h1 style="color: #1E4D8B; margin: 0; font-size: 22px;">RyHaD Tic-Medic</h1>
+            <p style="color: #666; font-size: 13px; margin-top: 5px;">Portail d'Administration & Gestion d'Atelier</p>
+          </div>
+          <div style="background-color: #ffffff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 25px;">
+            <h2 style="color: #1C222B; font-size: 18px; margin-top: 0;">Bonjour ${firstName},</h2>
+            <p style="color: #4B5563; font-size: 14px;">
+              Une demande de réinitialisation de votre mot de passe a été initiée pour votre compte staff RyHaD Tic-Medic.
+            </p>
+            <p style="color: #4B5563; font-size: 14px;">
+              Cliquez sur le bouton ci-dessous pour définir un nouveau mot de passe sécurisé (ce lien est à usage unique et expire dans <strong>30 minutes</strong>) :
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" style="background-color: #1E4D8B; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
+                Définir un nouveau mot de passe
+              </a>
+            </div>
+            <p style="color: #6B7280; font-size: 12px; margin-top: 25px; border-top: 1px solid #F3F4F6; padding-top: 15px;">
+              Si vous n'êtes pas à l'origine de cette demande, vous pouvez ignorer cet email en toute sécurité. Votre mot de passe actuel restera inchangé.
+            </p>
+          </div>
+          <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #9CA3AF;">
+            RyHaD Tic-Medic • Gbégamey, Cotonou, Bénin • +229 01 90 88 13 14
+          </div>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Erreur envoi email réinitialisation Resend:", error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Alerte de sécurité lors de la modification réussie d'un mot de passe
+ */
+export async function sendPasswordChangedAlert({
+  email,
+  firstName,
+}: {
+  email: string;
+  firstName: string;
+}) {
+  if (!resend) {
+    console.log(`[EMAIL DEV MODE] Alerte mot de passe modifié pour ${email}`);
+    return { success: true, mocked: true };
+  }
+
+  try {
+    await resend.emails.send({
+      from: emailFrom,
+      to: email,
+      subject: "🛡️ Confirmation : votre mot de passe a été modifié — RyHaD Tic-Medic",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #2CA58D;">Mot de passe mis à jour avec succès</h2>
+          <p>Bonjour <strong>${firstName}</strong>,</p>
+          <p>Nous vous confirmons que le mot de passe de votre compte staff <strong>${email}</strong> vient d'être modifié avec succès.</p>
+          <p>Si vous êtes à l'origine de cette action, aucune démarche supplémentaire n'est requise.</p>
+          <p style="color: #E2574C; font-size: 13px; font-weight: bold; margin-top: 20px;">
+            ⚠️ Si vous n'avez pas modifié votre mot de passe, contactez immédiatement l'administrateur de l'atelier RyHaD.
+          </p>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Erreur alerte mot de passe Resend:", error);
+    return { success: false, error };
+  }
+}
+
+/**
+ * Envoie un email de bienvenue à un nouveau collaborateur avec ses identifiants
+ */
+export async function sendWelcomeUserEmail({
+  email,
+  firstName,
+  role,
+  temporaryPassword,
+  loginUrl,
+}: {
+  email: string;
+  firstName: string;
+  role: string;
+  temporaryPassword?: string;
+  loginUrl: string;
+}) {
+  if (!resend) {
+    console.log(`[EMAIL DEV MODE] Bienvenue collaborateur ${firstName} (${email}) - Rôle: ${role}`);
+    return { success: true, mocked: true };
+  }
+
+  try {
+    const roleLabels: Record<string, string> = {
+      ADMIN: "Administrateur",
+      RECEPTIONNISTE: "Réceptionniste / Accueil",
+      TECHNICIEN: "Technicien d'Atelier",
+    };
+
+    await resend.emails.send({
+      from: emailFrom,
+      to: email,
+      subject: "🎉 Bienvenue dans l'équipe RyHaD Tic-Medic — Vos accès CRM",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="text-align: center; margin-bottom: 25px;">
+            <h1 style="color: #1E4D8B; margin: 0; font-size: 22px;">RyHaD Tic-Medic</h1>
+            <p style="color: #666; font-size: 13px; margin-top: 5px;">Espace de Gestion & Suivi d'Interventions</p>
+          </div>
+          <div style="background-color: #ffffff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 25px;">
+            <h2 style="color: #1C222B; font-size: 18px; margin-top: 0;">Bienvenue ${firstName} !</h2>
+            <p style="color: #4B5563; font-size: 14px;">
+              Votre compte collaborateur a été créé sur l'application CRM de RyHaD Tic-Medic avec le rôle : <strong>${roleLabels[role] || role}</strong>.
+            </p>
+            <div style="background-color: #F4F6F8; border-radius: 8px; padding: 15px; margin: 20px 0; font-size: 13px;">
+              <p style="margin: 0 0 8px 0;"><strong>Identifiant (Email) :</strong> ${email}</p>
+              ${temporaryPassword ? `<p style="margin: 0;"><strong>Mot de passe initial :</strong> <code style="background: #E5E7EB; padding: 2px 6px; border-radius: 4px;">${temporaryPassword}</code></p>` : ""}
+            </div>
+            <div style="text-align: center; margin: 25px 0;">
+              <a href="${loginUrl}" style="background-color: #1E4D8B; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
+                Accéder au CRM Atelier
+              </a>
+            </div>
+            <p style="color: #6B7280; font-size: 12px; margin-top: 20px;">
+              Nous vous recommandons de modifier votre mot de passe dès votre première connexion.
+            </p>
+          </div>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Erreur email bienvenue Resend:", error);
+    return { success: false, error };
+  }
+}
+
