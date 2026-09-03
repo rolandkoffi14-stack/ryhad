@@ -187,9 +187,9 @@ export function CrmSidebar({
               </div>
 
               <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                {/* Badge d'urgence avec pastille numérique */}
-                {item.urgentCount !== undefined && item.urgentCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] font-extrabold bg-brand-red text-white shadow-2xs animate-pulse">
+                {/* Badge d'urgence avec pastille numérique (masqué dès que l'utilisateur est sur la page ouverte) */}
+                {item.urgentCount !== undefined && item.urgentCount > 0 && !isActive && (
+                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-brand-red text-white shadow-2xs">
                     {item.urgentCount}
                   </span>
                 )}
