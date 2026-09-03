@@ -13,6 +13,7 @@ export function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,13 +30,14 @@ export function LoginForm() {
 
       if (res?.error) {
         setError("Identifiants incorrects ou compte désactivé. Veuillez vérifier votre email et mot de passe.");
+        setLoading(false);
       } else {
-        router.push(callbackUrl);
-        router.refresh();
+        setIsSuccess(true);
+        // Utiliser window.location.href pour une transition nette avec prise en compte immédiate des cookies de session
+        window.location.href = callbackUrl;
       }
     } catch (err: any) {
       setError("Une erreur inattendue est survenue lors de la connexion.");
-    } finally {
       setLoading(false);
     }
   };
@@ -88,11 +90,25 @@ export function LoginForm() {
 
         <button
           type="submit"
-          disabled={loading}
-          className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs shadow-md transition-all disabled:opacity-50"
+          disabled={loading || isSuccess}
+          className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs shadow-md transition-all disabled:opacity-75 cursor-pointer disabled:cursor-not-allowed"
         >
-          <Lock className="w-4 h-4 text-brand-green" />
-          <span>{loading ? "Vérification..." : "Accéder à l'Espace CRM Atelier"}</span>
+          {isSuccess ? (
+            <>
+              <ShieldCheck className="w-4 h-4 text-brand-green animate-bounce" />
+              <span>Connexion réussie ! Chargement de l&apos;atelier...</span>
+            </>
+          ) : loading ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <span>Vérification des identifiants...</span>
+            </>
+          ) : (
+            <>
+              <Lock className="w-4 h-4 text-brand-green" />
+              <span>Accéder à l&apos;Espace CRM Atelier</span>
+            </>
+          )}
         </button>
       </form>
 

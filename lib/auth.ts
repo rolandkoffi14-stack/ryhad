@@ -1,3 +1,4 @@
+import { cache } from "react";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
@@ -91,10 +92,28 @@ export interface SessionUser {
   phone?: string | null;
 }
 
-export async function getCurrentUser(): Promise<SessionUser> {
+export const getCurrentUser = cache(async (): Promise<SessionUser> => {
   const session = await auth();
 
   if (session?.user?.id) {
+    const userRole = (session.user as any).role as StaffRole;
+    const firstName = (session.user as any).firstName as string;
+    const lastName = (session.user as any).lastName as string;
+
+    // Si les données sont déjà dans le token JWT, on évite tout aller-retour SQL (0 ms)
+    if (userRole && firstName !== undefined) {
+      return {
+        id: session.user.id,
+        email: session.user.email || "",
+        firstName: firstName || "Utilisateur",
+        lastName: lastName || "",
+        role: userRole,
+        assignableAsTechnician: Boolean((session.user as any).assignableAsTechnician),
+        phone: (session.user as any).phone || null,
+      };
+    }
+
+    // Fallback de sécurité uniquement si le token est incomplet
     try {
       const dbUser = await db.user.findUnique({
         where: { id: session.user.id },
@@ -135,7 +154,7 @@ export async function getCurrentUser(): Promise<SessionUser> {
     assignableAsTechnician: false,
     phone: null,
   };
-}
+});
 
 export function hasPermission(
   role: StaffRole,

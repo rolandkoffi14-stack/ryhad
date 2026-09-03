@@ -49,30 +49,41 @@ export default async function CrmDashboardPage() {
         orderBy: { dateCreation: "desc" },
       });
     } else {
-      // Pour ADMIN et RÉCEPTIONNISTE : vue globale de l'atelier
-      tickets = await db.intervention.findMany({
-        include: {
-          client: true,
-          contract: true,
-          technicienAssigne: true,
-          documents: true,
-        },
-        orderBy: { dateCreation: "desc" },
-      });
+      // Pour ADMIN et RÉCEPTIONNISTE : parallélisation totale des 5 requêtes de synthèse
+      const [
+        fetchedTickets,
+        fetchedClientsCount,
+        fetchedContractsCount,
+        fetchedCommercialCount,
+        revenueAggregate,
+      ] = await Promise.all([
+        db.intervention.findMany({
+          include: {
+            client: true,
+            contract: true,
+            technicienAssigne: true,
+            documents: true,
+          },
+          orderBy: { dateCreation: "desc" },
+        }),
+        db.client.count(),
+        db.contract.count({
+          where: { statut: ContractStatus.ACTIF },
+        }),
+        db.demandeCommerciale.count({
+          where: { statut: "NOUVEAU" },
+        }),
+        db.financialDocument.aggregate({
+          where: { statutPaiement: "PAYE" },
+          _sum: { montant: true },
+        }),
+      ]);
 
-      clientsCount = await db.client.count();
-      activeContractsCount = await db.contract.count({
-        where: { statut: ContractStatus.ACTIF },
-      });
-      commercialRequestsCount = await db.demandeCommerciale.count({
-        where: { statut: "NOUVEAU" },
-      });
-
-      const paidDocuments = await db.financialDocument.findMany({
-        where: { statutPaiement: "PAYE" },
-        select: { montant: true },
-      });
-      totalRevenue = paidDocuments.reduce((acc, doc) => acc + doc.montant, 0);
+      tickets = fetchedTickets;
+      clientsCount = fetchedClientsCount;
+      activeContractsCount = fetchedContractsCount;
+      commercialRequestsCount = fetchedCommercialCount;
+      totalRevenue = revenueAggregate._sum.montant || 0;
     }
   } catch (e) {
     console.error("Dashboard data load error:", e);

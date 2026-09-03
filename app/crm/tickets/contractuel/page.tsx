@@ -29,23 +29,33 @@ export default async function TicketsContractuelPage({
       whereClause.technicienAssigneId = user.id;
     }
 
-    tickets = await db.intervention.findMany({
-      where: whereClause,
-      include: {
-        client: true,
-        contract: true,
-        technicienAssigne: true,
-        documents: true,
-      },
-      orderBy: { dateCreation: "desc" },
-    });
+    if (isNew && user.role !== StaffRole.TECHNICIEN) {
+      // Chargement en parallèle du formulaire de création contrat
+      const [fetchedTickets, activeContracts, fetchedTechnicians] = await Promise.all([
+        db.intervention.findMany({
+          where: whereClause,
+          include: {
+            client: true,
+            contract: true,
+            technicienAssigne: true,
+            documents: true,
+          },
+          orderBy: { dateCreation: "desc" },
+        }),
+        db.contract.findMany({
+          where: { statut: ContractStatus.ACTIF },
+          include: { client: true },
+        }),
+        db.user.findMany({
+          where: {
+            OR: [{ role: "TECHNICIEN" }, { assignableAsTechnician: true }],
+            isActive: true,
+          },
+          select: { id: true, firstName: true, lastName: true },
+        }),
+      ]);
 
-    if (user.role !== StaffRole.TECHNICIEN) {
-      const activeContracts = await db.contract.findMany({
-        where: { statut: ContractStatus.ACTIF },
-        include: { client: true },
-      });
-
+      tickets = fetchedTickets;
       contracts = activeContracts.map((c) => ({
         id: c.id,
         clientId: c.clientId,
@@ -53,13 +63,18 @@ export default async function TicketsContractuelPage({
         equipementsCouverts: c.equipementsCouverts,
         periodicite: c.periodicite,
       }));
-
-      technicians = await db.user.findMany({
-        where: {
-          OR: [{ role: "TECHNICIEN" }, { assignableAsTechnician: true }],
-          isActive: true,
+      technicians = fetchedTechnicians;
+    } else {
+      // Chargement ultra-rapide de la liste seule (1 seule requête SQL)
+      tickets = await db.intervention.findMany({
+        where: whereClause,
+        include: {
+          client: true,
+          contract: true,
+          technicienAssigne: true,
+          documents: true,
         },
-        select: { id: true, firstName: true, lastName: true },
+        orderBy: { dateCreation: "desc" },
       });
     }
   } catch (e) {

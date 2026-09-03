@@ -20,7 +20,7 @@ export default async function TicketDetailPage({
   let technicians: any[] = [];
 
   try {
-    ticket = await db.intervention.findUnique({
+    const ticketPromise = db.intervention.findUnique({
       where: { id },
       include: {
         client: true,
@@ -35,18 +35,25 @@ export default async function TicketDetailPage({
       },
     });
 
+    const techPromise =
+      user.role !== StaffRole.TECHNICIEN
+        ? db.user.findMany({
+            where: {
+              OR: [{ role: "TECHNICIEN" }, { assignableAsTechnician: true }],
+              isActive: true,
+            },
+            select: { id: true, firstName: true, lastName: true },
+          })
+        : Promise.resolve([]);
+
+    const [fetchedTicket, fetchedTechs] = await Promise.all([ticketPromise, techPromise]);
+    ticket = fetchedTicket;
+    technicians = fetchedTechs;
+
     // Si technicien connecté et ticket non assigné à ce technicien, accès refusé
     if (user.role === StaffRole.TECHNICIEN && ticket && ticket.technicienAssigneId !== user.id) {
       notFound();
     }
-
-    technicians = await db.user.findMany({
-      where: {
-        OR: [{ role: "TECHNICIEN" }, { assignableAsTechnician: true }],
-        isActive: true,
-      },
-      select: { id: true, firstName: true, lastName: true },
-    });
   } catch (e) {
     console.error("Error fetching ticket detail:", e);
   }

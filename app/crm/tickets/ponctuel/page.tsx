@@ -30,35 +30,51 @@ export default async function TicketsPonctuelPage({
       whereClause.technicienAssigneId = user.id;
     }
 
-    tickets = await db.intervention.findMany({
-      where: whereClause,
-      include: {
-        client: true,
-        technicienAssigne: true,
-        documents: true,
-      },
-      orderBy: { dateCreation: "desc" },
-    });
-
-    if (user.role !== StaffRole.TECHNICIEN) {
-      clients = await db.client.findMany({
-        where: {
-          contrats: {
-            none: {
-              statut: "ACTIF",
+    if (isNew && user.role !== StaffRole.TECHNICIEN) {
+      // Chargement en parallèle du formulaire de création
+      const [fetchedTickets, fetchedClients, fetchedTechnicians] = await Promise.all([
+        db.intervention.findMany({
+          where: whereClause,
+          include: {
+            client: true,
+            technicienAssigne: true,
+            documents: true,
+          },
+          orderBy: { dateCreation: "desc" },
+        }),
+        db.client.findMany({
+          where: {
+            contrats: {
+              none: {
+                statut: "ACTIF",
+              },
             },
           },
-        },
-        select: { id: true, nom: true, telephone: true },
-        orderBy: { nom: "asc" },
-      });
+          select: { id: true, nom: true, telephone: true },
+          orderBy: { nom: "asc" },
+        }),
+        db.user.findMany({
+          where: {
+            OR: [{ role: "TECHNICIEN" }, { assignableAsTechnician: true }],
+            isActive: true,
+          },
+          select: { id: true, firstName: true, lastName: true },
+        }),
+      ]);
 
-      technicians = await db.user.findMany({
-        where: {
-          OR: [{ role: "TECHNICIEN" }, { assignableAsTechnician: true }],
-          isActive: true,
+      tickets = fetchedTickets;
+      clients = fetchedClients;
+      technicians = fetchedTechnicians;
+    } else {
+      // Chargement ultra-rapide de la liste seule (1 seule requête SQL)
+      tickets = await db.intervention.findMany({
+        where: whereClause,
+        include: {
+          client: true,
+          technicienAssigne: true,
+          documents: true,
         },
-        select: { id: true, firstName: true, lastName: true },
+        orderBy: { dateCreation: "desc" },
       });
     }
   } catch (e) {

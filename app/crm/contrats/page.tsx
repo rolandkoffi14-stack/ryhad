@@ -18,29 +18,29 @@ export default async function CrmContratsPage() {
   let clients: any[] = [];
 
   try {
-    contracts = await db.contract.findMany({
-      include: {
-        client: true,
-        visitesPlanifiees: {
-          orderBy: { datePrevue: "asc" },
+    const [fetchedContracts, fetchedClients] = await Promise.all([
+      db.contract.findMany({
+        include: {
+          client: true,
+          visitesPlanifiees: {
+            orderBy: { datePrevue: "asc" },
+          },
+          facturesPeriodiques: {
+            orderBy: { dateEmission: "desc" },
+          },
         },
-        facturesPeriodiques: {
-          orderBy: { dateEmission: "desc" },
-        },
-      },
-      orderBy: { dateDebut: "desc" },
-    });
+        orderBy: { dateDebut: "desc" },
+      }),
+      db.client.findMany({
+        select: { id: true, nom: true, type: true },
+        orderBy: { nom: "asc" },
+      }),
+    ]);
 
-    clients = await db.client.findMany({
-      where: { type: ClientType.ENTREPRISE },
-      select: { id: true, nom: true },
-    });
-
-    if (clients.length === 0) {
-      clients = await db.client.findMany({
-        select: { id: true, nom: true },
-      });
-    }
+    contracts = fetchedContracts;
+    // Prioriser les entreprises, sinon tous les clients
+    const entrepriseClients = fetchedClients.filter((c) => c.type === ClientType.ENTREPRISE);
+    clients = entrepriseClients.length > 0 ? entrepriseClients : fetchedClients;
   } catch (e) {
     console.error("Error loading contracts:", e);
   }
