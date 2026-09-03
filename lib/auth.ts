@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { StaffRole } from "@prisma/client";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   secret: process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET,
   session: {
     strategy: "jwt",
