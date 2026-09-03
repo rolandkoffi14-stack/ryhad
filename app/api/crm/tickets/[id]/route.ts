@@ -28,6 +28,7 @@ import {
   sendClientQuoteEmail,
   sendClientReadyForPickupEmail,
 } from "@/lib/services/notifications";
+import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 export async function PATCH(
   request: Request,
@@ -136,6 +137,8 @@ export async function PATCH(
         },
       });
 
+      broadcastCrmEvent("ticket:updated", id);
+
       return NextResponse.json({
         success: true,
         message: `Frais de diagnostic (${formatFCFA(montantDiag)}) encaissés avec succès.`,
@@ -192,6 +195,8 @@ export async function PATCH(
           },
         },
       });
+
+      broadcastCrmEvent("ticket:updated", id);
 
       return NextResponse.json({ success: true, message: `Facture ${repDoc.numero} encaissée avec succès.` });
     }
@@ -436,6 +441,8 @@ export async function PATCH(
         }).catch((err) => console.error("Erreur envoi email retrait client:", err));
       }
 
+      broadcastCrmEvent("ticket:updated", id);
+
       return NextResponse.json({ success: true, message: "Statut mis à jour avec succès" });
     }
 
@@ -495,6 +502,8 @@ export async function PATCH(
           },
         },
       });
+      broadcastCrmEvent("ticket:updated", id);
+
       return NextResponse.json({ success: true, message: "Rapport technique enregistré" });
     }
 
@@ -559,6 +568,8 @@ export async function PATCH(
         },
       });
 
+      broadcastCrmEvent("ticket:updated", id);
+
       return NextResponse.json({ success: true, message: "Main d'œuvre enregistrée avec succès." });
     }
 
@@ -621,6 +632,8 @@ export async function PATCH(
         },
       });
 
+      broadcastCrmEvent("ticket:updated", id);
+
       return NextResponse.json({ success: true, message: "Ligne ajoutée au devis" });
     }
 
@@ -671,6 +684,8 @@ export async function PATCH(
         });
       }
 
+      broadcastCrmEvent("ticket:updated", id);
+
       return NextResponse.json({ success: true, message: "Ligne supprimée du devis" });
     }
 
@@ -716,6 +731,8 @@ export async function PATCH(
           technicienAssigneId: technicienId,
         }).catch((err) => console.error("Erreur notification assignation technicien:", err));
       }
+
+      broadcastCrmEvent("ticket:updated", id);
 
       return NextResponse.json({ success: true, message: "Technicien assigné" });
     }

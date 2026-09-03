@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { generateDocumentNumber } from "@/lib/documents/numbering";
 import { DocumentType, FactureType, StatutPaiement, StaffRole } from "@prisma/client";
+import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 export async function POST(request: Request) {
   try {
@@ -58,6 +59,8 @@ export async function POST(request: Request) {
       },
     });
 
+    broadcastCrmEvent("document:created", doc.id);
+
     return NextResponse.json({ success: true, document: doc }, { status: 201 });
   } catch (error: any) {
     console.error("Erreur génération document financier:", error);
@@ -101,6 +104,8 @@ export async function PATCH(request: Request) {
       where: { id: documentId },
       data: updateData,
     });
+
+    broadcastCrmEvent("document:updated", doc.id);
 
     return NextResponse.json({ success: true, document: doc, message: "Statut mis à jour avec succès." });
   } catch (error: any) {

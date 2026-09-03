@@ -4,6 +4,7 @@ import { Resend } from "resend";
 import { env } from "@/lib/env";
 import { NotificationType, StaffRole } from "@prisma/client";
 import { formatFCFA } from "@/lib/format";
+import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 const resendApiKey = env.RESEND_API_KEY;
 const emailFrom = env.EMAIL_FROM || "RyHaD Tic-Medic <notifications@ryhad.bj>";
@@ -50,6 +51,9 @@ export async function sendStaffNotification({
     await db.notification.createMany({
       data: notificationsData,
     });
+
+    // Émettre un événement temps réel pour actualiser immédiatement la cloche de notification
+    broadcastCrmEvent("notification:new");
 
     // 2. Envoi de la notification Web Push native
     if (sendPush) {

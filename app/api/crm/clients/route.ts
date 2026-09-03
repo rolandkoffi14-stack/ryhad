@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { clientFormSchema } from "@/lib/validations";
 import { StaffRole } from "@prisma/client";
+import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 export async function POST(request: Request) {
   try {
@@ -32,6 +33,8 @@ export async function POST(request: Request) {
         adresse: validated.adresse ? validated.adresse.trim() : null,
       },
     });
+
+    broadcastCrmEvent("client:updated", client.id);
 
     return NextResponse.json({ success: true, client }, { status: 201 });
   } catch (error: any) {

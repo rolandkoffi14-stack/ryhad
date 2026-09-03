@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { ticketPonctuelCrmSchema } from "@/lib/validations";
 import { generateInterventionNumber, generateDocumentNumber } from "@/lib/documents/numbering";
 import { InterventionType, InterventionStatut, DocumentType, FactureType, StatutPaiement, StaffRole } from "@prisma/client";
+import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 export async function POST(request: Request) {
   try {
@@ -79,6 +80,8 @@ export async function POST(request: Request) {
         documents: true,
       },
     });
+
+    broadcastCrmEvent("ticket:created", ticket.id);
 
     return NextResponse.json(
       { success: true, id: ticket.id, numero: ticket.numero, invoiceNumero: docNumero },

@@ -4,6 +4,7 @@ import { commercialRequestSchema } from "@/lib/validations";
 import { notifyNewCommercialRequestToStaff } from "@/lib/services/notifications";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { DemandeStatut, ClientType } from "@prisma/client";
+import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 export async function POST(request: Request) {
   try {
@@ -59,6 +60,8 @@ export async function POST(request: Request) {
       typeDemande: validatedData.typeDemande,
       description: validatedData.description,
     }).catch((err) => console.error("Commercial notification error:", err));
+
+    broadcastCrmEvent("demande:created", demande.id);
 
     return NextResponse.json(
       {

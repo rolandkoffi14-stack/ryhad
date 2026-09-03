@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { generateDocumentNumber } from "@/lib/documents/numbering";
 import { DemandeStatut, DocumentType, FactureType, StatutPaiement, StaffRole } from "@prisma/client";
+import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 export async function GET(
   request: Request,
@@ -79,6 +80,7 @@ export async function PATCH(
         },
         include: { client: true, documents: true },
       });
+      broadcastCrmEvent("demande:updated", id);
       return NextResponse.json({ success: true, demande: updated, message: "Demande passée en cours de traitement." });
     }
 
@@ -99,6 +101,7 @@ export async function PATCH(
         },
         include: { client: true, documents: true },
       });
+      broadcastCrmEvent("demande:updated", id);
       return NextResponse.json({ success: true, demande: updated, message: "Cotation enregistrée." });
     }
 
@@ -153,6 +156,8 @@ export async function PATCH(
         include: { client: true, documents: true },
       });
 
+      broadcastCrmEvent("demande:updated", id);
+
       return NextResponse.json({
         success: true,
         demande: updated,
@@ -204,6 +209,8 @@ export async function PATCH(
         include: { client: true, documents: true },
       });
 
+      broadcastCrmEvent("demande:updated", id);
+
       return NextResponse.json({
         success: true,
         demande: updated,
@@ -228,6 +235,8 @@ export async function PATCH(
         },
         include: { client: true, documents: true },
       });
+
+      broadcastCrmEvent("demande:updated", id);
 
       return NextResponse.json({
         success: true,
@@ -262,6 +271,8 @@ export async function PATCH(
         include: { client: true, documents: true },
       });
 
+      broadcastCrmEvent("demande:updated", id);
+
       return NextResponse.json({
         success: true,
         demande: updated,
@@ -279,6 +290,8 @@ export async function PATCH(
         include: { client: true, documents: true },
       });
 
+      broadcastCrmEvent("demande:updated", id);
+
       return NextResponse.json({
         success: true,
         demande: updated,
@@ -293,6 +306,7 @@ export async function PATCH(
         data: { statut: statut as DemandeStatut },
         include: { client: true, documents: true },
       });
+      broadcastCrmEvent("demande:updated", id);
       return NextResponse.json({ success: true, demande: updated });
     }
 

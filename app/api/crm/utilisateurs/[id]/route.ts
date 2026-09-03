@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { StaffRole } from "@prisma/client";
 import { z } from "zod";
+import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 const updateUserSchema = z.object({
   isActive: z.boolean().optional(),
@@ -63,6 +64,8 @@ export async function PATCH(
         isActive: true,
       },
     });
+
+    broadcastCrmEvent("utilisateur:updated", id);
 
     return NextResponse.json({
       success: true,

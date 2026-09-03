@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { contractFormSchema } from "@/lib/validations";
 import { ContractStatus, VisiteStatus, Periodicite, StaffRole } from "@prisma/client";
+import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 export async function POST(request: Request) {
   try {
@@ -68,6 +69,8 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    broadcastCrmEvent("contrat:updated", contract.id);
 
     return NextResponse.json({ success: true, contract }, { status: 201 });
   } catch (error: any) {

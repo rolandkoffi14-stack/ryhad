@@ -6,6 +6,7 @@ import { sendInterventionNotification } from "@/lib/services/email";
 import { notifyNewInterventionToStaff } from "@/lib/services/notifications";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { InterventionType, InterventionStatut, PieceJointeType, ClientType, ContractStatus } from "@prisma/client";
+import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 export async function POST(request: Request) {
   try {
@@ -108,6 +109,8 @@ export async function POST(request: Request) {
       typeMateriel: intervention.typeMateriel,
       panneDeclaree: intervention.panneDeclaree,
     }).catch((err) => console.error("Client email notification background error:", err));
+
+    broadcastCrmEvent("ticket:created", intervention.id);
 
     return NextResponse.json(
       {

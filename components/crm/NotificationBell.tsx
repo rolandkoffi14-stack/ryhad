@@ -50,9 +50,19 @@ export function NotificationBell() {
 
   useEffect(() => {
     fetchNotifications();
-    // Rafraîchissement automatique toutes les 30 secondes
-    const interval = setInterval(fetchNotifications, 30000);
-    return () => clearInterval(interval);
+
+    const handleRealtimeEvent = () => {
+      fetchNotifications();
+    };
+
+    window.addEventListener("crm:realtime-event", handleRealtimeEvent);
+    // Rafraîchissement périodique de sécurité toutes les 60 secondes
+    const interval = setInterval(fetchNotifications, 60000);
+
+    return () => {
+      window.removeEventListener("crm:realtime-event", handleRealtimeEvent);
+      clearInterval(interval);
+    };
   }, []);
 
   // Fermer le menu lors d'un clic extérieur

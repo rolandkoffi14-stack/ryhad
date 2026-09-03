@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { userCreateSchema } from "@/lib/validations";
 import { StaffRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 export async function POST(request: Request) {
   try {
@@ -74,6 +75,8 @@ export async function POST(request: Request) {
     } catch (mailErr) {
       console.error("Erreur lors de l'envoi du mail de bienvenue (non bloquant):", mailErr);
     }
+
+    broadcastCrmEvent("utilisateur:updated", newUser.id);
 
     return NextResponse.json({
       success: true,
