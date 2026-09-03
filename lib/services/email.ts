@@ -1,9 +1,10 @@
 import { Resend } from "resend";
+import { env } from "@/lib/env";
 
-const resendApiKey = process.env.RESEND_API_KEY;
-const emailFrom = process.env.EMAIL_FROM || "RyHaD Tic-Medic <notifications@ryhad.bj>";
-const workshopEmail = process.env.NOTIFICATION_EMAIL || "ryhadticmedic@gmail.com";
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.ryhad.bj";
+const resendApiKey = env.RESEND_API_KEY;
+const emailFrom = env.EMAIL_FROM || "RyHaD Tic-Medic <notifications@ryhad.bj>";
+const workshopEmail = env.NOTIFICATION_EMAIL || "ryhadticmedic@gmail.com";
+const appUrl = env.NEXT_PUBLIC_APP_URL || "https://www.ryhad.bj";
 
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 

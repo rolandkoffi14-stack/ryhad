@@ -1,12 +1,13 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import fs from "fs";
 import path from "path";
+import { env } from "@/lib/env";
 
-const r2AccountId = process.env.R2_ACCOUNT_ID;
-const r2AccessKey = process.env.R2_ACCESS_KEY_ID;
-const r2SecretKey = process.env.R2_SECRET_ACCESS_KEY;
-const r2Bucket = process.env.R2_BUCKET_NAME || "ryhad-media";
-const r2PublicUrl = process.env.R2_PUBLIC_URL || "https://media.ryhad.bj";
+const r2AccountId = env.R2_ACCOUNT_ID;
+const r2AccessKey = env.R2_ACCESS_KEY_ID;
+const r2SecretKey = env.R2_SECRET_ACCESS_KEY;
+const r2Bucket = env.R2_BUCKET_NAME || "ryhad-media";
+const r2PublicUrl = env.R2_PUBLIC_URL || "https://media.ryhad.bj";
 
 let s3Client: S3Client | null = null;
 

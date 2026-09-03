@@ -1,6 +1,7 @@
 /**
- * Utilitaire de Rate Limiting en mémoire (Sliding Window)
- * Conçu pour protéger les routes API contre le flood, le brute-force et le DoS
+ * Module de Rate Limiting Hybride
+ * Supporte Upstash Redis (REST) en environnement distribué multi-instances
+ * avec fallback transparent sur fenêtre glissante en mémoire locale.
  */
 
 interface RateLimitRecord {
@@ -8,15 +9,15 @@ interface RateLimitRecord {
   resetAt: number;
 }
 
-const tracker = new Map<string, RateLimitRecord>();
+const localTracker = new Map<string, RateLimitRecord>();
 
-// Nettoyage périodique toutes les 5 minutes pour éviter toute fuite mémoire
+// Nettoyage périodique toutes les 5 minutes pour la mémoire locale
 if (typeof setInterval !== "undefined") {
   setInterval(() => {
     const now = Date.now();
-    for (const [key, record] of tracker.entries()) {
+    for (const [key, record] of localTracker.entries()) {
       if (now > record.resetAt) {
-        tracker.delete(key);
+        localTracker.delete(key);
       }
     }
   }, 5 * 60 * 1000);
@@ -36,13 +37,50 @@ export async function checkRateLimit(
 ): Promise<{ success: boolean; remaining: number; resetAt: number }> {
   const limit = options.limit ?? 10;
   const windowMs = options.windowMs ?? 60 * 1000;
+  const windowSec = Math.ceil(windowMs / 1000);
   const now = Date.now();
 
-  const record = tracker.get(identifier);
+  const upstashUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const upstashToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  // 1. Si Upstash Redis est configuré (Multi-instances / Serverless distribué)
+  if (upstashUrl && upstashToken) {
+    try {
+      const key = `ratelimit:${identifier}`;
+      // Incrément atomique via pipeline REST
+      const pipelineRes = await fetch(`${upstashUrl}/pipeline`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${upstashToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify([
+          ["INCR", key],
+          ["EXPIRE", key, windowSec],
+        ]),
+      });
+
+      if (pipelineRes.ok) {
+        const results = await pipelineRes.json();
+        const currentCount = (results[0]?.result as number) || 1;
+        const remaining = Math.max(0, limit - currentCount);
+
+        return {
+          success: currentCount <= limit,
+          remaining,
+          resetAt: now + windowMs,
+        };
+      }
+    } catch {
+      // Fallback silencieux sur la mémoire locale en cas d'indisponibilité réseau Redis
+    }
+  }
+
+  // 2. Fallback Mémoire Locale (Sliding Window)
+  const record = localTracker.get(identifier);
 
   if (!record || now > record.resetAt) {
-    // Nouvelle fenêtre
-    tracker.set(identifier, {
+    localTracker.set(identifier, {
       count: 1,
       resetAt: now + windowMs,
     });
@@ -83,3 +121,4 @@ export function getClientIp(request: Request): string {
   }
   return "127.0.0.1";
 }
+
