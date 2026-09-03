@@ -2,13 +2,37 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getPublicStatusInfo } from "@/lib/interventions/statut-transitions";
 import { generateDocumentNumber } from "@/lib/documents/numbering";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { InterventionStatut, DocumentType, FactureType, StatutPaiement } from "@prisma/client";
+
+function maskClientName(name: string): string {
+  if (!name) return "Client";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return parts[0].length > 2 ? `${parts[0].slice(0, 2)}***` : `${parts[0]}***`;
+  }
+  return parts
+    .map((part, index) => {
+      if (index === 0) return part;
+      return `${part.charAt(0)}.`;
+    })
+    .join(" ");
+}
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ numero: string }> }
 ) {
   try {
+    const ip = getClientIp(request);
+    const rateCheck = await checkRateLimit(`suivi_get_${ip}`, { limit: 30, windowMs: 60 * 1000 });
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { success: false, message: "Trop de requêtes. Veuillez patienter un instant." },
+        { status: 429 }
+      );
+    }
+
     const { numero } = await params;
 
     if (!numero) {
@@ -56,7 +80,7 @@ export async function GET(
         typeMateriel: intervention.typeMateriel,
         panneDeclaree: intervention.panneDeclaree,
         modeIntervention: intervention.modeIntervention,
-        clientNom: intervention.client.nom,
+        clientNom: maskClientName(intervention.client.nom),
         dateCreation: intervention.dateCreation,
         dateCloture: intervention.dateCloture,
         statut: intervention.statut,
@@ -89,6 +113,15 @@ export async function POST(
   { params }: { params: Promise<{ numero: string }> }
 ) {
   try {
+    const ip = getClientIp(request);
+    const rateCheck = await checkRateLimit(`suivi_post_${ip}`, { limit: 10, windowMs: 60 * 1000 });
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { success: false, message: "Trop de requêtes. Veuillez patienter une minute." },
+        { status: 429 }
+      );
+    }
+
     const { numero } = await params;
     const body = await request.json();
     const { action } = body;

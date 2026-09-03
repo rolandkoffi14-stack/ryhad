@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import { DocumentPdfTemplate, PdfDocumentData } from "@/lib/documents/pdf-templates/DocumentPdfTemplate";
 import { renderToBuffer } from "@react-pdf/renderer";
 import React from "react";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { DocumentType, FactureType } from "@prisma/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -12,6 +13,15 @@ export async function GET(
   { params }: { params: Promise<{ numero: string }> }
 ) {
   try {
+    const ip = getClientIp(request);
+    const rateCheck = await checkRateLimit(`pdf_${ip}`, { limit: 15, windowMs: 60 * 1000 });
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { success: false, message: "Trop de téléchargements de documents demandés. Veuillez patienter une minute." },
+        { status: 429 }
+      );
+    }
+
     const { numero } = await params;
 
     const doc = await db.financialDocument.findUnique({

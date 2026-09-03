@@ -1,11 +1,30 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ticketPonctuelCrmSchema } from "@/lib/validations";
 import { generateInterventionNumber, generateDocumentNumber } from "@/lib/documents/numbering";
-import { InterventionType, InterventionStatut, DocumentType, FactureType, StatutPaiement } from "@prisma/client";
+import { InterventionType, InterventionStatut, DocumentType, FactureType, StatutPaiement, StaffRole } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ success: false, message: "Non authentifié" }, { status: 401 });
+    }
+
+    const role = (session.user as any).role as StaffRole;
+    if (role === StaffRole.TECHNICIEN) {
+      return NextResponse.json(
+        { success: false, message: "Action réservée à la réception ou à la direction." },
+        { status: 403 }
+      );
+    }
+
+    const userName =
+      `${(session.user as any).firstName || ""} ${(session.user as any).lastName || ""}`.trim() ||
+      session.user.name ||
+      "Réception";
+
     const body = await request.json();
     const validated = ticketPonctuelCrmSchema.parse(body);
 
@@ -46,8 +65,8 @@ export async function POST(request: Request) {
         historique: {
           create: [
             {
-              action: "Ticket ponctuel créé par la réception",
-              note: `Diagnostic initial : ${montantDiag} FCFA`,
+              action: `Ticket ponctuel créé par ${userName} (${role})`,
+              note: `Diagnostic initial fixé à ${montantDiag} FCFA`,
             },
             {
               action: `Facture de diagnostic émise : ${docNumero}`,
@@ -67,6 +86,12 @@ export async function POST(request: Request) {
     );
   } catch (error: any) {
     console.error("Erreur création ticket ponctuel:", error);
-    return NextResponse.json({ success: false, message: error.message || "Erreur serveur" }, { status: 400 });
+    if (error.name === "ZodError") {
+      return NextResponse.json({ success: false, errors: error.errors }, { status: 400 });
+    }
+    return NextResponse.json(
+      { success: false, message: "Une erreur est survenue lors de la création du ticket." },
+      { status: 500 }
+    );
   }
 }

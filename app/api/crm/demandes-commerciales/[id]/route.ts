@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { getCurrentUser } from "@/lib/auth";
 import { generateDocumentNumber } from "@/lib/documents/numbering";
 import { DemandeStatut, DocumentType, FactureType, StatutPaiement, StaffRole } from "@prisma/client";
 
@@ -9,6 +9,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ success: false, message: "Non authentifié" }, { status: 401 });
+    }
+
     const { id } = await params;
     const demande = await db.demandeCommerciale.findUnique({
       where: { id },
@@ -26,7 +31,8 @@ export async function GET(
 
     return NextResponse.json({ success: true, demande });
   } catch (error: any) {
-    return NextResponse.json({ success: false, message: error.message || "Erreur serveur" }, { status: 500 });
+    console.error("Erreur GET demande commerciale:", error);
+    return NextResponse.json({ success: false, message: "Erreur lors de la récupération de la demande" }, { status: 500 });
   }
 }
 
@@ -35,8 +41,13 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const user = await getCurrentUser();
-    if (user.role === StaffRole.TECHNICIEN) {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ success: false, message: "Non authentifié" }, { status: 401 });
+    }
+
+    const role = (session.user as any).role as StaffRole;
+    if (role === StaffRole.TECHNICIEN) {
       return NextResponse.json(
         { success: false, message: "Action réservée à la réception ou à la direction." },
         { status: 403 }

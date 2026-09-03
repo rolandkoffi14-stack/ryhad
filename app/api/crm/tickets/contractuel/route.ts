@@ -1,11 +1,30 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { ticketContractuelCrmSchema } from "@/lib/validations";
 import { generateInterventionNumber } from "@/lib/documents/numbering";
-import { InterventionType, InterventionStatut } from "@prisma/client";
+import { InterventionType, InterventionStatut, StaffRole } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ success: false, message: "Non authentifié" }, { status: 401 });
+    }
+
+    const role = (session.user as any).role as StaffRole;
+    if (role === StaffRole.TECHNICIEN) {
+      return NextResponse.json(
+        { success: false, message: "Action réservée à la réception ou à la direction." },
+        { status: 403 }
+      );
+    }
+
+    const userName =
+      `${(session.user as any).firstName || ""} ${(session.user as any).lastName || ""}`.trim() ||
+      session.user.name ||
+      "Réception";
+
     const body = await request.json();
     const validated = ticketContractuelCrmSchema.parse(body);
 
@@ -26,8 +45,8 @@ export async function POST(request: Request) {
         historique: {
           create: [
             {
-              action: "Ticket contractuel déclenché (prise en charge directe)",
-              note: "Main d'œuvre couverte par le contrat de maintenance",
+              action: `Ticket contractuel déclenché par ${userName} (${role})`,
+              note: "Main d'œuvre couverte par le contrat de maintenance active",
             },
           ],
         },
@@ -37,6 +56,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, id: ticket.id, numero: ticket.numero }, { status: 201 });
   } catch (error: any) {
     console.error("Erreur création ticket contractuel:", error);
-    return NextResponse.json({ success: false, message: error.message || "Erreur serveur" }, { status: 400 });
+    if (error.name === "ZodError") {
+      return NextResponse.json({ success: false, errors: error.errors }, { status: 400 });
+    }
+    return NextResponse.json(
+      { success: false, message: "Une erreur est survenue lors de la création du ticket." },
+      { status: 500 }
+    );
   }
 }

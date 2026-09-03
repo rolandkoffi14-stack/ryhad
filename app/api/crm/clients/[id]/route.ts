@@ -14,6 +14,14 @@ export async function PATCH(
       return NextResponse.json({ success: false, message: "Non authentifié" }, { status: 401 });
     }
 
+    const role = (session.user as any).role as StaffRole;
+    if (role === StaffRole.TECHNICIEN) {
+      return NextResponse.json(
+        { success: false, message: "Action réservée à la réception ou à la direction." },
+        { status: 403 }
+      );
+    }
+
     const { id } = await params;
     const body = await request.json();
     const validated = clientFormSchema.parse(body);
@@ -33,9 +41,12 @@ export async function PATCH(
     return NextResponse.json({ success: true, client: updatedClient });
   } catch (error: any) {
     console.error("Erreur modification client:", error);
+    if (error.name === "ZodError") {
+      return NextResponse.json({ success: false, errors: error.errors }, { status: 400 });
+    }
     return NextResponse.json(
-      { success: false, message: error.message || "Erreur lors de la mise à jour" },
-      { status: 400 }
+      { success: false, message: "Erreur lors de la mise à jour du client." },
+      { status: 500 }
     );
   }
 }

@@ -2,10 +2,21 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { commercialRequestSchema } from "@/lib/validations";
 import { sendCommercialNotification } from "@/lib/services/email";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { DemandeStatut, ClientType } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
+    // 0. Limitation de débit anti-flood (5 requêtes / minute par IP)
+    const ip = getClientIp(request);
+    const rateCheck = await checkRateLimit(`commercial_${ip}`, { limit: 5, windowMs: 60 * 1000 });
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { success: false, message: "Trop de requêtes. Veuillez patienter une minute avant de soumettre une nouvelle demande." },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const validatedData = commercialRequestSchema.parse(body);
 

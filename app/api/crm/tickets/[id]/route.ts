@@ -24,6 +24,7 @@ export async function PATCH(
     }
 
     const userRole = (session.user as any).role as StaffRole;
+    const userId = (session.user as any).id as string;
     const userName =
       `${(session.user as any).firstName || ""} ${(session.user as any).lastName || ""}`.trim() ||
       session.user.name ||
@@ -45,6 +46,10 @@ export async function PATCH(
     if (!currentTicket) {
       return NextResponse.json({ success: false, message: "Ticket introuvable" }, { status: 404 });
     }
+
+    // Vérification de sécurité IDOR/BOLA pour les techniciens
+    const isAssignedTech = currentTicket.technicienAssigneId === userId;
+    const isTechRestricted = userRole === StaffRole.TECHNICIEN && currentTicket.technicienAssigneId && !isAssignedTech;
 
     const { actionType, newStatut, diagnosticTechnicien, technicienAssigneId, newPiece, pieceId } = body;
 
@@ -177,6 +182,13 @@ export async function PATCH(
     // ACTION : Mise à jour de statut avec validation stricte & automatismes
     // --------------------------------------------------------------------------
     if (actionType === "update_status" && newStatut) {
+      if (isTechRestricted) {
+        return NextResponse.json(
+          { success: false, message: "Accès refusé : ce dossier est assigné à un autre technicien." },
+          { status: 403 }
+        );
+      }
+
       const allowedNext = getStatutsAutorises(currentTicket.type, currentTicket.statut, {
         hasPieces: currentTicket.piecesUtilisees.length > 0,
         hasMainOeuvre: (currentTicket.montantMainOeuvre || 0) > 0,
@@ -383,6 +395,13 @@ export async function PATCH(
         );
       }
 
+      if (isTechRestricted) {
+        return NextResponse.json(
+          { success: false, message: "Accès refusé : ce dossier est assigné à un autre technicien." },
+          { status: 403 }
+        );
+      }
+
       // Verrouillage si le diagnostic/intervention est déjà terminé (sauf ADMIN)
       const isEditableDiag =
         currentTicket.statut === InterventionStatut.EN_DIAGNOSTIC ||
@@ -424,6 +443,13 @@ export async function PATCH(
       if (userRole === StaffRole.RECEPTIONNISTE) {
         return NextResponse.json(
           { success: false, message: "Action réservée aux techniciens et administrateurs." },
+          { status: 403 }
+        );
+      }
+
+      if (isTechRestricted) {
+        return NextResponse.json(
+          { success: false, message: "Accès refusé : ce dossier est assigné à un autre technicien." },
           { status: 403 }
         );
       }
@@ -488,6 +514,13 @@ export async function PATCH(
         );
       }
 
+      if (isTechRestricted) {
+        return NextResponse.json(
+          { success: false, message: "Accès refusé : ce dossier est assigné à un autre technicien." },
+          { status: 403 }
+        );
+      }
+
       const isEditablePieces =
         currentTicket.statut === InterventionStatut.EN_DIAGNOSTIC ||
         (currentTicket.type === InterventionType.CONTRACTUEL &&
@@ -533,6 +566,13 @@ export async function PATCH(
       if (userRole === StaffRole.RECEPTIONNISTE) {
         return NextResponse.json(
           { success: false, message: "Action réservée aux techniciens et administrateurs." },
+          { status: 403 }
+        );
+      }
+
+      if (isTechRestricted) {
+        return NextResponse.json(
+          { success: false, message: "Accès refusé : ce dossier est assigné à un autre technicien." },
           { status: 403 }
         );
       }

@@ -30,6 +30,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const email = String(credentials.email).toLowerCase().trim();
         const password = String(credentials.password);
 
+        // Protection anti brute-force : 10 tentatives max toutes les 5 minutes
+        const { checkRateLimit } = await import("@/lib/rate-limit");
+        const rateCheck = await checkRateLimit(`login_${email}`, { limit: 10, windowMs: 5 * 60 * 1000 });
+        if (!rateCheck.success) {
+          throw new Error("Trop de tentatives de connexion. Veuillez patienter 5 minutes.");
+        }
+
         const user = await db.user.findUnique({
           where: { email },
         });

@@ -1,17 +1,31 @@
 import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { generateDocumentNumber } from "@/lib/documents/numbering";
-import { DocumentType, FactureType, StatutPaiement } from "@prisma/client";
+import { DocumentType, FactureType, StatutPaiement, StaffRole } from "@prisma/client";
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ success: false, message: "Non authentifié" }, { status: 401 });
+    }
+
+    const role = (session.user as any).role as StaffRole;
+    if (role === StaffRole.TECHNICIEN) {
+      return NextResponse.json(
+        { success: false, message: "Action réservée à la réception ou à la direction." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { type, typeFacture, interventionId, contractId, montant, statutPaiement } = body;
 
     const docType = (type as DocumentType) || DocumentType.FACTURE;
     const numero = await generateDocumentNumber(docType);
 
-    let docMontant = montant;
+    let docMontant = montant ? parseInt(montant, 10) : undefined;
     let computedTypeFacture: FactureType | null = null;
 
     if (docType === DocumentType.FACTURE) {
@@ -47,18 +61,34 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, document: doc }, { status: 201 });
   } catch (error: any) {
     console.error("Erreur génération document financier:", error);
-    const userMessage =
-      error.message && !error.message.includes("prisma") && !error.message.includes("invocation") && !error.message.includes("SELECT")
-        ? error.message
-        : "Une erreur est survenue lors de la génération du document financier.";
-    return NextResponse.json({ success: false, message: userMessage }, { status: 500 });
+    return NextResponse.json(
+      { success: false, message: "Une erreur est survenue lors de la génération du document financier." },
+      { status: 500 }
+    );
   }
 }
 
 export async function PATCH(request: Request) {
   try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ success: false, message: "Non authentifié" }, { status: 401 });
+    }
+
+    const role = (session.user as any).role as StaffRole;
+    if (role === StaffRole.TECHNICIEN) {
+      return NextResponse.json(
+        { success: false, message: "Seule la réception ou l'administration peut encaisser ou modifier un document." },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { documentId, statutPaiement, modePaiement, referencePaiement } = body;
+
+    if (!documentId) {
+      return NextResponse.json({ success: false, message: "Identifiant de document requis." }, { status: 400 });
+    }
 
     const updateData: any = { statutPaiement };
     if (statutPaiement === StatutPaiement.PAYE) {
@@ -75,6 +105,9 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: true, document: doc, message: "Statut mis à jour avec succès." });
   } catch (error: any) {
     console.error("Erreur mise à jour document financier:", error);
-    return NextResponse.json({ success: false, message: "Une erreur est survenue lors de la mise à jour." }, { status: 400 });
+    return NextResponse.json(
+      { success: false, message: "Une erreur est survenue lors de la mise à jour du document." },
+      { status: 500 }
+    );
   }
 }
