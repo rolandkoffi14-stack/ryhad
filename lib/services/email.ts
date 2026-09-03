@@ -139,6 +139,52 @@ export async function sendCommercialNotification(data: {
 }
 
 /**
+ * Envoie un email à l'atelier lors de la réception d'un message depuis le formulaire de contact
+ */
+export async function sendContactNotification(data: {
+  nom: string;
+  telephone: string;
+  email?: string | null;
+  sujet: string;
+  message: string;
+}) {
+  if (!resend) {
+    console.log(`[EMAIL DEV MODE] Message de contact de ${data.nom} (${data.telephone}) - Sujet: ${data.sujet}`);
+    return { success: true, mocked: true };
+  }
+
+  try {
+    await resend.emails.send({
+      from: emailFrom,
+      to: workshopEmail,
+      replyTo: data.email || undefined,
+      subject: `📩 Message de Contact Site : ${data.sujet} (${data.nom})`,
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B;">
+          <h2 style="color: #1E4D8B;">Nouveau message reçu depuis le site RyHaD Tic-Medic</h2>
+          <p><strong>Nom de l'expéditeur :</strong> ${data.nom}</p>
+          <p><strong>Téléphone :</strong> ${data.telephone}</p>
+          <p><strong>Email :</strong> ${data.email || "Non renseigné"}</p>
+          <p><strong>Objet du message :</strong> ${data.sujet}</p>
+          <p><strong>Message :</strong></p>
+          <blockquote style="background: #F4F6F8; padding: 14px; border-left: 4px solid #1E4D8B; border-radius: 4px; font-style: normal; margin: 15px 0;">
+            ${data.message.replace(/\n/g, "<br/>")}
+          </blockquote>
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          <p style="font-size: 12px; color: #777;">
+            RyHaD Tic-Medic • Gbégamey, rue avant le collège Clé de la réussite, Cotonou, Bénin • Tél : +229 01 90 88 13 14
+          </p>
+        </div>
+      `,
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Erreur envoi email contact Resend:", error);
+    return { success: false, error };
+  }
+}
+
+/**
  * Envoie un email sécurisé de réinitialisation de mot de passe (valable 30 min)
  */
 export async function sendPasswordResetEmail({

@@ -3,14 +3,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { Phone, Menu, X, Shield, Search, ArrowRight } from "lucide-react";
+import { Menu, X, Search, ArrowRight } from "lucide-react";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navLinks = [
     { href: "/services", label: "Services" },
-    { href: "/tarifs", label: "Tarifs" },
+    { href: "/faq", label: "FAQ" },
     { href: "/a-propos", label: "À Propos" },
     { href: "/contact", label: "Contact" },
   ];
@@ -80,16 +80,8 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Actions & Téléphone */}
+          {/* Actions */}
           <div className="hidden sm:flex items-center gap-4">
-            <a
-              href="tel:+2290190881314"
-              className="flex items-center gap-2 text-sm font-bold text-brand-blue hover:text-brand-blue-dark transition-colors px-3 py-2 rounded-lg bg-brand-blue-light/60"
-            >
-              <Phone className="w-4 h-4 text-brand-green" />
-              <span>+229 01 90 88 13 14</span>
-            </a>
-
             <Link
               href="/demande-intervention"
               className="inline-flex items-center gap-2 bg-brand-blue text-white px-4 py-2.5 rounded-lg font-semibold text-sm shadow-md hover:bg-brand-blue-dark active:scale-[0.98] transition-all"
@@ -126,13 +118,6 @@ export function Header() {
             ))}
           </nav>
           <div className="pt-3 border-t border-gray-100 flex flex-col gap-2.5">
-            <a
-              href="tel:+2290190881314"
-              className="flex items-center justify-center gap-2 text-sm font-bold text-brand-blue py-2.5 rounded-lg bg-brand-blue-light/60"
-            >
-              <Phone className="w-4 h-4 text-brand-green" />
-              <span>Appel direct : +229 01 90 88 13 14</span>
-            </a>
             <Link
               href="/demande-intervention"
               onClick={() => setIsOpen(false)}

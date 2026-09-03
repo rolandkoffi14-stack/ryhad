@@ -132,8 +132,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/tarifs" className="hover:text-white transition-colors">
-                  Grille des forfaits et diagnostics
+                <Link href="/faq" className="hover:text-white transition-colors">
+                  Foire Aux Questions (FAQ)
                 </Link>
               </li>
               <li>

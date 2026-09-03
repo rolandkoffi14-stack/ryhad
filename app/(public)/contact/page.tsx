@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Phone, Mail, MapPin, Clock, Send, CheckCircle2, ArrowRight } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, Send, CheckCircle2, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
 
 export default function ContactPage() {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     nom: "",
@@ -14,9 +16,30 @@ export default function ContactPage() {
     message: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Une erreur est survenue lors de l'envoi de votre message.");
+      }
+
+      setSubmitted(true);
+    } catch (err: any) {
+      setError(err.message || "Impossible de contacter le serveur. Veuillez vérifier votre connexion.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -123,11 +146,20 @@ export default function ContactPage() {
                 </div>
                 <h3 className="text-xl font-bold text-brand-dark">Message bien reçu !</h3>
                 <p className="text-xs sm:text-sm text-gray-600 max-w-md mx-auto">
-                  Merci de nous avoir contactés. Un membre de l&apos;équipe RyHaD Tic-Medic reviendra vers vous très rapidement.
+                  Merci de nous avoir contactés. Votre message a été transmis à notre équipe et nous reviendrons vers vous très rapidement.
                 </p>
                 <div className="pt-4">
                   <button
-                    onClick={() => setSubmitted(false)}
+                    onClick={() => {
+                      setSubmitted(false);
+                      setFormData({
+                        nom: "",
+                        telephone: "",
+                        email: "",
+                        sujet: "Renseignement général",
+                        message: "",
+                      });
+                    }}
                     className="text-xs font-bold text-brand-blue hover:underline"
                   >
                     Envoyer un autre message
@@ -142,6 +174,13 @@ export default function ContactPage() {
                     Renseignez vos coordonnées pour être recontacté par nos conseillers techniques.
                   </p>
                 </div>
+
+                {error && (
+                  <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2.5 text-xs text-red-800">
+                    <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                    <span>{error}</span>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -222,10 +261,20 @@ export default function ContactPage() {
                 <div className="pt-2">
                   <button
                     type="submit"
-                    className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs sm:text-sm shadow-md active:scale-[0.99] transition-all"
+                    disabled={loading}
+                    className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs sm:text-sm shadow-md active:scale-[0.99] transition-all disabled:opacity-50"
                   >
-                    <Send className="w-4 h-4 text-brand-green" />
-                    <span>Envoyer mon message</span>
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin text-brand-green" />
+                        <span>Envoi en cours...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4 text-brand-green" />
+                        <span>Envoyer mon message</span>
+                      </>
+                    )}
                   </button>
                 </div>
               </form>

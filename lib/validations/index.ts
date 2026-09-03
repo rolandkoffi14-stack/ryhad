@@ -33,6 +33,17 @@ export const commercialRequestSchema = z.object({
 
 export type CommercialRequestInput = z.infer<typeof commercialRequestSchema>;
 
+// Formulaire public de contact général
+export const contactFormSchema = z.object({
+  nom: z.string().min(2, "Le nom doit comporter au moins 2 caractères"),
+  telephone: z.string().min(8, "Numéro de téléphone requis"),
+  email: z.string().email("Adresse email invalide").optional().or(z.literal("")),
+  sujet: z.string().min(2, "Objet de la demande requis"),
+  message: z.string().min(10, "Le message doit comporter au moins 10 caractères"),
+});
+
+export type ContactFormInput = z.infer<typeof contactFormSchema>;
+
 // Création / Modification de Client
 export const clientFormSchema = z.object({
   type: z.nativeEnum(ClientType),
