@@ -17,24 +17,15 @@ import {
   X,
 } from "lucide-react";
 import { StaffRole } from "@prisma/client";
-import { UrgentBadgeCounts } from "@/lib/crm/badges";
 
 interface Props {
   userRole: StaffRole;
-  urgentCounts?: UrgentBadgeCounts;
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
 }
 
 export function CrmSidebar({
   userRole,
-  urgentCounts = {
-    ticketsPonctuel: 0,
-    ticketsContractuel: 0,
-    documents: 0,
-    demandesCommerciales: 0,
-    contrats: 0,
-  },
   isMobileOpen = false,
   onMobileClose,
 }: Props) {
@@ -46,7 +37,6 @@ export function CrmSidebar({
     icon: any;
     exact?: boolean;
     badge?: string;
-    urgentCount?: number;
     roles: StaffRole[];
   }
 
@@ -68,14 +58,12 @@ export function CrmSidebar({
       href: "/crm/tickets/ponctuel",
       label: userRole === StaffRole.TECHNICIEN ? "Tickets Ponctuels" : "Tickets Ponctuels",
       icon: Ticket,
-      urgentCount: urgentCounts.ticketsPonctuel,
       roles: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE, StaffRole.TECHNICIEN],
     },
     {
       href: "/crm/tickets/contractuel",
       label: userRole === StaffRole.TECHNICIEN ? "Interventions Contrats" : "Tickets Contractuels",
       icon: ClipboardList,
-      urgentCount: urgentCounts.ticketsContractuel,
       roles: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE, StaffRole.TECHNICIEN],
     },
     {
@@ -88,7 +76,6 @@ export function CrmSidebar({
       href: "/crm/documents",
       label: "Devis & Factures",
       icon: Receipt,
-      urgentCount: urgentCounts.documents,
       roles: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE],
     },
     {
@@ -101,7 +88,6 @@ export function CrmSidebar({
       href: "/crm/demandes-commerciales",
       label: "Demandes Commerciales",
       icon: ShoppingBag,
-      urgentCount: urgentCounts.demandesCommerciales,
       roles: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE],
     },
     {
@@ -186,15 +172,8 @@ export function CrmSidebar({
                 <span className="truncate">{item.label}</span>
               </div>
 
-              <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                {/* Badge d'urgence avec pastille numérique (masqué dès que l'utilisateur est sur la page ouverte) */}
-                {item.urgentCount !== undefined && item.urgentCount > 0 && !isActive && (
-                  <span className="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-brand-red text-white shadow-2xs">
-                    {item.urgentCount}
-                  </span>
-                )}
-
-                {item.badge && (
+              {item.badge && (
+                <div className="flex items-center gap-1.5 shrink-0 ml-2">
                   <span
                     className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${
                       isActive ? "bg-white/20 text-white" : "bg-gray-800 text-gray-400"
@@ -202,8 +181,8 @@ export function CrmSidebar({
                   >
                     {item.badge}
                   </span>
-                )}
-              </div>
+                </div>
+              )}
             </Link>
           );
         })}

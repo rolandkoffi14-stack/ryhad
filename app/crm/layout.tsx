@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { auth, getCurrentUser } from "@/lib/auth";
-import { getUrgentBadgeCounts } from "@/lib/crm/badges";
 import { CrmLayoutClient } from "@/components/layout/CrmLayoutClient";
 
 export const metadata = {
@@ -27,10 +26,9 @@ export default async function CrmLayout({
   }
 
   const user = await getCurrentUser();
-  const urgentCounts = await getUrgentBadgeCounts(user);
 
   return (
-    <CrmLayoutClient user={user} urgentCounts={urgentCounts}>
+    <CrmLayoutClient user={user}>
       {children}
     </CrmLayoutClient>
   );

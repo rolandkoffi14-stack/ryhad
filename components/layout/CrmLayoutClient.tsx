@@ -4,15 +4,13 @@ import { useState } from "react";
 import { CrmSidebar } from "./CrmSidebar";
 import { CrmHeader } from "./CrmHeader";
 import { SessionUser } from "@/lib/auth";
-import { UrgentBadgeCounts } from "@/lib/crm/badges";
 
 interface Props {
   user: SessionUser;
-  urgentCounts: UrgentBadgeCounts;
   children: React.ReactNode;
 }
 
-export function CrmLayoutClient({ user, urgentCounts, children }: Props) {
+export function CrmLayoutClient({ user, children }: Props) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -20,7 +18,6 @@ export function CrmLayoutClient({ user, urgentCounts, children }: Props) {
       {/* Sidebar Desktop & Mobile Drawer */}
       <CrmSidebar
         userRole={user.role}
-        urgentCounts={urgentCounts}
         isMobileOpen={isMobileMenuOpen}
         onMobileClose={() => setIsMobileMenuOpen(false)}
       />
