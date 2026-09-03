@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { Menu, X, Search, ArrowRight } from "lucide-react";
-import { InstallPwaHeaderButton } from "@/components/pwa/InstallPwaHeaderButton";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -82,8 +81,7 @@ export function Header() {
           </nav>
 
           {/* Actions */}
-          <div className="hidden sm:flex items-center gap-3">
-            <InstallPwaHeaderButton />
+          <div className="hidden sm:flex items-center gap-4">
             <Link
               href="/demande-intervention"
               className="inline-flex items-center gap-2 bg-brand-blue text-white px-4 py-2.5 rounded-lg font-semibold text-sm shadow-md hover:bg-brand-blue-dark active:scale-[0.98] transition-all"

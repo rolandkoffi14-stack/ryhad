@@ -2,17 +2,40 @@ import { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    id: "/",
-    name: "RyHaD Tic-Medic",
-    short_name: "RyHaD",
-    description: "Maintenance informatique, biomédicale et audiovisuelle à Cotonou, Bénin.",
-    start_url: "/",
+    id: "/crm",
+    name: "RyHaD CRM — Gestion & Maintenance",
+    short_name: "RyHaD CRM",
+    description: "Application de gestion interne des interventions, tickets, devis et factures de RyHaD Tic-Medic.",
+    start_url: "/crm",
     scope: "/",
     display: "standalone",
-    background_color: "#FFFFFF",
+    background_color: "#F4F6F8",
     theme_color: "#1E4D8B",
     orientation: "portrait-primary",
-    categories: ["business", "productivity", "utilities"],
+    categories: ["business", "productivity"],
+    shortcuts: [
+      {
+        name: "Tableau de bord",
+        short_name: "Dashboard",
+        description: "Accéder au tableau de bord CRM",
+        url: "/crm",
+        icons: [{ src: "/icons/icon-192x192.png", sizes: "192x192" }],
+      },
+      {
+        name: "Tickets Ponctuels",
+        short_name: "Ponctuel",
+        description: "Suivre les tickets de réparation ponctuelle",
+        url: "/crm/tickets/ponctuel",
+        icons: [{ src: "/icons/icon-192x192.png", sizes: "192x192" }],
+      },
+      {
+        name: "Contrats de Maintenance",
+        short_name: "Contrats",
+        description: "Consulter les contrats et visites planifiées",
+        url: "/crm/contrats",
+        icons: [{ src: "/icons/icon-192x192.png", sizes: "192x192" }],
+      },
+    ],
     icons: [
       {
         src: "/icons/icon-192x192.png",

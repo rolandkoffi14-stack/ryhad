@@ -6,6 +6,9 @@ import { CrmHeader } from "./CrmHeader";
 import { SessionUser } from "@/lib/auth";
 import { UrgentBadgeCounts } from "@/lib/crm/badges";
 
+import { PushSubscriptionManager } from "@/components/pwa/PushSubscriptionManager";
+import { PwaInstallPrompt } from "@/components/pwa/PwaInstallPrompt";
+
 interface Props {
   user: SessionUser;
   urgentCounts: UrgentBadgeCounts;
@@ -17,6 +20,9 @@ export function CrmLayoutClient({ user, urgentCounts, children }: Props) {
 
   return (
     <div className="flex min-h-screen bg-brand-slate">
+      <PushSubscriptionManager />
+      <PwaInstallPrompt />
+
       {/* Sidebar Desktop & Mobile Drawer */}
       <CrmSidebar
         userRole={user.role}

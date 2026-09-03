@@ -10,7 +10,6 @@ const montserrat = Montserrat({
 });
 
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
-import { PwaInstallPrompt } from "@/components/pwa/PwaInstallPrompt";
 
 export const metadata: Metadata = {
   title: {
@@ -109,7 +108,6 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ServiceWorkerRegister />
-        <PwaInstallPrompt />
         {children}
       </body>
     </html>
