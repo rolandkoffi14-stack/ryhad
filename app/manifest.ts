@@ -2,31 +2,34 @@ import { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "RyHaD Tic-Medic — Maintenance & Gestion",
+    id: "/",
+    name: "RyHaD Tic-Medic",
     short_name: "RyHaD",
-    description: "Application de maintenance informatique, biomédicale et audiovisuelle à Cotonou, Bénin.",
-    start_url: "/crm",
+    description: "Maintenance informatique, biomédicale et audiovisuelle à Cotonou, Bénin.",
+    start_url: "/",
+    scope: "/",
     display: "standalone",
     background_color: "#FFFFFF",
     theme_color: "#1E4D8B",
     orientation: "portrait-primary",
+    categories: ["business", "productivity", "utilities"],
     icons: [
       {
-        src: "/images/logo.jpg",
+        src: "/icons/icon-192x192.png",
         sizes: "192x192",
-        type: "image/jpeg",
+        type: "image/png",
         purpose: "any",
       },
       {
-        src: "/images/logo.jpg",
+        src: "/icons/icon-512x512.png",
         sizes: "512x512",
-        type: "image/jpeg",
+        type: "image/png",
         purpose: "any",
       },
       {
-        src: "/images/logo.jpg",
+        src: "/icons/icon-maskable-512x512.png",
         sizes: "512x512",
-        type: "image/jpeg",
+        type: "image/png",
         purpose: "maskable",
       },
     ],

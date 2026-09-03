@@ -9,6 +9,9 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
+import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
+import { PwaInstallPrompt } from "@/components/pwa/PwaInstallPrompt";
+
 export const metadata: Metadata = {
   title: {
     template: "%s | RyHaD Tic-Medic — Maintenance & Solutions Tech Cotonou",
@@ -16,6 +19,7 @@ export const metadata: Metadata = {
   },
   description:
     "Expert en maintenance informatique (PC, serveurs), biomédicale, audiovisuelle (TV, vidéoprojecteurs), réseaux, vidéosurveillance et vente de matériel à Cotonou, Bénin.",
+  applicationName: "RyHaD Tic-Medic",
   keywords: [
     "maintenance informatique Cotonou",
     "réparation ordinateur Bénin",
@@ -27,6 +31,22 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "RyHaD Tic-Medic" }],
   metadataBase: new URL("https://www.ryhad.bj"),
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+      { url: "/favicon.png", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "RyHaD",
+  },
   openGraph: {
     title: "RyHaD Tic-Medic — Maintenance & Solutions Tech à Cotonou",
     description:
@@ -42,7 +62,7 @@ const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
   name: "RyHaD Tic-Medic",
-  image: "https://www.ryhad.bj/images/logo.png",
+  image: "https://www.ryhad.bj/icons/icon-512x512.png",
   telephone: "+229 01 90 88 13 14",
   email: "ryhadticmedic@gmail.com",
   url: "https://www.ryhad.bj",
@@ -76,6 +96,9 @@ export default function RootLayout({
   return (
     <html lang="fr" className={montserrat.variable} suppressHydrationWarning>
       <head>
+        <meta name="theme-color" content="#1E4D8B" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -85,6 +108,8 @@ export default function RootLayout({
         className={`${montserrat.className} bg-white text-brand-dark min-h-screen flex flex-col`}
         suppressHydrationWarning
       >
+        <ServiceWorkerRegister />
+        <PwaInstallPrompt />
         {children}
       </body>
     </html>

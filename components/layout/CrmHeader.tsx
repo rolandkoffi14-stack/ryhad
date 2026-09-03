@@ -7,6 +7,7 @@ import { SessionUser } from "@/lib/auth";
 import { StaffRole } from "@prisma/client";
 
 import { NotificationBell } from "@/components/crm/NotificationBell";
+import { InstallPwaHeaderButton } from "@/components/pwa/InstallPwaHeaderButton";
 
 interface Props {
   user: SessionUser;
@@ -59,6 +60,9 @@ export function CrmHeader({ user, onMenuToggle }: Props) {
 
       {/* Actions & Profil utilisateur */}
       <div className="flex items-center gap-3">
+        {/* Bouton installation PWA */}
+        <InstallPwaHeaderButton />
+
         {/* Cloche de notifications In-App & Web Push */}
         <NotificationBell />
 

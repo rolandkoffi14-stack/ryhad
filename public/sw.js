@@ -1,11 +1,48 @@
 // Service Worker — RyHaD Tic-Medic PWA & Web Push Notifications
+const CACHE_NAME = "ryhad-pwa-v1";
+const PRECACHE_ASSETS = [
+  "/",
+  "/manifest.webmanifest",
+  "/icons/icon-192x192.png",
+  "/icons/icon-512x512.png",
+  "/favicon.png",
+];
 
 self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(PRECACHE_ASSETS).catch((err) => {
+        console.warn("Pre-caching non bloquant:", err);
+      });
+    })
+  );
   self.skipWaiting();
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+// Événement fetch requis pour la conformité PWA dans Chrome/Edge
+self.addEventListener("fetch", (event) => {
+  // Ignorer les requêtes non GET ou vers les API dynamiques
+  if (event.request.method !== "GET" || event.request.url.includes("/api/")) {
+    return;
+  }
+
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      return caches.match(event.request);
+    })
+  );
 });
 
 // Écoute des notifications Push reçues du serveur
@@ -17,8 +54,8 @@ self.addEventListener("push", (event) => {
     const title = data.title || "RyHaD Tic-Medic";
     const options = {
       body: data.body || "Nouvelle mise à jour disponible",
-      icon: data.icon || "/images/logo.jpg",
-      badge: data.badge || "/images/logo.jpg",
+      icon: data.icon || "/icons/icon-192x192.png",
+      badge: data.badge || "/icons/icon-192x192.png",
       tag: data.tag || "ryhad-notification",
       data: {
         url: data.url || "/crm",
