@@ -102,8 +102,9 @@ export async function POST(
   } catch (error: any) {
     console.error("Erreur envoi accès collaborateur:", error);
     return NextResponse.json(
-      { success: false, message: error.message || "Erreur serveur" },
+      { success: false, message: "Une erreur est survenue lors de l'envoi de l'accès." },
       { status: 500 }
     );
   }
+
 }

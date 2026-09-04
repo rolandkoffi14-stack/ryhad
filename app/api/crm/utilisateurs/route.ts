@@ -89,8 +89,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, errors: error.errors }, { status: 400 });
     }
     return NextResponse.json(
-      { success: false, message: error.message || "Erreur lors de la création de l'utilisateur" },
+      { success: false, message: "Erreur lors de la création de l'utilisateur." },
       { status: 500 }
     );
+
   }
 }

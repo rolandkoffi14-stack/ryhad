@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { generateDocumentNumber } from "@/lib/documents/numbering";
+import { documentGenerateSchema, documentUpdateSchema } from "@/lib/validations";
 import { DocumentType, FactureType, StatutPaiement, StaffRole } from "@prisma/client";
 import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
@@ -21,27 +22,28 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { type, typeFacture, interventionId, contractId, montant, statutPaiement } = body;
+    const validated = documentGenerateSchema.parse(body);
 
-    const docType = (type as DocumentType) || DocumentType.FACTURE;
+    const docType: DocumentType = (validated.type as DocumentType) || DocumentType.FACTURE;
     const numero = await generateDocumentNumber(docType);
 
-    let docMontant = montant ? parseInt(montant, 10) : undefined;
+    let docMontant = validated.montant ? Number(validated.montant) : undefined;
     let computedTypeFacture: FactureType | null = null;
 
     if (docType === DocumentType.FACTURE) {
-      if (typeFacture) {
-        computedTypeFacture = typeFacture as FactureType;
-      } else if (contractId) {
+      if (validated.typeFacture) {
+        computedTypeFacture = validated.typeFacture as FactureType;
+      } else if (validated.contractId) {
         computedTypeFacture = FactureType.CONTRAT;
       } else {
         computedTypeFacture = FactureType.REPARATION;
       }
     }
 
-    // Si contrat, récupérer le montant main d'œuvre
-    if (contractId && !docMontant) {
-      const contract = await db.contract.findUnique({ where: { id: contractId } });
+
+    // Si contrat, récupérer le montant main d'œuvre si non spécifié
+    if (validated.contractId && !docMontant) {
+      const contract = await db.contract.findUnique({ where: { id: validated.contractId } });
       if (contract) {
         docMontant = contract.montantMainOeuvre;
       }
@@ -52,10 +54,10 @@ export async function POST(request: Request) {
         numero,
         type: docType,
         typeFacture: computedTypeFacture,
-        interventionId: interventionId || null,
-        contractId: contractId || null,
+        interventionId: validated.interventionId || null,
+        contractId: validated.contractId || null,
         montant: docMontant || 10000,
-        statutPaiement: statutPaiement || StatutPaiement.EN_ATTENTE,
+        statutPaiement: validated.statutPaiement || StatutPaiement.EN_ATTENTE,
       },
     });
 
@@ -64,6 +66,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true, document: doc }, { status: 201 });
   } catch (error: any) {
     console.error("Erreur génération document financier:", error);
+    if (error.name === "ZodError") {
+      return NextResponse.json({ success: false, errors: error.errors }, { status: 400 });
+    }
     return NextResponse.json(
       { success: false, message: "Une erreur est survenue lors de la génération du document financier." },
       { status: 500 }
@@ -87,21 +92,17 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { documentId, statutPaiement, modePaiement, referencePaiement } = body;
+    const validated = documentUpdateSchema.parse(body);
 
-    if (!documentId) {
-      return NextResponse.json({ success: false, message: "Identifiant de document requis." }, { status: 400 });
-    }
-
-    const updateData: any = { statutPaiement };
-    if (statutPaiement === StatutPaiement.PAYE) {
-      updateData.modePaiement = modePaiement || "ESPECES";
-      updateData.referencePaiement = referencePaiement || null;
+    const updateData: any = { statutPaiement: validated.statutPaiement };
+    if (validated.statutPaiement === StatutPaiement.PAYE) {
+      updateData.modePaiement = validated.modePaiement || "ESPECES";
+      updateData.referencePaiement = validated.referencePaiement || null;
       updateData.datePaiement = new Date();
     }
 
     const doc = await db.financialDocument.update({
-      where: { id: documentId },
+      where: { id: validated.documentId },
       data: updateData,
     });
 
@@ -110,9 +111,13 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ success: true, document: doc, message: "Statut mis à jour avec succès." });
   } catch (error: any) {
     console.error("Erreur mise à jour document financier:", error);
+    if (error.name === "ZodError") {
+      return NextResponse.json({ success: false, errors: error.errors }, { status: 400 });
+    }
     return NextResponse.json(
       { success: false, message: "Une erreur est survenue lors de la mise à jour du document." },
       { status: 500 }
     );
   }
 }
+

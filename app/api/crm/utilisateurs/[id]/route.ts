@@ -5,6 +5,7 @@ import { StaffRole } from "@prisma/client";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
+import { strongPasswordSchema } from "@/lib/validations";
 
 const updateUserPatchSchema = z.object({
   isActive: z.boolean().optional(),
@@ -20,8 +21,9 @@ const updateUserPutSchema = z.object({
   role: z.nativeEnum(StaffRole),
   assignableAsTechnician: z.boolean(),
   isActive: z.boolean(),
-  password: z.string().min(10, "Le mot de passe doit contenir au moins 10 caractères").optional(),
+  password: strongPasswordSchema.optional().or(z.literal("")),
 });
+
 
 /**
  * PUT /api/crm/utilisateurs/[id]

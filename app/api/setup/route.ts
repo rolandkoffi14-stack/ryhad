@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { setupAdminSchema } from "@/lib/validations";
 import { StaffRole } from "@prisma/client";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 /**
  * GET /api/setup
@@ -32,6 +33,16 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
+    // 0. Limitation de débit anti-bruteforce (5 requêtes / 15 min par IP)
+    const ip = getClientIp(request);
+    const rateCheck = await checkRateLimit(`setup_${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { success: false, message: "Trop de tentatives d'initialisation. Veuillez patienter 15 minutes." },
+        { status: 429 }
+      );
+    }
+
     // 1. Vérification atomique de sécurité : aucun utilisateur ne doit exister
     const userCount = await prisma.user.count();
     if (userCount > 0) {
@@ -43,6 +54,7 @@ export async function POST(request: Request) {
         { status: 403 }
       );
     }
+
 
     // 2. Validation stricte du schéma
     const body = await request.json();

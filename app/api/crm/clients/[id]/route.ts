@@ -116,8 +116,9 @@ export async function DELETE(
   } catch (error: any) {
     console.error("Erreur suppression client:", error);
     return NextResponse.json(
-      { success: false, message: error.message || "Erreur lors de la suppression" },
+      { success: false, message: "Une erreur est survenue lors de la suppression du client." },
       { status: 500 }
     );
+
   }
 }

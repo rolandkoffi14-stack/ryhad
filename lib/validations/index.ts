@@ -1,5 +1,15 @@
 import { z } from "zod";
-import { TypeMateriel, ModeIntervention, TypeDemandeCommerciale, Periodicite, ClientType, StaffRole } from "@prisma/client";
+import {
+  TypeMateriel,
+  ModeIntervention,
+  TypeDemandeCommerciale,
+  Periodicite,
+  ClientType,
+  StaffRole,
+  DocumentType,
+  FactureType,
+  StatutPaiement,
+} from "@prisma/client";
 
 // Formulaire public de demande d'intervention
 export const interventionRequestSchema = z.object({
@@ -181,5 +191,24 @@ export const forgotPasswordSchema = z.object({
 export const resetPasswordSchema = z.object({
   token: z.string().min(10, "Jeton de réinitialisation invalide ou manquant"),
   password: strongPasswordSchema,
+});
+
+// ============================================================================
+// 9. SCHÉMAS DE DOCUMENTS FINANCIERS (CRM)
+// ============================================================================
+export const documentGenerateSchema = z.object({
+  type: z.nativeEnum(DocumentType).optional(),
+  typeFacture: z.nativeEnum(FactureType).optional().nullable(),
+  interventionId: z.string().optional().nullable(),
+  contractId: z.string().optional().nullable(),
+  montant: z.union([z.number().min(0), z.string()]).optional().nullable(),
+  statutPaiement: z.nativeEnum(StatutPaiement).optional(),
+});
+
+export const documentUpdateSchema = z.object({
+  documentId: z.string().min(1, "Identifiant de document requis"),
+  statutPaiement: z.nativeEnum(StatutPaiement),
+  modePaiement: z.string().optional().nullable(),
+  referencePaiement: z.string().optional().nullable(),
 });
 
