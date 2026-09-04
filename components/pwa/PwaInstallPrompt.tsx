@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Download, X, Smartphone, CheckCircle2 } from "lucide-react";
+import { ConfirmationModal } from "@/components/crm/ConfirmationModal";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -60,12 +61,12 @@ export function PwaInstallPrompt() {
     };
   }, []);
 
+  const [showIosModal, setShowIosModal] = useState(false);
+
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
       if (isIos) {
-        alert(
-          "Pour installer l'application sur iPhone/iPad :\n1. Touchez l'icône de Partage en bas de Safari (carré avec flèche vers le haut)\n2. Faites défiler et touchez 'Sur l'écran d'accueil'\n3. Touchez 'Ajouter'"
-        );
+        setShowIosModal(true);
       }
       return;
     }
@@ -142,6 +143,26 @@ export function PwaInstallPrompt() {
           </div>
         </aside>
       )}
+
+      {/* Instructions d'installation iOS */}
+      <ConfirmationModal
+        isOpen={showIosModal}
+        onClose={() => setShowIosModal(false)}
+        onConfirm={() => setShowIosModal(false)}
+        title="Installer l'application sur iPhone / iPad"
+        message={
+          <div className="space-y-2 text-xs text-gray-600">
+            <p className="font-semibold text-brand-dark">Pour ajouter RyHaD à votre écran d&apos;accueil :</p>
+            <ol className="list-decimal list-inside space-y-1 pl-1">
+              <li>Touchez l&apos;icône de <strong>Partage</strong> en bas de Safari (carré avec flèche vers le haut).</li>
+              <li>Faites défiler le menu et touchez <strong>« Sur l&apos;écran d&apos;accueil »</strong>.</li>
+              <li>Touchez <strong>« Ajouter »</strong> en haut à droite.</li>
+            </ol>
+          </div>
+        }
+        confirmLabel="J'ai compris"
+        variant="info"
+      />
     </>
   );
 }

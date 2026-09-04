@@ -51,7 +51,7 @@ export default async function CrmUtilisateursPage() {
         </p>
       </div>
 
-      <UsersTable users={users} />
+      <UsersTable users={users} currentUserId={user.id} />
     </div>
   );
 }

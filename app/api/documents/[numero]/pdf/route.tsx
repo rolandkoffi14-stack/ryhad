@@ -8,13 +8,16 @@ import { DocumentType, FactureType } from "@prisma/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ numero: string }> }
 ) {
   try {
     const ip = getClientIp(request);
-    const rateCheck = await checkRateLimit(`pdf_${ip}`, { limit: 15, windowMs: 60 * 1000 });
+    const rateCheck = await checkRateLimit(`pdf_${ip}`, { limit: 30, windowMs: 60 * 1000 });
     if (!rateCheck.success) {
       return NextResponse.json(
         { success: false, message: "Trop de téléchargements de documents demandés. Veuillez patienter une minute." },
@@ -83,51 +86,62 @@ export async function GET(
       }
     }
 
+    const dateFormatted = doc.dateEmission
+      ? format(new Date(doc.dateEmission), "dd/MM/yyyy", { locale: fr })
+      : format(new Date(), "dd/MM/yyyy", { locale: fr });
+
     const pdfData: PdfDocumentData = {
       numero: doc.numero,
       type: doc.type,
       typeFacture: doc.typeFacture,
-      dateEmission: format(new Date(doc.dateEmission), "dd/MM/yyyy", { locale: fr }),
+      dateEmission: dateFormatted,
       statutPaiement: doc.statutPaiement,
       montant: docMontant,
       client: {
-        nom: client.nom,
-        telephone: client.telephone,
-        email: client.email,
-        adresse: client.adresse,
+        nom: client.nom || "Client",
+        telephone: client.telephone || "",
+        email: client.email || null,
+        adresse: client.adresse || null,
       },
       intervention: doc.intervention
         ? {
             numero: doc.intervention.numero,
-            typeMateriel: doc.intervention.typeMateriel,
-            panneDeclaree: doc.intervention.panneDeclaree,
-            diagnosticTechnicien: doc.intervention.diagnosticTechnicien,
-            montantMainOeuvre: doc.intervention.montantMainOeuvre,
-            libelleMainOeuvre: doc.intervention.libelleMainOeuvre,
-            piecesUtilisees: doc.intervention.piecesUtilisees,
+            typeMateriel: doc.intervention.typeMateriel || "MATERIEL",
+            panneDeclaree: doc.intervention.panneDeclaree || "Non spécifiée",
+            diagnosticTechnicien: doc.intervention.diagnosticTechnicien || null,
+            montantMainOeuvre: doc.intervention.montantMainOeuvre || 0,
+            libelleMainOeuvre: doc.intervention.libelleMainOeuvre || null,
+            piecesUtilisees: (doc.intervention.piecesUtilisees || []).map((p) => ({
+              designation: p.designation,
+              quantite: p.quantite,
+              prixUnitaire: p.prixUnitaire,
+            })),
           }
         : null,
       contract: doc.contract
         ? {
-            periodicite: doc.contract.periodicite,
-            equipementsCouverts: doc.contract.equipementsCouverts,
+            periodicite: String(doc.contract.periodicite),
+            equipementsCouverts: doc.contract.equipementsCouverts || "Parc sous contrat",
           }
         : null,
       demandeCommerciale: doc.demandeCommerciale
         ? {
             typeDemande: doc.demandeCommerciale.typeDemande.replace(/_/g, " "),
-            description: doc.demandeCommerciale.description,
+            description: doc.demandeCommerciale.description || "",
             articles: commercialArticles,
           }
         : null,
     };
 
     const pdfBuffer = await renderToBuffer(<DocumentPdfTemplate data={pdfData} />);
+    const uint8Array = new Uint8Array(pdfBuffer);
 
-    return new NextResponse(pdfBuffer as any, {
+    return new Response(uint8Array, {
+      status: 200,
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${doc.numero}.pdf"`,
+        "Cache-Control": "no-cache, no-store, must-revalidate",
       },
     });
   } catch (error) {

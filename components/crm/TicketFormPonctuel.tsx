@@ -298,7 +298,14 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
 
       {/* MODALE : CRÉATION RAPIDE DE CLIENT */}
       {showClientModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !clientLoading) {
+              setShowClientModal(false);
+            }
+          }}
+        >
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-gray-200 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div className="flex items-center gap-2">

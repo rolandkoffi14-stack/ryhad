@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -101,10 +102,22 @@ export function CrmSidebar({
 
   const navItems = allNavItems.filter((item) => item.roles.includes(userRole));
 
+  // Verrouillage du scroll du body sur mobile quand le menu est ouvert
+  useEffect(() => {
+    if (isMobileOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isMobileOpen]);
+
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-brand-dark text-gray-300">
+    <div className="flex flex-col h-full bg-brand-dark text-gray-300 select-none">
       {/* Brand Header */}
-      <div className="p-5 border-b border-gray-800 flex items-center justify-between">
+      <div className="p-5 border-b border-gray-800 flex items-center justify-between shrink-0">
         <Link href="/crm" className="flex items-center gap-2.5" onClick={onMobileClose}>
           <div className="relative w-9 h-9 rounded-xl bg-white flex items-center justify-center p-0.5 border border-gray-700 shadow-xs">
             <Image
@@ -137,7 +150,7 @@ export function CrmSidebar({
           <button
             onClick={onMobileClose}
             aria-label="Fermer le menu"
-            className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors"
+            className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -189,7 +202,7 @@ export function CrmSidebar({
       </nav>
 
       {/* Footer Sidebar */}
-      <div className="p-4 border-t border-gray-800 space-y-3">
+      <div className="p-4 border-t border-gray-800 space-y-3 shrink-0">
         <Link
           href="/"
           className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-white transition-colors"
@@ -203,14 +216,14 @@ export function CrmSidebar({
 
   return (
     <>
-      {/* Desktop Sidebar (Fixe) */}
-      <aside className="hidden lg:block w-64 min-h-screen border-r border-gray-800 shrink-0">
+      {/* Desktop Sidebar (Fixe / Sticky) */}
+      <aside className="hidden lg:block w-64 h-screen sticky top-0 border-r border-gray-800 shrink-0 overflow-hidden">
         {sidebarContent}
       </aside>
 
       {/* Mobile Drawer (Responsive) */}
       {isMobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
+        <div className="fixed inset-0 z-50 lg:hidden flex animate-in fade-in duration-150">
           {/* Backdrop */}
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
@@ -218,7 +231,7 @@ export function CrmSidebar({
           />
 
           {/* Panel */}
-          <div className="relative w-64 max-w-[80vw] h-full shadow-2xl z-10">
+          <div className="relative w-64 max-w-[80vw] h-full shadow-2xl z-10 animate-in slide-in-from-left duration-200">
             {sidebarContent}
           </div>
         </div>

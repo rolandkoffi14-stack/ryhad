@@ -19,3 +19,11 @@
   - **ADMIN** : accès complet (contrats, rapports, gestion des utilisateurs). **Un seul compte** dans le MVP, avec `assignableAsTechnician` qui le fait apparaître dans la liste des techniciens disponibles pour les pannes complexes — pas de double connexion à jongler.
 - **Réassignation d'un ticket** (ex. technicien junior → admin) : autorisée, ne doit jamais faire perdre l'historique (`HistoriqueTicket` conserve toutes les entrées, y compris les réassignations, avec auteur et date).
 - **Pas de compte client en MVP** (conforme au cahier des charges, section 4.7) — le suivi de dossier public reste en lecture seule par numéro de ticket, sans authentification.
+
+---
+
+## 4. Règles d'Interface & Modales (Non Négociable)
+
+- **Interdiction Formelle des Dialogues Natifs** : Jamais de `window.alert()`, `window.confirm()`, ni `window.prompt()`. Toutes les confirmations, erreurs et avertissements doivent impérativement passer par des composants React dédiés (`ConfirmationModal`, formulaires modaux avec backdrop couvrant toute la page `fixed inset-0 z-50 bg-black/60 backdrop-blur-xs`, fermeture au clic extérieur et touche Escape).
+- **Protection des Comptes & Anti-Verrouillage** : Aucun utilisateur ne peut s'auto-désactiver (`currentUser.id !== targetUser.id`), et le compte administrateur est strictement protégé contre toute désactivation accidentelle.
+

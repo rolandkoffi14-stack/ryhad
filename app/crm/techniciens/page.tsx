@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { StaffRole } from "@prisma/client";
 import { TechniciansGrid } from "@/components/crm/TechniciansGrid";
@@ -5,6 +7,13 @@ import { TechniciansGrid } from "@/components/crm/TechniciansGrid";
 export const dynamic = "force-dynamic";
 
 export default async function CrmTechniciensPage() {
+  const user = await getCurrentUser();
+
+  // Réservé à la Direction (ADMIN) et à la Réception
+  if (user.role === StaffRole.TECHNICIEN) {
+    redirect("/crm");
+  }
+
   let technicians: any[] = [];
 
   try {
@@ -23,7 +32,15 @@ export default async function CrmTechniciensPage() {
         interventionsAssignees: {
           where: {
             statut: {
-              notIn: ["LIVRE_CLOTURE", "CLOTURE"],
+              in: [
+                "NOUVEAU",
+                "FRAIS_DIAGNOSTIC_ENCAISSE",
+                "EN_DIAGNOSTIC",
+                "DEVIS_ACCEPTE",
+                "EN_REPARATION",
+                "EN_INTERVENTION",
+                "TERMINE",
+              ],
             },
           },
           select: {
@@ -38,6 +55,7 @@ export default async function CrmTechniciensPage() {
           orderBy: { dateCreation: "desc" },
         },
       },
+      orderBy: [{ role: "asc" }, { lastName: "asc" }],
     });
   } catch (e) {
     console.error("Error loading technicians:", e);

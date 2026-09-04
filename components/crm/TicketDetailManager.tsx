@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import { InterventionStatut, InterventionType, DocumentType, FactureType, StaffRole } from "@prisma/client";
 import { PaymentConfirmationModal } from "@/components/crm/PaymentConfirmationModal";
+import { ConfirmationModal } from "@/components/crm/ConfirmationModal";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -303,41 +304,9 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
     }
   };
 
-  const handleUpdateStatus = async (targetStatut: InterventionStatut) => {
-    // Vérification stricte lors du passage à DIAGNOSTIC_TERMINE
-    if (targetStatut === InterventionStatut.DIAGNOSTIC_TERMINE) {
-      if (ticket.type === InterventionType.PONCTUEL) {
-        const parsedMO = parseInt(String(montantMO), 10) || 0;
-        const sumPieces = ticket.piecesUtilisees.reduce((acc, p) => acc + p.quantite * p.prixUnitaire, 0);
-        const totalDevis = parsedMO + sumPieces;
+  const [isConfirmZeroMOOpen, setIsConfirmZeroMOOpen] = useState(false);
 
-        if (totalDevis <= 0) {
-          setError("Impossible d'émettre le devis : veuillez chiffrer la main d'œuvre ou ajouter au moins un accessoire/pièce.");
-          return;
-        }
-
-        // Si MO = 0 et pièces > 0 : Avertissement de confirmation anti-oubli
-        if (parsedMO === 0 && sumPieces > 0) {
-          const confirmWithoutMO = window.confirm(
-            "⚠️ Confirmation devis sans main d'œuvre :\n\nVous avez renseigné 0 FCFA de main d'œuvre pour ces pièces/accessoires.\n\nS'agit-il d'un simple accessoire sans prestation de démontage/réparation (ex: chargeur, batterie) ?\n\nCliquez sur OK pour confirmer l'émission du devis."
-          );
-          if (!confirmWithoutMO) return;
-        }
-
-        // Sauvegarder d'abord la MO si elle a été modifiée
-        if (parsedMO !== ticket.montantMainOeuvre || libelleMO !== ticket.libelleMainOeuvre) {
-          const saved = await handleSaveMainOeuvre(parsedMO, libelleMO);
-          if (!saved) return;
-        }
-      } else {
-        // En parcours contractuel, le devis ne concerne que les pièces
-        if (ticket.piecesUtilisees.length === 0) {
-          setError("Pour générer un devis sous contrat, veuillez ajouter au moins une pièce détachée à facturer.");
-          return;
-        }
-      }
-    }
-
+  const proceedUpdateStatus = async (targetStatut: InterventionStatut) => {
     setLoading(true);
     setError(null);
     setSuccessMsg(null);
@@ -360,6 +329,42 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleUpdateStatus = async (targetStatut: InterventionStatut) => {
+    // Vérification stricte lors du passage à DIAGNOSTIC_TERMINE
+    if (targetStatut === InterventionStatut.DIAGNOSTIC_TERMINE) {
+      if (ticket.type === InterventionType.PONCTUEL) {
+        const parsedMO = parseInt(String(montantMO), 10) || 0;
+        const sumPieces = ticket.piecesUtilisees.reduce((acc, p) => acc + p.quantite * p.prixUnitaire, 0);
+        const totalDevis = parsedMO + sumPieces;
+
+        if (totalDevis <= 0) {
+          setError("Impossible d'émettre le devis : veuillez chiffrer la main d'œuvre ou ajouter au moins un accessoire/pièce.");
+          return;
+        }
+
+        // Si MO = 0 et pièces > 0 : Avertissement de confirmation anti-oubli via modale
+        if (parsedMO === 0 && sumPieces > 0) {
+          setIsConfirmZeroMOOpen(true);
+          return;
+        }
+
+        // Sauvegarder d'abord la MO si elle a été modifiée
+        if (parsedMO !== ticket.montantMainOeuvre || libelleMO !== ticket.libelleMainOeuvre) {
+          const saved = await handleSaveMainOeuvre(parsedMO, libelleMO);
+          if (!saved) return;
+        }
+      } else {
+        // En parcours contractuel, le devis ne concerne que les pièces
+        if (ticket.piecesUtilisees.length === 0) {
+          setError("Pour générer un devis sous contrat, veuillez ajouter au moins une pièce détachée à facturer.");
+          return;
+        }
+      }
+    }
+
+    await proceedUpdateStatus(targetStatut);
   };
 
   // État de la modale de paiement
@@ -1322,6 +1327,35 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
         montant={paymentModalState.montant}
         titre={paymentModalState.titre}
         description={paymentModalState.description}
+        loading={loading}
+      />
+
+      {/* Modale de confirmation de devis sans main d'œuvre */}
+      <ConfirmationModal
+        isOpen={isConfirmZeroMOOpen}
+        onClose={() => setIsConfirmZeroMOOpen(false)}
+        onConfirm={async () => {
+          setIsConfirmZeroMOOpen(false);
+          const parsedMO = parseInt(String(montantMO), 10) || 0;
+          if (parsedMO !== ticket.montantMainOeuvre || libelleMO !== ticket.libelleMainOeuvre) {
+            const saved = await handleSaveMainOeuvre(parsedMO, libelleMO);
+            if (!saved) return;
+          }
+          await proceedUpdateStatus(InterventionStatut.DIAGNOSTIC_TERMINE);
+        }}
+        title="Confirmation de devis sans main d'œuvre"
+        message={
+          <div>
+            <p className="mb-2">
+              Vous avez renseigné <strong>0 FCFA</strong> de main d&apos;œuvre pour ces pièces ou accessoires.
+            </p>
+            <p className="text-gray-500">
+              S&apos;agit-il d&apos;un simple accessoire ou pièce sans prestation de démontage/réparation en atelier (ex : chargeur, batterie externe) ?
+            </p>
+          </div>
+        }
+        confirmLabel="Confirmer et émettre le devis"
+        variant="warning"
         loading={loading}
       />
     </div>

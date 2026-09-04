@@ -16,11 +16,14 @@ import {
   UserPlus,
   Power,
   RefreshCw,
+  Edit2,
 } from "lucide-react";
 import { StaffRole } from "@prisma/client";
 import { PaginationControls } from "@/components/crm/PaginationControls";
 import { QuickViewModal, QuickViewData } from "@/components/crm/QuickViewModal";
 import { UserCreateModal } from "@/components/crm/UserCreateModal";
+import { UserEditModal, EditUserData } from "@/components/crm/UserEditModal";
+import { ConfirmationModal, ConfirmationModalVariant } from "@/components/crm/ConfirmationModal";
 
 interface UserItem {
   id: string;
@@ -35,9 +38,10 @@ interface UserItem {
 
 interface Props {
   users: UserItem[];
+  currentUserId?: string;
 }
 
-export function UsersTable({ users }: Props) {
+export function UsersTable({ users, currentUserId = "" }: Props) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<string>("ALL");
@@ -46,36 +50,65 @@ export function UsersTable({ users }: Props) {
 
   // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<EditUserData | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [quickViewData, setQuickViewData] = useState<QuickViewData | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [sendingAccessId, setSendingAccessId] = useState<string | null>(null);
 
-  const handleSendAccess = async (u: UserItem) => {
-    if (
-      !confirm(
-        `Envoyer un email avec lien d'accès et réinitialisation de mot de passe à ${u.firstName} ${u.lastName} (${u.email}) ?`
-      )
-    ) {
-      return;
-    }
+  // Confirmation Modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmLabel?: string;
+    variant?: ConfirmationModalVariant;
+    onConfirm: () => void | Promise<void>;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
 
-    setSendingAccessId(u.id);
-    try {
-      const res = await fetch(`/api/crm/utilisateurs/${u.id}/send-access`, {
-        method: "POST",
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        alert(data.message || "Erreur lors de l'envoi de l'email d'accès.");
-      } else {
-        alert(data.message || `Email d'accès envoyé avec succès à ${u.email} !`);
-      }
-    } catch (err) {
-      alert("Erreur de communication avec le serveur.");
-    } finally {
-      setSendingAccessId(null);
-    }
+  const handleSendAccess = (u: UserItem) => {
+    setConfirmModal({
+      isOpen: true,
+      title: "Envoyer les identifiants d'accès",
+      message: `Souhaitez-vous envoyer un email d'activation avec réinitialisation de mot de passe à ${u.firstName} ${u.lastName} (${u.email}) ?`,
+      confirmLabel: "Envoyer l'email",
+      variant: "info",
+      onConfirm: async () => {
+        setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        setSendingAccessId(u.id);
+        try {
+          const res = await fetch(`/api/crm/utilisateurs/${u.id}/send-access`, {
+            method: "POST",
+          });
+          const data = await res.json();
+          setConfirmModal({
+            isOpen: true,
+            title: res.ok && data.success ? "Email transmis !" : "Échec de l'envoi",
+            message: data.message || (res.ok ? "L'email a été envoyé avec succès." : "Une erreur est survenue."),
+            confirmLabel: "Compris",
+            variant: res.ok && data.success ? "success" : "danger",
+            onConfirm: () => setConfirmModal((prev) => ({ ...prev, isOpen: false })),
+          });
+        } catch (err) {
+          setConfirmModal({
+            isOpen: true,
+            title: "Erreur de connexion",
+            message: "Impossible de joindre le serveur d'envoi d'emails.",
+            confirmLabel: "Fermer",
+            variant: "danger",
+            onConfirm: () => setConfirmModal((prev) => ({ ...prev, isOpen: false })),
+          });
+        } finally {
+          setSendingAccessId(null);
+        }
+      },
+    });
   };
 
   const getRoleBadge = (role: StaffRole) => {
@@ -118,7 +151,7 @@ export function UsersTable({ users }: Props) {
 
   const handleOpenQuickView = (u: UserItem) => {
     setQuickViewData({
-      type: "CLIENT",
+      type: "UTILISATEUR",
       title: `${u.firstName} ${u.lastName}`,
       subtitle: `Rôle : ${u.role} — Compte ${u.isActive ? "Actif" : "Inactif"}`,
       badge: {
@@ -142,30 +175,67 @@ export function UsersTable({ users }: Props) {
     setIsQuickViewOpen(true);
   };
 
-  const handleToggleActive = async (u: UserItem) => {
-    const action = u.isActive ? "désactiver" : "activer";
-    if (!confirm(`Êtes-vous sûr de vouloir ${action} le compte de ${u.firstName} ${u.lastName} ?`)) {
+  const handleOpenEdit = (u: UserItem) => {
+    setEditingUser(u);
+    setIsEditModalOpen(true);
+  };
+
+  const handleToggleActive = (u: UserItem) => {
+    if (u.id === currentUserId) {
+      setConfirmModal({
+        isOpen: true,
+        title: "Action impossible",
+        message: "Vous ne pouvez pas désactiver votre propre compte administrateur.",
+        confirmLabel: "Compris",
+        variant: "warning",
+        onConfirm: () => setConfirmModal((prev) => ({ ...prev, isOpen: false })),
+      });
       return;
     }
 
-    setUpdatingId(u.id);
-    try {
-      const res = await fetch(`/api/crm/utilisateurs/${u.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isActive: !u.isActive }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        alert(data.message || "Erreur lors de la modification du statut.");
-      } else {
-        router.refresh();
-      }
-    } catch (e: any) {
-      alert("Erreur de communication avec le serveur.");
-    } finally {
-      setUpdatingId(null);
-    }
+    const action = u.isActive ? "désactiver" : "activer";
+    setConfirmModal({
+      isOpen: true,
+      title: `${u.isActive ? "Désactiver" : "Activer"} le compte`,
+      message: `Êtes-vous sûr de vouloir ${action} l'accès de ${u.firstName} ${u.lastName} ?`,
+      confirmLabel: u.isActive ? "Désactiver le compte" : "Activer le compte",
+      variant: u.isActive ? "danger" : "success",
+      onConfirm: async () => {
+        setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        setUpdatingId(u.id);
+        try {
+          const res = await fetch(`/api/crm/utilisateurs/${u.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ isActive: !u.isActive }),
+          });
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            setConfirmModal({
+              isOpen: true,
+              title: "Erreur",
+              message: data.message || "Erreur lors de la modification du statut.",
+              confirmLabel: "Fermer",
+              variant: "danger",
+              onConfirm: () => setConfirmModal((prev) => ({ ...prev, isOpen: false })),
+            });
+          } else {
+            router.refresh();
+          }
+        } catch (e: any) {
+          setConfirmModal({
+            isOpen: true,
+            title: "Erreur serveur",
+            message: "Erreur de communication avec le serveur.",
+            confirmLabel: "Fermer",
+            variant: "danger",
+            onConfirm: () => setConfirmModal((prev) => ({ ...prev, isOpen: false })),
+          });
+        } finally {
+          setUpdatingId(null);
+        }
+      },
+    });
   };
 
   return (
@@ -239,96 +309,128 @@ export function UsersTable({ users }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100 text-gray-700">
-            {paginatedUsers.map((u) => (
-              <tr key={u.id} className="hover:bg-brand-slate/40 transition-colors">
-                <td className="px-5 py-3.5">
-                  <div className="font-extrabold text-brand-dark text-xs">
-                    {u.firstName} {u.lastName}
-                  </div>
-                  <span className="text-[10px] text-gray-400 block">{u.email}</span>
-                </td>
-
-                <td className="px-5 py-3.5 text-gray-600">
-                  {u.phone ? <span className="font-semibold">{u.phone}</span> : <span className="text-gray-400 italic">—</span>}
-                </td>
-
-                <td className="px-5 py-3.5">
-                  <span
-                    className={`inline-block text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-lg border ${getRoleBadge(
-                      u.role
-                    )}`}
-                  >
-                    {u.role}
-                  </span>
-                </td>
-
-                <td className="px-5 py-3.5">
-                  {u.assignableAsTechnician ? (
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-green">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Oui</span>
-                    </span>
-                  ) : (
-                    <span className="text-[11px] text-gray-400 font-medium">Non</span>
-                  )}
-                </td>
-
-                <td className="px-5 py-3.5">
-                  {u.isActive ? (
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full border border-brand-green/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-brand-green" />
-                      Actif
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
-                      <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
-                      Désactivé
-                    </span>
-                  )}
-                </td>
-
-                <td className="px-5 py-3.5 text-right">
-                  <div className="flex items-center justify-end gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => handleSendAccess(u)}
-                      disabled={sendingAccessId === u.id || !u.isActive}
-                      title={u.isActive ? "Envoyer / Renvoyer le lien d'accès et réinitialisation par email" : "Compte désactivé"}
-                      className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-blue hover:border-brand-blue hover:bg-brand-blue/5 transition-all shadow-2xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      {sendingAccessId === u.id ? (
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-brand-blue" />
-                      ) : (
-                        <Mail className="w-3.5 h-3.5" />
+            {paginatedUsers.map((u) => {
+              const isSelf = u.id === currentUserId;
+              return (
+                <tr key={u.id} className="hover:bg-brand-slate/40 transition-colors">
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-2">
+                      <div className="font-extrabold text-brand-dark text-xs">
+                        {u.firstName} {u.lastName}
+                      </div>
+                      {isSelf && (
+                        <span className="text-[9px] font-extrabold bg-brand-blue/10 text-brand-blue border border-brand-blue/20 px-1.5 py-0.2 rounded-full">
+                          Vous
+                        </span>
                       )}
-                    </button>
+                    </div>
+                    <span className="text-[10px] text-gray-400 block">{u.email}</span>
+                  </td>
 
-                    <button
-                      type="button"
-                      onClick={() => handleToggleActive(u)}
-                      disabled={updatingId === u.id}
-                      title={u.isActive ? "Désactiver le compte" : "Activer le compte"}
-                      className={`p-1.5 rounded-xl border transition-all shadow-2xs cursor-pointer ${
-                        u.isActive
-                          ? "border-gray-200 bg-white text-gray-400 hover:text-brand-red hover:border-brand-red hover:bg-brand-red-light"
-                          : "border-brand-green/30 bg-brand-green/10 text-brand-green hover:bg-brand-green/20"
-                      }`}
-                    >
-                      <Power className="w-3.5 h-3.5" />
-                    </button>
+                  <td className="px-5 py-3.5 text-gray-600">
+                    {u.phone ? <span className="font-semibold">{u.phone}</span> : <span className="text-gray-400 italic">—</span>}
+                  </td>
 
-                    <button
-                      type="button"
-                      onClick={() => handleOpenQuickView(u)}
-                      title="Aperçu collaborateur"
-                      className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-blue hover:border-brand-blue hover:bg-brand-blue/5 transition-all shadow-2xs cursor-pointer"
+                  <td className="px-5 py-3.5">
+                    <span
+                      className={`inline-block text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-lg border ${getRoleBadge(
+                        u.role
+                      )}`}
                     >
-                      <Eye className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                      {u.role}
+                    </span>
+                  </td>
+
+                  <td className="px-5 py-3.5">
+                    {u.assignableAsTechnician ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-green">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Oui</span>
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-gray-400 font-medium">Non</span>
+                    )}
+                  </td>
+
+                  <td className="px-5 py-3.5">
+                    {u.isActive ? (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full border border-brand-green/20">
+                        <span className="w-1.5 h-1.5 rounded-full bg-brand-green" />
+                        Actif
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-gray-400" />
+                        Désactivé
+                      </span>
+                    )}
+                  </td>
+
+                  <td className="px-5 py-3.5 text-right">
+                    <div className="flex items-center justify-end gap-1.5">
+                      {/* Modifier le profil & mot de passe */}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEdit(u)}
+                        title="Modifier les informations et accès"
+                        className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-blue hover:border-brand-blue hover:bg-brand-blue/5 transition-all shadow-2xs cursor-pointer"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Envoi des accès email */}
+                      <button
+                        type="button"
+                        onClick={() => handleSendAccess(u)}
+                        disabled={sendingAccessId === u.id || !u.isActive}
+                        title={u.isActive ? "Envoyer / Renvoyer le lien d'accès par email" : "Compte désactivé"}
+                        className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-blue hover:border-brand-blue hover:bg-brand-blue/5 transition-all shadow-2xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        {sendingAccessId === u.id ? (
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin text-brand-blue" />
+                        ) : (
+                          <Mail className="w-3.5 h-3.5" />
+                        )}
+                      </button>
+
+                      {/* Activer / Désactiver (interdit sur soi-même) */}
+                      {!isSelf ? (
+                        <button
+                          type="button"
+                          onClick={() => handleToggleActive(u)}
+                          disabled={updatingId === u.id}
+                          title={u.isActive ? "Désactiver le compte" : "Activer le compte"}
+                          className={`p-1.5 rounded-xl border transition-all shadow-2xs cursor-pointer ${
+                            u.isActive
+                              ? "border-gray-200 bg-white text-gray-400 hover:text-brand-red hover:border-brand-red hover:bg-brand-red-light"
+                              : "border-brand-green/30 bg-brand-green/10 text-brand-green hover:bg-brand-green/20"
+                          }`}
+                        >
+                          <Power className="w-3.5 h-3.5" />
+                        </button>
+                      ) : (
+                        <div
+                          title="Vous ne pouvez pas désactiver votre propre compte"
+                          className="p-1.5 rounded-xl border border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed"
+                        >
+                          <Power className="w-3.5 h-3.5" />
+                        </div>
+                      )}
+
+                      {/* Aperçu rapide */}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenQuickView(u)}
+                        title="Aperçu collaborateur"
+                        className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-blue hover:border-brand-blue hover:bg-brand-blue/5 transition-all shadow-2xs cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
 
             {paginatedUsers.length === 0 && (
               <tr>
@@ -362,6 +464,24 @@ export function UsersTable({ users }: Props) {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onUserCreated={() => router.refresh()}
+      />
+
+      <UserEditModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        user={editingUser}
+        currentUserId={currentUserId}
+        onUserUpdated={() => router.refresh()}
+      />
+
+      <ConfirmationModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmModal.onConfirm}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmLabel={confirmModal.confirmLabel}
+        variant={confirmModal.variant}
       />
     </div>
   );

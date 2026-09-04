@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { Search, LogOut, Menu } from "lucide-react";
 import { SessionUser } from "@/lib/auth";
@@ -16,6 +16,27 @@ interface Props {
 
 export function CrmHeader({ user, onMenuToggle }: Props) {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setShowUserMenu(false);
+      }
+    }
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape" && showUserMenu) {
+        setShowUserMenu(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [showUserMenu]);
 
   const getRoleBadge = (role: StaffRole) => {
     switch (role) {
@@ -66,7 +87,7 @@ export function CrmHeader({ user, onMenuToggle }: Props) {
         {/* Cloche de notifications In-App & Web Push */}
         <NotificationBell />
 
-        <div className="relative">
+        <div className="relative" ref={userMenuRef}>
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
             aria-label="Profil utilisateur"

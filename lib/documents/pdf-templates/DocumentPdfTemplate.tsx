@@ -251,7 +251,7 @@ export function DocumentPdfTemplate({ data }: { data: PdfDocumentData }) {
           <View style={styles.docMetaBox}>
             <Text style={styles.docTitle}>{getDocTypeLabel()}</Text>
             <Text style={styles.docNumber}>N° {data.numero}</Text>
-            <Text style={styles.docDate}>Date d&apos;émission : {data.dateEmission}</Text>
+            <Text style={styles.docDate}>Date d'émission : {data.dateEmission}</Text>
             <View style={[styles.statusBadge, getStatusColor(data.statutPaiement)]}>
               <Text>STATUT : {data.statutPaiement}</Text>
             </View>
@@ -350,7 +350,7 @@ export function DocumentPdfTemplate({ data }: { data: PdfDocumentData }) {
                 </View>
               ) : (
                 <View style={styles.tableRow}>
-                  <Text style={styles.colDesc}>Main d&apos;œuvre technique &amp; Déplacements (Inclus au contrat)</Text>
+                  <Text style={styles.colDesc}>Main d'œuvre technique & Déplacements (Inclus au contrat)</Text>
                   <Text style={styles.colUnitPrice}>0</Text>
                   <Text style={styles.colQty}>1</Text>
                   <Text style={styles.colTotal}>0</Text>
@@ -405,7 +405,7 @@ export function DocumentPdfTemplate({ data }: { data: PdfDocumentData }) {
         <View style={styles.footer}>
           <Text>
             RyHaD Tic-Medic — Entreprise enregistrée à Cotonou, Bénin.{"\n"}
-            Garantie sur les pièces et prestations selon conditions d&apos;intervention. Merci pour votre confiance !
+            Garantie sur les pièces et prestations selon conditions d'intervention. Merci pour votre confiance !
           </Text>
         </View>
       </Page>

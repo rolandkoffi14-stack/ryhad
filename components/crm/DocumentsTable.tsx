@@ -23,6 +23,7 @@ import { formatFCFA } from "@/lib/format";
 import { PaginationControls } from "@/components/crm/PaginationControls";
 import { QuickViewModal, QuickViewData } from "@/components/crm/QuickViewModal";
 import { PaymentConfirmationModal } from "@/components/crm/PaymentConfirmationModal";
+import { ConfirmationModal } from "@/components/crm/ConfirmationModal";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -219,6 +220,11 @@ export function DocumentsTable({ documents }: Props) {
     };
   };
 
+  const [errorModal, setErrorModal] = useState<{ isOpen: boolean; message: string }>({
+    isOpen: false,
+    message: "",
+  });
+
   const handleConfirmPayment = async (modePaiement: string, referencePaiement?: string) => {
     if (!paymentModalState.docId) return;
     setLoading(true);
@@ -238,7 +244,10 @@ export function DocumentsTable({ documents }: Props) {
 
       router.refresh();
     } catch (err: any) {
-      alert(err.message);
+      setErrorModal({
+        isOpen: true,
+        message: err.message || "Erreur lors de l'encaissement.",
+      });
     } finally {
       setLoading(false);
     }
@@ -516,6 +525,16 @@ export function DocumentsTable({ documents }: Props) {
         titre={`Encaissement Facture ${paymentModalState.numero}`}
         description="Veuillez renseigner le mode de paiement utilisé pour régler cette facture."
         loading={loading}
+      />
+
+      <ConfirmationModal
+        isOpen={errorModal.isOpen}
+        onClose={() => setErrorModal({ isOpen: false, message: "" })}
+        onConfirm={() => setErrorModal({ isOpen: false, message: "" })}
+        title="Erreur d'encaissement"
+        message={errorModal.message}
+        confirmLabel="Compris"
+        variant="danger"
       />
     </div>
   );

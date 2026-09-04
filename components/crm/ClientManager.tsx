@@ -25,6 +25,7 @@ import {
 import { ClientType, StaffRole } from "@prisma/client";
 import { PaginationControls } from "@/components/crm/PaginationControls";
 import { QuickViewModal, QuickViewData } from "@/components/crm/QuickViewModal";
+import { ConfirmationModal } from "@/components/crm/ConfirmationModal";
 
 interface ClientData {
   id: string;
@@ -183,9 +184,27 @@ export function ClientManager({ clients, userRole }: Props) {
     }
   };
 
-  const handleDeleteClient = async (client: ClientData) => {
-    if (!confirm(`Confirmez-vous la suppression du client "${client.nom}" ?`)) return;
+  // Confirmation Modal
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState<{
+    isOpen: boolean;
+    client: ClientData | null;
+  }>({
+    isOpen: false,
+    client: null,
+  });
 
+  const handleDeleteClient = (client: ClientData) => {
+    setDeleteConfirmModal({
+      isOpen: true,
+      client,
+    });
+  };
+
+  const confirmDeleteClient = async () => {
+    const client = deleteConfirmModal.client;
+    if (!client) return;
+
+    setDeleteConfirmModal({ isOpen: false, client: null });
     setLoading(true);
     setError(null);
     setSuccessMsg(null);
@@ -495,7 +514,12 @@ export function ClientManager({ clients, userRole }: Props) {
 
       {/* Modale Création / Modification Client */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !loading) setShowCreateModal(false);
+          }}
+        >
           <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-5 border-b border-gray-100 bg-brand-slate/60 flex items-center justify-between">
               <h2 className="text-sm font-extrabold text-brand-dark">
@@ -621,6 +645,22 @@ export function ClientManager({ clients, userRole }: Props) {
           </div>
         </div>
       )}
+
+      {/* Confirmation de suppression client */}
+      <ConfirmationModal
+        isOpen={deleteConfirmModal.isOpen}
+        onClose={() => setDeleteConfirmModal({ isOpen: false, client: null })}
+        onConfirm={confirmDeleteClient}
+        title="Supprimer la fiche client"
+        message={
+          deleteConfirmModal.client
+            ? `Êtes-vous sûr de vouloir supprimer définitivement le client "${deleteConfirmModal.client.nom}" ? Cette action est irréversible.`
+            : ""
+        }
+        confirmLabel="Supprimer définitivement"
+        variant="danger"
+        loading={loading}
+      />
     </div>
   );
 }
