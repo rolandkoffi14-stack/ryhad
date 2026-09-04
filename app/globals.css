@@ -26,6 +26,11 @@
   }
 }
 
+/* Standardized cohesive icon style */
+svg.lucide {
+  stroke-width: 1.75;
+}
+
 /* Custom UI utilities */
 .glass-panel {
   background: rgba(255, 255, 255, 0.85);

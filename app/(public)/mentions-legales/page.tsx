@@ -41,31 +41,46 @@ export default function MentionsLegalesPage() {
         </section>
 
         <section className="bg-white p-6 rounded-xl border border-gray-200 subtle-shadow space-y-3">
-          <h2 className="text-base font-bold text-brand-dark flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-brand-green" />
-            <span>2. Protection des Données Personnelles</span>
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold text-brand-dark flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-brand-green" />
+              <span>2. Protection des Données Personnelles (APDP Bénin)</span>
+            </h2>
+            <Link href="/confidentialite" className="text-xs font-bold text-brand-blue hover:text-brand-green transition-colors">
+              Voir la politique complète →
+            </Link>
+          </div>
           <p>
-            Les données recueillies lors des demandes d&apos;intervention (nom, numéro de téléphone, adresse email, adresse de localisation, photos du matériel) sont destinées exclusivement à la gestion administrative, technique et financière de vos réparations.
+            Les données recueillies lors des demandes d&apos;intervention (nom, numéro de téléphone, adresse email, pannes signalées) sont destinées exclusivement à la gestion administrative, technique et financière de vos réparations.
           </p>
           <p>
-            Vos informations ne font l&apos;objet d&apos;aucune cession, vente ou échange avec des tiers à des fins publicitaires. Le module de suivi public est accessible uniquement avec le numéro de référence unique de votre ticket (ex: INT-2026-XXXX) et ne divulgue aucune information financière sensible.
+            Vos informations ne font l&apos;objet d&apos;aucune cession commerciale. Consultez notre{" "}
+            <Link href="/confidentialite" className="text-brand-blue font-bold hover:underline">
+              Politique de Confidentialité détaillée
+            </Link>{" "}
+            pour connaître l&apos;ensemble de vos droits et les mesures de sécurité appliquées.
           </p>
         </section>
 
         <section className="bg-white p-6 rounded-xl border border-gray-200 subtle-shadow space-y-3">
-          <h2 className="text-base font-bold text-brand-dark flex items-center gap-2">
-            <FileText className="w-4 h-4 text-brand-blue" />
-            <span>3. Conditions Générales d&apos;Intervention & Garantie</span>
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-bold text-brand-dark flex items-center gap-2">
+              <FileText className="w-4 h-4 text-brand-blue" />
+              <span>3. Conditions Générales d&apos;Intervention & Garantie</span>
+            </h2>
+            <Link href="/conditions-generales" className="text-xs font-bold text-brand-blue hover:text-brand-green transition-colors">
+              Voir les conditions complètes →
+            </Link>
+          </div>
           <p>
-            Toute intervention en atelier ou à domicile fait l&apos;objet d&apos;un enregistrement préalable et de l&apos;émission d&apos;un reçu ou devis descriptif.
+            Toute intervention en atelier ou sur site fait l&apos;objet d&apos;un enregistrement préalable et d&apos;un devis descriptif soumis à l&apos;accord du client.
           </p>
-          <ul className="list-disc pl-5 space-y-1 text-xs text-gray-600">
-            <li>Les pièces détachées remplacées sont garanties contre tout vice de fabrication pour une durée définie sur la facture finale.</li>
-            <li>Le diagnostic initial permet d&apos;évaluer la faisabilité technique. En cas de refus du devis par le client, seuls les frais d&apos;examen initial convenus restent acquis.</li>
-            <li>Le matériel réparé est conservé en atelier pendant une durée légale de 90 jours après notification de fin d&apos;intervention.</li>
-          </ul>
+          <p>
+            Pour prendre connaissance des modalités détaillées de diagnostic, garantie de 30 jours, modalités de règlement et délais de garde, veuillez consulter nos{" "}
+            <Link href="/conditions-generales" className="text-brand-blue font-bold hover:underline">
+              Conditions Générales d&apos;Intervention
+            </Link>.
+          </p>
         </section>
       </div>
     </div>

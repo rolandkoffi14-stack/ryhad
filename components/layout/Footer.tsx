@@ -174,9 +174,17 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="mt-12 pt-6 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
           <p>© {new Date().getFullYear()} RyHaD Tic-Medic. Tous droits réservés. Cotonou, Bénin.</p>
-          <div className="flex items-center gap-4">
-            <Link href="/mentions-legales" className="hover:text-gray-400">
-              Mentions Légales & Confidentialité
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <Link href="/mentions-legales" className="hover:text-gray-300 transition-colors">
+              Mentions Légales
+            </Link>
+            <span className="text-gray-700">•</span>
+            <Link href="/conditions-generales" className="hover:text-gray-300 transition-colors">
+              Conditions d&apos;Intervention
+            </Link>
+            <span className="text-gray-700">•</span>
+            <Link href="/confidentialite" className="hover:text-gray-300 transition-colors">
+              Confidentialité
             </Link>
           </div>
         </div>
