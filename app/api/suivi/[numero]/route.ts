@@ -4,6 +4,8 @@ import { getPublicStatusInfo } from "@/lib/interventions/statut-transitions";
 import { generateDocumentNumber } from "@/lib/documents/numbering";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { InterventionStatut, DocumentType, FactureType, StatutPaiement } from "@prisma/client";
+import { notifyDevisAccepteEnLigneToStaff } from "@/lib/services/notifications";
+import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 function maskClientName(name: string): string {
   if (!name) return "Client";
@@ -222,6 +224,14 @@ export async function POST(
         },
       });
 
+      notifyDevisAccepteEnLigneToStaff({
+        ticketId: intervention.id,
+        numero: intervention.numero,
+        clientNom: intervention.client.nom,
+      }).catch((err) => console.error("Erreur notification devis validé en ligne:", err));
+
+      broadcastCrmEvent("ticket:updated", intervention.id);
+
       return NextResponse.json({
         success: true,
         message: "Merci ! Votre accord a été enregistré. Notre atelier va préparer votre matériel dès confirmation de règlement.",
@@ -253,6 +263,8 @@ export async function POST(
           },
         },
       });
+
+      broadcastCrmEvent("ticket:updated", intervention.id);
 
       return NextResponse.json({
         success: true,

@@ -24,7 +24,10 @@ import {
 } from "@prisma/client";
 import {
   notifyTechAssigned,
-  notifyStatusChangeToStaff,
+  notifyDiagTermineToStaff,
+  notifyPaymentReceivedToTech,
+  notifyReparationTermineeToStaff,
+  notifyTicketClosedToAdmin,
   sendClientQuoteEmail,
   sendClientReadyForPickupEmail,
 } from "@/lib/services/notifications";
@@ -137,6 +140,20 @@ export async function PATCH(
         },
       });
 
+      // Alerter le technicien assigné que les frais de diagnostic sont encaissés
+      if (currentTicket.technicienAssigneId) {
+        notifyPaymentReceivedToTech({
+          ticketId: currentTicket.id,
+          numero: currentTicket.numero,
+          clientNom: currentTicket.client.nom,
+          typeMateriel: currentTicket.typeMateriel,
+          typeFactureLibelle: "facture de diagnostic",
+          montant: montantDiag,
+          technicienAssigneId: currentTicket.technicienAssigneId,
+          actorId: userId,
+        }).catch((err) => console.error("Erreur notification encaissement diagnostic:", err));
+      }
+
       broadcastCrmEvent("ticket:updated", id);
 
       return NextResponse.json({
@@ -195,6 +212,20 @@ export async function PATCH(
           },
         },
       });
+
+      // Alerter le technicien assigné (Feu vert pour les réparations)
+      if (currentTicket.technicienAssigneId) {
+        notifyPaymentReceivedToTech({
+          ticketId: currentTicket.id,
+          numero: currentTicket.numero,
+          clientNom: currentTicket.client.nom,
+          typeMateriel: currentTicket.typeMateriel,
+          typeFactureLibelle: "facture de réparation",
+          montant: repDoc.montant,
+          technicienAssigneId: currentTicket.technicienAssigneId,
+          actorId: userId,
+        }).catch((err) => console.error("Erreur notification encaissement réparation:", err));
+      }
 
       broadcastCrmEvent("ticket:updated", id);
 
@@ -403,22 +434,55 @@ export async function PATCH(
         },
       });
 
-      // 1. Notification In-App + Web Push au personnel concerné
-      notifyStatusChangeToStaff({
-        ticketId: currentTicket.id,
-        numero: currentTicket.numero,
-        nouveauStatut: newStatut,
-        clientNom: currentTicket.client.nom,
-        technicienAssigneId: currentTicket.technicienAssigneId,
-      }).catch((err) => console.error("Erreur notification status change:", err));
+      // 1. Diagnostic terminé : Alerter la réception pour transmission/relance du devis
+      if (newStatut === InterventionStatut.DIAGNOSTIC_TERMINE) {
+        const devisDoc = currentTicket.documents.find((d) => d.type === DocumentType.DEVIS);
+        const montantDevis =
+          devisDoc?.montant ||
+          ((currentTicket.montantMainOeuvre || 0) +
+            currentTicket.piecesUtilisees.reduce((acc, p) => acc + p.quantite * p.prixUnitaire, 0));
 
-      // 2. Notification Email au client si un devis vient d'être généré/envoyé
+        notifyDiagTermineToStaff({
+          ticketId: currentTicket.id,
+          numero: currentTicket.numero,
+          typeMateriel: currentTicket.typeMateriel,
+          clientNom: currentTicket.client.nom,
+          montantDevis,
+          actorId: userId,
+        }).catch((err) => console.error("Erreur notification devis prêt:", err));
+      }
+
+      // 2. Réparation terminée : Alerter la réception pour restitution
+      if (newStatut === InterventionStatut.TERMINE) {
+        notifyReparationTermineeToStaff({
+          ticketId: currentTicket.id,
+          numero: currentTicket.numero,
+          clientNom: currentTicket.client.nom,
+          typeMateriel: currentTicket.typeMateriel,
+          actorId: userId,
+        }).catch((err) => console.error("Erreur notification réparation terminée:", err));
+      }
+
+      // 3. Clôture de dossier : Notification de synthèse par email à la direction
+      if (newStatut === InterventionStatut.LIVRE_CLOTURE || newStatut === InterventionStatut.CLOTURE) {
+        notifyTicketClosedToAdmin({
+          numero: currentTicket.numero,
+          clientNom: currentTicket.client.nom,
+          typeMateriel: currentTicket.typeMateriel,
+          actorName: userName,
+        }).catch((err) => console.error("Erreur notification clôture admin:", err));
+      }
+
+      // 4. Notification Email au client si un devis vient d'être généré/envoyé
       if (
         (newStatut === InterventionStatut.DIAGNOSTIC_TERMINE || newStatut === InterventionStatut.DEVIS_ENVOYE) &&
         currentTicket.client.email
       ) {
         const devisDoc = currentTicket.documents.find((d) => d.type === DocumentType.DEVIS);
-        const montantDevis = devisDoc?.montant || ((currentTicket.montantMainOeuvre || 0) + currentTicket.piecesUtilisees.reduce((acc, p) => acc + p.quantite * p.prixUnitaire, 0));
+        const montantDevis =
+          devisDoc?.montant ||
+          ((currentTicket.montantMainOeuvre || 0) +
+            currentTicket.piecesUtilisees.reduce((acc, p) => acc + p.quantite * p.prixUnitaire, 0));
         if (devisDoc || createdDocNumero) {
           sendClientQuoteEmail({
             clientEmail: currentTicket.client.email,
@@ -431,7 +495,7 @@ export async function PATCH(
         }
       }
 
-      // 3. Notification Email au client si la réparation est terminée et prête pour retrait
+      // 5. Notification Email au client si la réparation est terminée et prête pour retrait
       if (newStatut === InterventionStatut.TERMINE && currentTicket.client.email) {
         sendClientReadyForPickupEmail({
           clientEmail: currentTicket.client.email,
@@ -722,14 +786,17 @@ export async function PATCH(
       });
 
       if (technicienId && techUser) {
-        notifyTechAssigned({
-          id: currentTicket.id,
-          numero: currentTicket.numero,
-          typeMateriel: currentTicket.typeMateriel,
-          panneDeclaree: currentTicket.panneDeclaree,
-          clientNom: currentTicket.client.nom,
-          technicienAssigneId: technicienId,
-        }).catch((err) => console.error("Erreur notification assignation technicien:", err));
+        notifyTechAssigned(
+          {
+            id: currentTicket.id,
+            numero: currentTicket.numero,
+            typeMateriel: currentTicket.typeMateriel,
+            panneDeclaree: currentTicket.panneDeclaree,
+            clientNom: currentTicket.client.nom,
+            technicienAssigneId: technicienId,
+          },
+          userId
+        ).catch((err) => console.error("Erreur notification assignation technicien:", err));
       }
 
       broadcastCrmEvent("ticket:updated", id);

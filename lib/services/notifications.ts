@@ -13,6 +13,9 @@ const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 export interface StaffNotificationOptions {
   userIds: string[];
+  pushUserIds?: string[];
+  emailUserIds?: string[];
+  actorId?: string;
   titre: string;
   message: string;
   type: NotificationType;
@@ -24,9 +27,13 @@ export interface StaffNotificationOptions {
 
 /**
  * Service universel d'envoi de notification au personnel (In-App + Web Push + Email facultatif)
+ * avec filtrage strict pour ne jamais notifier l'auteur de l'action en Push.
  */
 export async function sendStaffNotification({
   userIds,
+  pushUserIds,
+  emailUserIds,
+  actorId,
   titre,
   message,
   type,
@@ -55,30 +62,40 @@ export async function sendStaffNotification({
     // Émettre un événement temps réel pour actualiser immédiatement la cloche de notification
     broadcastCrmEvent("notification:new");
 
-    // 2. Envoi de la notification Web Push native
+    // 2. Envoi de la notification Web Push ciblée (exclut systématiquement l'auteur de l'action)
     if (sendPush) {
-      await sendWebPushToUsers(userIds, {
-        title: titre,
-        body: message,
-        url: lien,
-        tag: `notif-${type}-${Date.now()}`,
-      });
+      const rawPushTargets = pushUserIds || userIds;
+      const filteredPushTargets = actorId
+        ? rawPushTargets.filter((id) => id !== actorId)
+        : rawPushTargets;
+
+      if (filteredPushTargets.length > 0) {
+        await sendWebPushToUsers(filteredPushTargets, {
+          title: titre,
+          body: message,
+          url: lien,
+          tag: `notif-${type}-${Date.now()}`,
+        });
+      }
     }
 
     // 3. Envoi par email aux collaborateurs si un template est fourni
     if (emailSubject && emailHtml && resend) {
+      const rawEmailTargets = emailUserIds || userIds;
       const targetUsers = await db.user.findMany({
-        where: { id: { in: userIds }, isActive: true },
+        where: { id: { in: rawEmailTargets }, isActive: true },
         select: { email: true, firstName: true },
       });
 
       const emailPromises = targetUsers.map((u) =>
-        resend.emails.send({
-          from: emailFrom,
-          to: u.email,
-          subject: emailSubject,
-          html: emailHtml,
-        }).catch((err) => console.error(`Erreur envoi email staff à ${u.email}:`, err))
+        resend.emails
+          .send({
+            from: emailFrom,
+            to: u.email,
+            subject: emailSubject,
+            html: emailHtml,
+          })
+          .catch((err) => console.error(`Erreur envoi email staff à ${u.email}:`, err))
       );
 
       await Promise.allSettled(emailPromises);
@@ -92,11 +109,14 @@ export async function sendStaffNotification({
 }
 
 // ------------------------------------------------------------------------------
-// ÉVÉNEMENTS MÉTIERS STAFF
+// ÉVÉNEMENTS MÉTIERS STAFF CIBLÉS
 // ------------------------------------------------------------------------------
 
 /**
- * Notifie l'administration et la réception lors du dépôt d'un nouveau ticket
+ * 1. Dépôt de nouveau ticket sur la vitrine :
+ * - Web Push : Réceptionnistes uniquement
+ * - Email : Administrateurs (synthèse)
+ * - In-App : Réception + Admin
  */
 export async function notifyNewInterventionToStaff(ticket: {
   numero: string;
@@ -110,11 +130,14 @@ export async function notifyNewInterventionToStaff(ticket: {
       role: { in: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE] },
       isActive: true,
     },
-    select: { id: true },
+    select: { id: true, role: true },
   });
 
-  const staffIds = staff.map((s) => s.id);
-  if (!staffIds.length) return;
+  const allStaffIds = staff.map((s) => s.id);
+  const receptionIds = staff.filter((s) => s.role === StaffRole.RECEPTIONNISTE).map((s) => s.id);
+  const adminIds = staff.filter((s) => s.role === StaffRole.ADMIN).map((s) => s.id);
+
+  if (!allStaffIds.length) return;
 
   const titre = `🚨 Nouveau Ticket : ${ticket.numero}`;
   const message = `Client ${ticket.clientNom} (${ticket.clientTelephone}) — ${ticket.typeMateriel.replace(/_/g, " ")} : ${ticket.panneDeclaree}`;
@@ -136,7 +159,9 @@ export async function notifyNewInterventionToStaff(ticket: {
   `;
 
   await sendStaffNotification({
-    userIds: staffIds,
+    userIds: allStaffIds,
+    pushUserIds: receptionIds.length > 0 ? receptionIds : allStaffIds, // Push uniquement à la réception
+    emailUserIds: adminIds, // Email à la direction
     titre,
     message,
     type: NotificationType.TICKET_CREE,
@@ -148,16 +173,21 @@ export async function notifyNewInterventionToStaff(ticket: {
 }
 
 /**
- * Notifie un technicien lorsqu'un ticket lui est assigné
+ * 2. Assignation de technicien :
+ * - Web Push & In-App : Technicien assigné uniquement (sauf si auteur)
+ * - Email : Technicien assigné
  */
-export async function notifyTechAssigned(ticket: {
-  id: string;
-  numero: string;
-  typeMateriel: string;
-  panneDeclaree: string;
-  clientNom: string;
-  technicienAssigneId: string;
-}) {
+export async function notifyTechAssigned(
+  ticket: {
+    id: string;
+    numero: string;
+    typeMateriel: string;
+    panneDeclaree: string;
+    clientNom: string;
+    technicienAssigneId: string;
+  },
+  actorId?: string
+) {
   const tech = await db.user.findUnique({
     where: { id: ticket.technicienAssigneId },
   });
@@ -189,6 +219,7 @@ export async function notifyTechAssigned(ticket: {
 
   await sendStaffNotification({
     userIds: [tech.id],
+    actorId,
     titre,
     message,
     type: NotificationType.TICKET_ASSIGNE,
@@ -200,73 +231,219 @@ export async function notifyTechAssigned(ticket: {
 }
 
 /**
- * Notifie le staff concerné lors de l'évolution d'un ticket (devis accepté, réparation terminée, etc.)
+ * 4. Diagnostic terminé (Devis généré) :
+ * - Web Push & In-App : Réceptionnistes uniquement (pour transmission/relance client)
  */
-export async function notifyStatusChangeToStaff({
+export async function notifyDiagTermineToStaff({
   ticketId,
   numero,
-  nouveauStatut,
+  typeMateriel,
   clientNom,
-  technicienAssigneId,
+  montantDevis,
+  actorId,
 }: {
   ticketId: string;
   numero: string;
-  nouveauStatut: string;
+  typeMateriel: string;
   clientNom: string;
-  technicienAssigneId?: string | null;
+  montantDevis: number;
+  actorId?: string;
 }) {
-  const staffToNotify: string[] = [];
-
-  // Ajouter le technicien assigné
-  if (technicienAssigneId) {
-    staffToNotify.push(technicienAssigneId);
-  }
-
-  // Ajouter admin et réceptionniste
-  const receptionAndAdmin = await db.user.findMany({
-    where: {
-      role: { in: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE] },
-      isActive: true,
-    },
+  const reception = await db.user.findMany({
+    where: { role: StaffRole.RECEPTIONNISTE, isActive: true },
     select: { id: true },
   });
 
-  receptionAndAdmin.forEach((s) => {
-    if (!staffToNotify.includes(s.id)) staffToNotify.push(s.id);
-  });
+  const receptionIds = reception.map((r) => r.id);
+  if (!receptionIds.length) return;
 
-  if (!staffToNotify.length) return;
-
-  let titre = `Dossier ${numero} mis à jour`;
-  let message = `Le statut du ticket de ${clientNom} est passé à : ${nouveauStatut.replace(/_/g, " ")}`;
-  let notifType: NotificationType = NotificationType.STATUT_CHANGE;
-
-  if (nouveauStatut === "DEVIS_ACCEPTE") {
-    titre = `✅ Devis accepté : ${numero}`;
-    message = `Le client ${clientNom} a validé le devis. Facture de réparation émise.`;
-    notifType = NotificationType.DEVIS_ACCEPTE;
-  } else if (nouveauStatut === "DEVIS_REFUSE") {
-    titre = `❌ Devis refusé : ${numero}`;
-    message = `Le client ${clientNom} a refusé le devis. Matériel disponible pour restitution.`;
-    notifType = NotificationType.DEVIS_REFUSE;
-  } else if (nouveauStatut === "TERMINE") {
-    titre = `🎉 Réparation terminée : ${numero}`;
-    message = `Les tests sur l'équipement de ${clientNom} sont validés. Prêt pour retrait.`;
-    notifType = NotificationType.STATUT_CHANGE;
-  }
+  const titre = `📋 Devis prêt à envoyer : ${numero}`;
+  const message = `Diagnostic terminé pour ${clientNom} (${typeMateriel.replace(/_/g, " ")}). Devis chiffré à ${formatFCFA(montantDevis)}. Prêt pour transmission.`;
 
   await sendStaffNotification({
-    userIds: staffToNotify,
+    userIds: receptionIds,
+    actorId,
     titre,
     message,
-    type: notifType,
+    type: NotificationType.STATUT_CHANGE,
     lien: `/crm/tickets/${ticketId}`,
     sendPush: true,
   });
 }
 
 /**
- * Notifie le staff lors d'une nouvelle demande commerciale (vente, location, formation)
+ * 6. Devis validé par le client en ligne :
+ * - Web Push & In-App : Réceptionnistes uniquement
+ */
+export async function notifyDevisAccepteEnLigneToStaff({
+  ticketId,
+  numero,
+  clientNom,
+  actorId,
+}: {
+  ticketId: string;
+  numero: string;
+  clientNom: string;
+  actorId?: string;
+}) {
+  const reception = await db.user.findMany({
+    where: { role: StaffRole.RECEPTIONNISTE, isActive: true },
+    select: { id: true },
+  });
+
+  const receptionIds = reception.map((r) => r.id);
+  if (!receptionIds.length) return;
+
+  const titre = `✅ Devis validé en ligne : ${numero}`;
+  const message = `Le client ${clientNom} a validé son devis depuis le portail de suivi. Facture émise en attente de règlement.`;
+
+  await sendStaffNotification({
+    userIds: receptionIds,
+    actorId,
+    titre,
+    message,
+    type: NotificationType.DEVIS_ACCEPTE,
+    lien: `/crm/tickets/${ticketId}`,
+    sendPush: true,
+  });
+}
+
+/**
+ * 7. Facture encaissée (Feu vert pour les travaux) :
+ * - Web Push & In-App : Technicien assigné uniquement
+ */
+export async function notifyPaymentReceivedToTech({
+  ticketId,
+  numero,
+  clientNom,
+  typeMateriel,
+  typeFactureLibelle,
+  montant,
+  technicienAssigneId,
+  actorId,
+}: {
+  ticketId: string;
+  numero: string;
+  clientNom: string;
+  typeMateriel: string;
+  typeFactureLibelle: string;
+  montant: number;
+  technicienAssigneId?: string | null;
+  actorId?: string;
+}) {
+  if (!technicienAssigneId) return;
+
+  const tech = await db.user.findUnique({
+    where: { id: technicienAssigneId },
+    select: { id: true, isActive: true },
+  });
+
+  if (!tech || !tech.isActive) return;
+
+  const titre = `💰 Règlement encaissé — Feu vert : ${numero}`;
+  const message = `La ${typeFactureLibelle} (${formatFCFA(montant)}) pour ${clientNom} (${typeMateriel.replace(/_/g, " ")}) a été encaissée. Vous pouvez procéder aux opérations techniques !`;
+
+  await sendStaffNotification({
+    userIds: [tech.id],
+    actorId,
+    titre,
+    message,
+    type: NotificationType.STATUT_CHANGE,
+    lien: `/crm/tickets/${ticketId}`,
+    sendPush: true,
+  });
+}
+
+/**
+ * 9. Réparation terminée :
+ * - Web Push & In-App : Réceptionnistes uniquement (pour préparer la restitution et appeler le client)
+ */
+export async function notifyReparationTermineeToStaff({
+  ticketId,
+  numero,
+  clientNom,
+  typeMateriel,
+  actorId,
+}: {
+  ticketId: string;
+  numero: string;
+  clientNom: string;
+  typeMateriel: string;
+  actorId?: string;
+}) {
+  const reception = await db.user.findMany({
+    where: { role: StaffRole.RECEPTIONNISTE, isActive: true },
+    select: { id: true },
+  });
+
+  const receptionIds = reception.map((r) => r.id);
+  if (!receptionIds.length) return;
+
+  const titre = `🎉 Réparation achevée : ${numero}`;
+  const message = `L'équipement de ${clientNom} (${typeMateriel.replace(/_/g, " ")}) a passé les tests de conformité. Prêt pour retrait au comptoir.`;
+
+  await sendStaffNotification({
+    userIds: receptionIds,
+    actorId,
+    titre,
+    message,
+    type: NotificationType.STATUT_CHANGE,
+    lien: `/crm/tickets/${ticketId}`,
+    sendPush: true,
+  });
+}
+
+/**
+ * 10. Clôture de dossier :
+ * - Email : Direction (Administrateurs)
+ */
+export async function notifyTicketClosedToAdmin({
+  numero,
+  clientNom,
+  typeMateriel,
+  actorName,
+}: {
+  numero: string;
+  clientNom: string;
+  typeMateriel: string;
+  actorName: string;
+}) {
+  const admins = await db.user.findMany({
+    where: { role: StaffRole.ADMIN, isActive: true },
+    select: { id: true, email: true },
+  });
+
+  const adminIds = admins.map((a) => a.id);
+  if (!adminIds.length) return;
+
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B;">
+      <h2 style="color: #2CA58D;">✅ Dossier Clôturé & Restitué</h2>
+      <p>Le dossier <strong>${numero}</strong> (${typeMateriel.replace(/_/g, " ")}) pour le client <strong>${clientNom}</strong> a été restitué et clôturé avec succès par <strong>${actorName}</strong>.</p>
+      <p style="margin-top: 20px;">
+        <a href="${appUrl}/crm/tickets/ponctuel" style="background-color: #1E4D8B; color: #ffffff; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold;">
+          Consulter l'historique
+        </a>
+      </p>
+    </div>
+  `;
+
+  await sendStaffNotification({
+    userIds: adminIds,
+    sendPush: false, // Aucun push pour la clôture
+    emailUserIds: adminIds,
+    titre: `Dossier ${numero} clôturé`,
+    message: `Dossier ${numero} (${clientNom}) clôturé et livré.`,
+    type: NotificationType.STATUT_CHANGE,
+    emailSubject: `✅ Dossier Clôturé : ${numero} (${clientNom})`,
+    emailHtml,
+  });
+}
+
+/**
+ * Demande commerciale reçue sur le site :
+ * - Web Push : Réceptionnistes uniquement
+ * - Email : Administrateurs
  */
 export async function notifyNewCommercialRequestToStaff(demande: {
   id: string;
@@ -280,11 +457,14 @@ export async function notifyNewCommercialRequestToStaff(demande: {
       role: { in: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE] },
       isActive: true,
     },
-    select: { id: true },
+    select: { id: true, role: true },
   });
 
-  const staffIds = staff.map((s) => s.id);
-  if (!staffIds.length) return;
+  const allStaffIds = staff.map((s) => s.id);
+  const receptionIds = staff.filter((s) => s.role === StaffRole.RECEPTIONNISTE).map((s) => s.id);
+  const adminIds = staff.filter((s) => s.role === StaffRole.ADMIN).map((s) => s.id);
+
+  if (!allStaffIds.length) return;
 
   const titre = `💼 Demande Commerciale : ${demande.typeDemande.replace(/_/g, " ")}`;
   const message = `Prospect ${demande.nom} (${demande.telephone}) — ${demande.description.slice(0, 80)}...`;
@@ -307,7 +487,9 @@ export async function notifyNewCommercialRequestToStaff(demande: {
   `;
 
   await sendStaffNotification({
-    userIds: staffIds,
+    userIds: allStaffIds,
+    pushUserIds: receptionIds.length > 0 ? receptionIds : allStaffIds,
+    emailUserIds: adminIds,
     titre,
     message,
     type: NotificationType.DEMANDE_COMMERCIALE,
