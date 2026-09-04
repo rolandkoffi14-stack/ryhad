@@ -610,15 +610,15 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
 
       {/* 2. Diag. Terminé : Devis généré prêt pour envoi */}
       {ticket.statut === InterventionStatut.DIAGNOSTIC_TERMINE && devisDoc && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-blue-50 border border-blue-200 flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-100 text-brand-blue flex items-center justify-center shrink-0 mt-0.5">
+        <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/70 border border-blue-200 flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-0.5">
             <FileText className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-xs font-extrabold text-brand-blue uppercase tracking-wide">
+            <h3 className="text-xs font-extrabold text-blue-950 uppercase tracking-wide">
               Étape 3 : Devis {devisDoc.numero} ({formatFCFA(devisDoc.montant)}) prêt pour envoi
             </h3>
-            <p className="text-[11px] text-blue-900 mt-0.5 font-medium">
+            <p className="text-[11px] text-blue-800 mt-0.5 font-medium">
               {userRole === StaffRole.TECHNICIEN
                 ? "Rapport technique et devis scellés. La réception va le transmettre au client pour validation."
                 : "Transmettez le devis au client (WhatsApp, email, appel) puis cliquez sur 'Envoyer Devis'."}
@@ -629,15 +629,15 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
 
       {/* 3. Devis Envoyé : En attente réponse client */}
       {ticket.statut === InterventionStatut.DEVIS_ENVOYE && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-cyan-50 border border-cyan-200 flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-cyan-100 text-cyan-800 flex items-center justify-center shrink-0 mt-0.5">
+        <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 border border-amber-300 flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
             <Clock className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-xs font-extrabold text-cyan-900 uppercase tracking-wide">
+            <h3 className="text-xs font-extrabold text-amber-950 uppercase tracking-wide">
               Étape 4 : Devis transmis au client — En attente de décision
             </h3>
-            <p className="text-[11px] text-cyan-800 mt-0.5 font-medium">
+            <p className="text-[11px] text-amber-800 mt-0.5 font-medium">
               Enregistrez la décision du client dans la barre d&apos;action dès réception de sa confirmation.
             </p>
           </div>
@@ -646,7 +646,7 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
 
       {/* 4. Devis Accepté : Facture de réparation en attente d'encaissement */}
       {ticket.statut === InterventionStatut.DEVIS_ACCEPTE && repDoc && !isRepPaid && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50 border border-emerald-300 flex items-start gap-3">
+        <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 border border-emerald-300 flex items-start gap-3">
           <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
             <Receipt className="w-5 h-5" />
           </div>
@@ -665,15 +665,15 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
 
       {/* 5. Terminé : Prêt à être livré */}
       {ticket.statut === InterventionStatut.TERMINE && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-brand-green-light border border-brand-green/40 flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-brand-green text-white flex items-center justify-center shrink-0 mt-0.5">
+        <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 border border-emerald-300 flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5">
             <PackageCheck className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-xs font-extrabold text-brand-green-dark uppercase tracking-wide">
+            <h3 className="text-xs font-extrabold text-emerald-950 uppercase tracking-wide">
               Étape Finale : Travaux validés & Matériel prêt
             </h3>
-            <p className="text-[11px] text-brand-green-dark mt-0.5 font-medium">
+            <p className="text-[11px] text-emerald-800 mt-0.5 font-medium">
               Le matériel est prêt pour remise au client. Clôturez le dossier lors de la restitution.
             </p>
           </div>
@@ -681,7 +681,7 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
       )}
 
       {/* Header Fiche Ticket */}
-      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 subtle-shadow space-y-6">
+      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 subtle-shadow space-y-6">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-gray-100">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
@@ -705,8 +705,8 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
           </div>
 
           {/* Action Bar unifiée des transitions directes */}
-          <div className="bg-brand-slate p-4 rounded-xl border border-gray-200 flex flex-col sm:flex-row items-center gap-3">
-            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center gap-3">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               Action suivante :
             </span>
 
@@ -724,14 +724,14 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
                     })
                   }
                   disabled={loading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-sm transition-all bg-brand-green hover:bg-brand-green-dark text-white disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-xs transition-all bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
                 >
                   <CreditCard className="w-3.5 h-3.5" />
                   <span>Encaisser Diagnostic ({diagAmountFormatted})</span>
                 </button>
               ) : (
-                <span className="text-xs font-bold text-gray-600 bg-white px-3.5 py-2 rounded-lg border border-gray-200 shadow-xs flex items-center gap-2">
-                  <Lock className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                <span className="text-xs font-bold text-slate-600 bg-white px-3.5 py-2 rounded-lg border border-slate-200 shadow-xs flex items-center gap-2">
+                  <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                   <span>Action suivante réservée à la réception : Encaissement des frais de diagnostic</span>
                 </span>
               )
@@ -749,14 +749,14 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
                     })
                   }
                   disabled={loading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-sm transition-all bg-brand-green hover:bg-brand-green-dark text-white disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-xs transition-all bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
                 >
                   <CreditCard className="w-3.5 h-3.5" />
                   <span>Encaisser Facture ({formatFCFA(repDoc.montant)})</span>
                 </button>
               ) : (
-                <span className="text-xs font-bold text-gray-600 bg-white px-3.5 py-2 rounded-lg border border-gray-200 shadow-xs flex items-center gap-2">
-                  <Lock className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                <span className="text-xs font-bold text-slate-600 bg-white px-3.5 py-2 rounded-lg border border-slate-200 shadow-xs flex items-center gap-2">
+                  <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                   <span>Action suivante réservée à la réception : Encaissement de la facture ({formatFCFA(repDoc.montant)})</span>
                 </span>
               )
@@ -767,20 +767,20 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
                   key={`btn-next-status-${st}-${idx}`}
                   onClick={() => handleUpdateStatus(st)}
                   disabled={loading}
-                  className={`w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-sm transition-all ${
+                  className={`w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-xs transition-all ${
                     st === InterventionStatut.DEVIS_REFUSE
-                      ? "bg-red-600 hover:bg-red-700 text-white"
+                      ? "bg-rose-600 hover:bg-rose-700 text-white"
                       : "bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
                   }`}
                 >
                   <span>{getCrmActionLabel(st, ticket.type, ticket.statut)}</span>
-                  <ArrowRight className="w-3.5 h-3.5 text-brand-green" />
+                  <ArrowRight className="w-3.5 h-3.5 text-white" />
                 </button>
               ))
             ) : (
               /* 4. En attente d'un autre rôle ou dossier clôturé */
-              <span className="text-xs font-bold text-gray-600 bg-white px-3.5 py-2 rounded-lg border border-gray-200 shadow-xs flex items-center gap-2">
-                <Lock className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+              <span className="text-xs font-bold text-slate-600 bg-white px-3.5 py-2 rounded-lg border border-slate-200 shadow-xs flex items-center gap-2">
+                <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                 <span>{getNextActionWaitingMessage()}</span>
               </span>
             )}
@@ -789,8 +789,8 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
 
         {/* Détails Client & Matériel */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
-          <div className="space-y-1 p-4 rounded-xl bg-brand-slate/60 border border-gray-100">
-            <span className="font-bold text-gray-500 uppercase tracking-wider text-[10px] block">Client</span>
+          <div className="space-y-1 p-4 rounded-xl bg-slate-50 border border-slate-100">
+            <span className="font-bold text-slate-500 uppercase tracking-wider text-[10px] block">Client</span>
             <div className="font-extrabold text-brand-dark text-sm">{ticket.client.nom}</div>
             <div className="text-gray-600 font-medium">{ticket.client.telephone}</div>
             {ticket.client.adresse && <div className="text-gray-500">{ticket.client.adresse}</div>}

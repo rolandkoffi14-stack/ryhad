@@ -41,13 +41,13 @@ export function CrmHeader({ user, onMenuToggle }: Props) {
   const getRoleBadge = (role: StaffRole) => {
     switch (role) {
       case StaffRole.ADMIN:
-        return "bg-brand-blue-light text-brand-blue border-brand-blue/30";
+        return "bg-blue-50 text-blue-700 border-blue-200";
       case StaffRole.RECEPTIONNISTE:
-        return "bg-purple-50 text-purple-700 border-purple-200";
+        return "bg-amber-50 text-amber-800 border-amber-300";
       case StaffRole.TECHNICIEN:
-        return "bg-brand-green-light text-brand-green-dark border-brand-green/30";
+        return "bg-emerald-50 text-emerald-800 border-emerald-300";
       default:
-        return "bg-gray-100 text-gray-700";
+        return "bg-slate-100 text-slate-700 border-slate-200";
     }
   };
 
@@ -56,25 +56,25 @@ export function CrmHeader({ user, onMenuToggle }: Props) {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-40">
+    <header className="bg-white border-b border-slate-200 px-4 sm:px-6 py-3 flex items-center justify-between sticky top-0 z-40">
       {/* Bouton Hamburger sur mobile & Recherche rapide */}
       <div className="flex items-center gap-3 flex-1 max-w-md">
         {onMenuToggle && (
           <button
             onClick={onMenuToggle}
             aria-label="Ouvrir le menu"
-            className="lg:hidden p-2 rounded-xl text-gray-600 hover:text-brand-dark hover:bg-gray-100 transition-colors"
+            className="lg:hidden p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
           >
             <Menu className="w-5 h-5" />
           </button>
         )}
 
         <div className="relative w-full">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
-            placeholder="Rechercher..."
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue bg-brand-slate/60"
+            placeholder="Rechercher un dossier, client, document..."
+            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue bg-slate-50 focus:bg-white transition-all text-slate-800"
           />
         </div>
       </div>

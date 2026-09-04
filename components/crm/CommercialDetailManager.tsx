@@ -288,8 +288,8 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
           </div>
 
           {/* Action Bar Supérieure */}
-          <div className="bg-brand-slate p-4 rounded-2xl border border-gray-200 flex flex-col sm:flex-row items-center gap-3">
-            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col sm:flex-row items-center gap-3">
+            <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               Action suivante :
             </span>
 
@@ -298,9 +298,9 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
               <button
                 onClick={() => handleAction("traiter")}
                 disabled={loading}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-sm transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-xs transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
               >
-                <Clock className="w-3.5 h-3.5 text-brand-green" />
+                <Clock className="w-3.5 h-3.5 text-white" />
                 <span>Prendre en Charge & Cotation</span>
               </button>
             )}
@@ -311,17 +311,17 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                 <button
                   onClick={() => handleAction("sauvegarder_lignes")}
                   disabled={loading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-bold py-2.5 px-3.5 rounded-xl border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 shadow-2xs"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-bold py-2.5 px-3.5 rounded-xl border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 shadow-2xs"
                 >
-                  <Save className="w-3.5 h-3.5 text-gray-500" />
+                  <Save className="w-3.5 h-3.5 text-slate-500" />
                   <span>Sauvegarder</span>
                 </button>
                 <button
                   onClick={() => handleAction("emettre_devis")}
                   disabled={loading || totalCalculated <= 0}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-sm transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-xs transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
                 >
-                  <FileText className="w-3.5 h-3.5 text-brand-green" />
+                  <FileText className="w-3.5 h-3.5 text-white" />
                   <span>Émettre Devis ({formatFCFA(totalCalculated)})</span>
                 </button>
               </div>
@@ -333,15 +333,15 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                 <button
                   onClick={() => handleAction("refuser_devis")}
                   disabled={loading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-bold py-2 px-3.5 rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-bold py-2 px-3.5 rounded-xl border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
                 >
-                  <Ban className="w-3.5 h-3.5 text-red-600" />
+                  <Ban className="w-3.5 h-3.5 text-rose-600" />
                   <span>Refuser Devis</span>
                 </button>
                 <button
                   onClick={() => handleAction("valider_accord")}
                   disabled={loading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-sm transition-all bg-brand-green hover:bg-brand-green-dark text-white disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-xs transition-all bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Valider Accord Client</span>
@@ -354,7 +354,7 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
               <button
                 onClick={() => setIsPaymentModalOpen(true)}
                 disabled={loading}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-sm transition-all bg-brand-green hover:bg-brand-green-dark text-white disabled:opacity-50"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-xs transition-all bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
               >
                 <CreditCard className="w-3.5 h-3.5" />
                 <span>Encaisser Facture ({formatFCFA(factDoc?.montant || demande.montantTotal || 0)})</span>

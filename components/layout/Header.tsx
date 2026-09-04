@@ -84,10 +84,10 @@ export function Header() {
           <div className="hidden sm:flex items-center gap-4">
             <Link
               href="/demande-intervention"
-              className="inline-flex items-center gap-2 bg-brand-blue text-white px-4 py-2.5 rounded-lg font-semibold text-sm shadow-md hover:bg-brand-blue-dark active:scale-[0.98] transition-all"
+              className="inline-flex items-center gap-2 bg-brand-green text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-md hover:bg-brand-green-dark active:scale-[0.98] transition-all"
             >
               <span>Demander une intervention</span>
-              <ArrowRight className="w-4 h-4 text-brand-green" />
+              <ArrowRight className="w-4 h-4 text-white" />
             </Link>
           </div>
 
@@ -121,15 +121,15 @@ export function Header() {
             <Link
               href="/demande-intervention"
               onClick={() => setIsOpen(false)}
-              className="flex items-center justify-center gap-2 bg-brand-blue text-white py-2.5 rounded-lg font-semibold text-sm shadow"
+              className="flex items-center justify-center gap-2 bg-brand-green text-white py-2.5 rounded-xl font-bold text-sm shadow hover:bg-brand-green-dark transition-all"
             >
               <span>Demander une intervention</span>
-              <ArrowRight className="w-4 h-4 text-brand-green" />
+              <ArrowRight className="w-4 h-4 text-white" />
             </Link>
             <Link
               href="/devis"
               onClick={() => setIsOpen(false)}
-              className="flex items-center justify-center gap-2 border border-brand-green text-brand-green py-2.5 rounded-lg font-semibold text-sm"
+              className="flex items-center justify-center gap-2 border border-gray-200 text-brand-dark hover:bg-brand-slate py-2.5 rounded-xl font-semibold text-sm transition-colors"
             >
               <span>Demande commerciale (Vente/Location)</span>
             </Link>

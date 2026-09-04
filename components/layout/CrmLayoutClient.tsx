@@ -16,7 +16,7 @@ export function CrmLayoutClient({ user, children }: Props) {
 
   return (
     <CrmRealtimeProvider>
-      <div className="flex min-h-screen bg-brand-slate">
+      <div className="flex min-h-screen bg-slate-100">
         {/* Sidebar Desktop & Mobile Drawer */}
         <CrmSidebar
           userRole={user.role}

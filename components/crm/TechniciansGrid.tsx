@@ -103,21 +103,21 @@ export function TechniciansGrid({ technicians }: Props) {
         {filteredTechs.map((tech) => (
           <div
             key={tech.id}
-            className="bg-white rounded-3xl p-6 border border-gray-200 subtle-shadow space-y-5"
+            className="bg-white rounded-2xl p-6 border border-slate-200 subtle-shadow space-y-5"
           >
             {/* Header Technicien */}
-            <div className="flex items-start justify-between pb-4 border-b border-gray-100">
+            <div className="flex items-start justify-between pb-4 border-b border-slate-100">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-2xl bg-brand-blue text-white flex items-center justify-center font-extrabold text-sm shadow-2xs">
                   {tech.firstName.charAt(0)}
                   {tech.lastName.charAt(0)}
                 </div>
                 <div>
-                  <h2 className="font-extrabold text-brand-dark text-sm">
+                  <h2 className="font-extrabold text-slate-900 text-sm">
                     {tech.firstName} {tech.lastName}
                   </h2>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-lg bg-brand-green-light text-brand-green-dark border border-brand-green/20">
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-300">
                       {tech.role === "ADMIN" ? "Admin Référent" : "Technicien Spécialisé"}
                     </span>
                   </div>
@@ -129,11 +129,11 @@ export function TechniciansGrid({ technicians }: Props) {
                   type="button"
                   onClick={() => handleOpenQuickView(tech)}
                   title="Aperçu rapide"
-                  className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-blue hover:border-brand-blue hover:bg-brand-blue/5 transition-all shadow-2xs"
+                  className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-brand-blue hover:border-brand-blue hover:bg-blue-50 transition-all shadow-2xs"
                 >
                   <Eye className="w-3.5 h-3.5" />
                 </button>
-                <span className="text-xs font-extrabold text-brand-blue bg-brand-blue-light px-2.5 py-1 rounded-xl">
+                <span className="text-xs font-extrabold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-xl">
                   {tech.interventionsAssignees.length} en cours
                 </span>
               </div>

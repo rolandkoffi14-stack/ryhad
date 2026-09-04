@@ -115,11 +115,11 @@ export function CrmSidebar({
   }, [isMobileOpen]);
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-brand-dark text-gray-300 select-none">
+    <div className="flex flex-col h-full bg-slate-900 text-slate-300 select-none">
       {/* Brand Header */}
-      <div className="p-5 border-b border-gray-800 flex items-center justify-between shrink-0">
+      <div className="p-5 border-b border-slate-800 flex items-center justify-between shrink-0">
         <Link href="/crm" className="flex items-center gap-2.5" onClick={onMobileClose}>
-          <div className="relative w-9 h-9 rounded-xl bg-white flex items-center justify-center p-0.5 border border-gray-700 shadow-xs">
+          <div className="relative w-9 h-9 rounded-xl bg-white flex items-center justify-center p-0.5 border border-slate-700 shadow-xs">
             <Image
               src="/images/logo.jpg"
               alt="RyHaD Logo"

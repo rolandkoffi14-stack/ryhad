@@ -10,32 +10,38 @@ interface Props {
 export function TicketStatusBadge({ statut, isPaid, className = "" }: Props) {
   const getBadgeStyle = (st: InterventionStatut) => {
     switch (st) {
+      // 1. FAMILLE BLEU / INFO (Démarrage, Diagnostic en cours, Visite en cours)
       case InterventionStatut.NOUVEAU:
-        return "bg-blue-50 text-brand-blue border-brand-blue/30";
-      case InterventionStatut.FRAIS_DIAGNOSTIC_ENCAISSE:
-        return "bg-amber-50 text-amber-700 border-amber-300";
+        return "bg-blue-50 text-blue-700 border-blue-200";
       case InterventionStatut.EN_DIAGNOSTIC:
-        return "bg-purple-50 text-purple-700 border-purple-300";
+      case InterventionStatut.EN_INTERVENTION:
+        return "bg-blue-50 text-blue-700 border-blue-200 font-semibold";
+
+      // 2. FAMILLE AMBRE / ATTENTION (Frais encaissés, Diagnostic fini, Devis en attente)
+      case InterventionStatut.FRAIS_DIAGNOSTIC_ENCAISSE:
       case InterventionStatut.DIAGNOSTIC_TERMINE:
-        return "bg-amber-100 text-amber-900 border-amber-400 font-extrabold";
       case InterventionStatut.DEVIS_ENVOYE:
-        return "bg-cyan-50 text-cyan-700 border-cyan-300";
+        return "bg-amber-50 text-amber-800 border-amber-300 font-bold";
+
+      // 3. FAMILLE ÉMERAUDE / SUCCÈS & EN COURS VALIDÉ (Devis accepté, Réparation active, Prêt)
       case InterventionStatut.DEVIS_ACCEPTE:
         return isPaid
-          ? "bg-emerald-50 text-emerald-800 border-emerald-400 font-extrabold shadow-2xs"
-          : "bg-amber-50 text-amber-800 border-amber-300 font-extrabold";
-      case InterventionStatut.DEVIS_REFUSE:
-        return "bg-red-50 text-red-700 border-red-300 font-bold";
+          ? "bg-emerald-50 text-emerald-800 border-emerald-300 font-extrabold"
+          : "bg-amber-50 text-amber-800 border-amber-300 font-bold";
       case InterventionStatut.EN_REPARATION:
-      case InterventionStatut.EN_INTERVENTION:
-        return "bg-indigo-50 text-indigo-700 border-indigo-300";
+        return "bg-emerald-50 text-emerald-800 border-emerald-300 font-semibold";
       case InterventionStatut.TERMINE:
-        return "bg-brand-green-light text-brand-green-dark border-brand-green/40 font-extrabold";
+        return "bg-emerald-50 text-emerald-800 border-emerald-300 font-extrabold shadow-2xs";
+
+      // 4. FAMILLE ROSE / ALERTE & REFUS (Devis refusé, incident)
+      case InterventionStatut.DEVIS_REFUSE:
+        return "bg-rose-50 text-rose-700 border-rose-200 font-bold";
+
+      // 5. FAMILLE ARDOISE / NEUTRE (Clôturé, Archivé)
       case InterventionStatut.LIVRE_CLOTURE:
       case InterventionStatut.CLOTURE:
-        return "bg-gray-100 text-gray-700 border-gray-300";
       default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
+        return "bg-slate-100 text-slate-700 border-slate-200";
     }
   };
 

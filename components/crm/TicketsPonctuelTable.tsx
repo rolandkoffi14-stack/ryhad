@@ -182,12 +182,12 @@ export function TicketsPonctuelTable({ tickets, isTechnician = false }: Props) {
   };
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-200 subtle-shadow overflow-hidden flex flex-col">
+    <div className="bg-white rounded-2xl border border-slate-200 subtle-shadow overflow-hidden flex flex-col">
       {/* Barre supérieure : Recherche & Filtres rapides */}
-      <div className="p-4 sm:p-5 border-b border-gray-100 bg-brand-slate/40 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      <div className="p-4 sm:p-5 border-b border-slate-100 bg-slate-50/70 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         {/* Recherche texte */}
         <div className="relative flex-1 max-w-md">
-          <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Rechercher un dossier..."
@@ -196,7 +196,7 @@ export function TicketsPonctuelTable({ tickets, isTechnician = false }: Props) {
               setSearchTerm(e.target.value);
               setCurrentPage(1);
             }}
-            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue"
+            className="w-full pl-10 pr-4 py-2 text-xs rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-brand-blue text-slate-800"
           />
         </div>
 
@@ -221,7 +221,7 @@ export function TicketsPonctuelTable({ tickets, isTechnician = false }: Props) {
                 className={`px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 ${
                   isActive
                     ? "bg-brand-blue text-white shadow-2xs"
-                    : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
                 }`}
               >
                 {tab.label}
@@ -234,7 +234,7 @@ export function TicketsPonctuelTable({ tickets, isTechnician = false }: Props) {
       {/* Tableau Allégé */}
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
-          <thead className="bg-brand-slate text-gray-500 font-bold uppercase tracking-wider text-[10px] border-b border-gray-100">
+          <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100">
             <tr>
               <th className="px-5 py-3.5">Réf. & Matériel</th>
               <th className="px-5 py-3.5">Client</th>
@@ -243,13 +243,13 @@ export function TicketsPonctuelTable({ tickets, isTechnician = false }: Props) {
               <th className="px-5 py-3.5 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100 text-gray-700">
+          <tbody className="divide-y divide-slate-100 text-slate-700">
             {paginatedTickets.map((t) => {
               const clientPhone = t.client?.telephone || "";
               const clientCleanPhone = clientPhone.replace(/[^0-9]/g, "");
 
               return (
-                <tr key={t.id} className="hover:bg-brand-slate/40 transition-colors">
+                <tr key={t.id} className="hover:bg-slate-50/70 transition-colors">
                   {/* 1. Réf. & Matériel */}
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2.5">

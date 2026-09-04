@@ -11,8 +11,11 @@
     --brand-green-dark: #217C6A;
     --brand-green-light: #EAF6F4;
     --brand-slate: #F4F6F8;
+    --brand-surface: #F8FAFC;
     --brand-dark: #1C222B;
+    --brand-dark-surface: #111827;
     --brand-red: #E2574C;
+    --brand-amber: #D97706;
   }
 
   body {

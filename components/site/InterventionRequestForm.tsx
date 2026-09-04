@@ -417,13 +417,13 @@ export function InterventionRequestForm({ initialType }: Props) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3.5 px-8 rounded-xl text-xs sm:text-sm shadow-md active:scale-[0.98] transition-all disabled:opacity-50"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-brand-green hover:bg-brand-green-dark text-white font-bold py-3.5 px-8 rounded-xl text-xs sm:text-sm shadow-md active:scale-[0.98] transition-all disabled:opacity-50"
         >
           {loading ? (
             <span>Enregistrement du dossier...</span>
           ) : (
             <>
-              <Send className="w-4 h-4 text-brand-green" />
+              <Send className="w-4 h-4 text-white" />
               <span>Valider et obtenir mon numéro de ticket</span>
             </>
           )}
