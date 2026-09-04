@@ -201,7 +201,7 @@ export function TicketTracker({ initialNumero }: Props) {
           </button>
         </div>
         <p className="text-[11px] text-gray-500 text-center">
-          💡 Les 4 derniers chiffres du téléphone du client permettent de déverrouiller le devis chiffré et l&apos;accord en ligne.
+          Les 4 derniers chiffres du téléphone client permettent de déverrouiller le devis chiffré et l&apos;accord en ligne.
         </p>
       </form>
 
@@ -355,7 +355,7 @@ export function TicketTracker({ initialNumero }: Props) {
 
           {/* SECTION D'ACCORD DU CLIENT SUR LE DEVIS (Si DEVIS_ENVOYE & Déverrouillé) */}
           {ticket.isUnlocked && ticket.statut === "DEVIS_ENVOYE" && ticket.devis && (
-            <div className="p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-brand-blue/30 space-y-6 shadow-sm">
+            <div className="p-6 sm:p-8 rounded-2xl bg-brand-blue-light/40 border border-brand-blue/30 space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-blue/10">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-brand-blue text-white flex items-center justify-center shrink-0 mt-0.5">

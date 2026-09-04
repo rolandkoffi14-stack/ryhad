@@ -59,21 +59,15 @@ export function Footer() {
             <p className="text-xs leading-relaxed text-gray-400">
               Votre partenaire de référence au Bénin pour la maintenance informatique, biomédicale, audiovisuelle, les infrastructures réseaux, la vidéosurveillance et la vente de matériel professionnel.
             </p>
-            <div className="pt-2 text-xs space-y-1 text-gray-400">
-              <p className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-brand-green" />
-                Interventions pour particuliers & entreprises
-              </p>
-              <p className="flex items-center gap-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-brand-green" />
-                Contrats de maintenance préventive
-              </p>
+            <div className="pt-2 text-xs space-y-1.5 text-gray-400">
+              <p>• Interventions pour particuliers & entreprises</p>
+              <p>• Contrats de maintenance préventive & curative</p>
             </div>
           </div>
 
           {/* Col 2: Services & Domaines */}
           <div>
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 border-l-2 border-brand-green pl-2">
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
               Nos Expertises
             </h4>
             <ul className="space-y-2 text-xs">
@@ -112,7 +106,7 @@ export function Footer() {
 
           {/* Col 3: Liens & Suivi */}
           <div>
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 border-l-2 border-brand-green pl-2">
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
               Accès Rapide
             </h4>
             <ul className="space-y-2 text-xs">
@@ -146,7 +140,7 @@ export function Footer() {
 
           {/* Col 4: Contact & Horaires */}
           <div>
-            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4 border-l-2 border-brand-green pl-2">
+            <h4 className="text-sm font-bold text-white uppercase tracking-wider mb-4">
               Atelier & Contact
             </h4>
             <div className="space-y-3 text-xs">
@@ -169,7 +163,7 @@ export function Footer() {
               <div className="flex items-start gap-2.5 pt-1">
                 <Clock className="w-4 h-4 text-brand-green shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-semibold text-white">Lundi – Vendredi : 9h00 – 20h00</span>
+                  <span className="font-semibold text-white">Lundi - Vendredi : 9h00 - 20h00</span>
                   <p className="text-[11px] text-gray-400">Permanence technique sur rendez-vous</p>
                 </div>
               </div>

@@ -109,7 +109,7 @@ export function SetupForm() {
         <p className="text-xs text-gray-600">
           Votre compte principal a été initialisé avec succès. Redirection vers la page de connexion en cours...
         </p>
-        <div className="w-6 h-6 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mt-4" />
+        <div role="status" aria-label="Redirection en cours" className="w-6 h-6 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mt-4" />
       </div>
     );
   }

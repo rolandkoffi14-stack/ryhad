@@ -125,7 +125,7 @@ export function ResetPasswordForm() {
         <p className="text-xs text-gray-600">
           Votre mot de passe a été mis à jour avec succès. Redirection vers la page de connexion...
         </p>
-        <div className="w-6 h-6 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mt-4" />
+        <div role="status" aria-label="Redirection en cours" className="w-6 h-6 border-2 border-brand-blue border-t-transparent rounded-full animate-spin mx-auto mt-4" />
       </div>
     );
   }

@@ -129,7 +129,7 @@ export default function HomePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 lg:py-24 w-full">
           <div className="max-w-3xl space-y-6">
             {/* Badge de réassurance */}
-            <div className="inline-flex items-center gap-2 bg-brand-green/20 border border-brand-green/40 backdrop-blur-md text-brand-green-light px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-sm">
+            <div className="inline-flex items-center gap-2 bg-brand-dark/80 border border-brand-green/40 text-brand-green-light px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
               <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse"></span>
               <span>Atelier Spécialisé à Cotonou • Gbégamey</span>
             </div>
@@ -137,7 +137,7 @@ export default function HomePage() {
             {/* Titre Principal */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white leading-tight tracking-tight">
               Maintenance Experte & Solutions Tech pour{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-green to-teal-300">
+              <span className="text-brand-green">
                 Tous Vos Équipements
               </span>
             </h1>
@@ -151,15 +151,15 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
               <Link
                 href="/demande-intervention"
-                className="inline-flex items-center justify-center gap-3 bg-brand-green hover:bg-brand-green-dark text-white font-bold px-7 py-4 rounded-xl shadow-lg hover:shadow-brand-green/25 active:scale-[0.98] transition-all duration-200 text-sm sm:text-base group"
+                className="inline-flex items-center justify-center gap-3 bg-brand-green hover:bg-brand-green-dark text-white font-bold px-7 py-4 rounded-xl shadow-md active:scale-[0.98] transition-all duration-200 text-sm sm:text-base group"
               >
                 <span>Demander une intervention</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="w-5 h-5 transition-transform" />
               </Link>
 
               <Link
                 href="/suivi"
-                className="inline-flex items-center justify-center gap-2.5 bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-4 rounded-xl backdrop-blur-md border border-white/25 shadow-sm active:scale-[0.98] transition-all text-sm sm:text-base"
+                className="inline-flex items-center justify-center gap-2.5 bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-4 rounded-xl border border-white/25 active:scale-[0.98] transition-all text-sm sm:text-base"
               >
                 <Search className="w-4 h-4 text-brand-green" />
                 <span>Suivre ma réparation</span>
@@ -175,7 +175,7 @@ export default function HomePage() {
 
             {/* Points forts / Badges intégrés */}
             <div className="pt-8 border-t border-white/15 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="flex items-center gap-3 bg-white/5 backdrop-blur-xs p-3 rounded-xl border border-white/10">
+              <div className="flex items-center gap-3 bg-white/5 p-3.5 rounded-xl border border-white/10">
                 <ShieldCheck className="w-5 h-5 text-brand-green shrink-0" />
                 <div>
                   <span className="text-xs font-bold text-white block">Pièces garanties</span>
@@ -183,7 +183,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 bg-white/5 backdrop-blur-xs p-3 rounded-xl border border-white/10">
+              <div className="flex items-center gap-3 bg-white/5 p-3.5 rounded-xl border border-white/10">
                 <Clock className="w-5 h-5 text-brand-green shrink-0" />
                 <div>
                   <span className="text-xs font-bold text-white block">Diagnostic rapide</span>
@@ -191,11 +191,11 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 bg-white/5 backdrop-blur-xs p-3 rounded-xl border border-white/10">
+              <div className="flex items-center gap-3 bg-white/5 p-3.5 rounded-xl border border-white/10">
                 <MapPin className="w-5 h-5 text-brand-green shrink-0" />
                 <div>
                   <span className="text-xs font-bold text-white block">Atelier Gbégamey</span>
-                  <span className="text-[11px] text-gray-300">Lun - Ven : 9h00 – 20h00</span>
+                  <span className="text-[11px] text-gray-300">Lun - Ven : 9h00 - 20h00</span>
                 </div>
               </div>
             </div>
@@ -223,7 +223,7 @@ export default function HomePage() {
             return (
               <div
                 key={srv.id}
-                className="bg-white rounded-xl p-5 border border-gray-100 subtle-shadow card-hover flex flex-col justify-between"
+                className="bg-white rounded-xl p-5 border border-gray-200/80 flex flex-col justify-between"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -366,7 +366,7 @@ export default function HomePage() {
         <div className="bg-gradient-to-r from-brand-blue via-brand-blue-dark to-brand-dark text-white rounded-2xl p-8 sm:p-12 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2 text-center md:text-left">
             <h3 className="text-2xl font-extrabold">Besoin d&apos;un diagnostic immédiat ?</h3>
-            <p className="text-xs sm:text-sm text-brand-blue-light/80 max-w-xl">
+            <p className="text-xs sm:text-sm text-white/90 max-w-xl">
               Remplissez le formulaire en 2 minutes ou apportez votre appareil à notre atelier de Gbégamey.
             </p>
           </div>
