@@ -153,14 +153,21 @@ export function TechniciansGrid({ technicians }: Props) {
               </div>
             </div>
 
-            {/* Liste des interventions en cours */}
+            {/* Liste des interventions en cours (limitée aux 3 plus récentes) */}
             <div className="space-y-2 pt-1">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
-                Dossiers en cours ({tech.interventionsAssignees.length}) :
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">
+                  Dossiers en cours ({tech.interventionsAssignees.length})
+                </span>
+                {tech.interventionsAssignees.length > 3 && (
+                  <span className="text-[10px] font-medium text-gray-500">
+                    Affichage des 3 derniers
+                  </span>
+                )}
+              </div>
 
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                {tech.interventionsAssignees.map((t) => (
+              <div className="space-y-2">
+                {tech.interventionsAssignees.slice(0, 3).map((t) => (
                   <div
                     key={t.id}
                     className="p-3 rounded-2xl bg-brand-slate/60 border border-gray-100 flex items-center justify-between text-xs"
@@ -183,6 +190,19 @@ export function TechniciansGrid({ technicians }: Props) {
                     </div>
                   </div>
                 ))}
+
+                {tech.interventionsAssignees.length > 3 && (
+                  <button
+                    type="button"
+                    onClick={() => handleOpenQuickView(tech)}
+                    className="w-full py-2 px-3 text-center text-[11px] font-bold text-brand-blue bg-brand-blue-light/50 hover:bg-brand-blue-light border border-brand-blue/20 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
+                  >
+                    <span>
+                      Voir les {tech.interventionsAssignees.length - 3} autre{tech.interventionsAssignees.length - 3 > 1 ? "s" : ""} dossier{tech.interventionsAssignees.length - 3 > 1 ? "s" : ""}
+                    </span>
+                    <ArrowRight className="w-3 h-3 text-brand-blue" />
+                  </button>
+                )}
 
                 {tech.interventionsAssignees.length === 0 && (
                   <div className="text-xs text-gray-400 italic py-3 text-center bg-brand-slate/40 rounded-2xl">
