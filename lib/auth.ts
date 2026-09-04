@@ -100,68 +100,61 @@ export interface SessionUser {
   phone?: string | null;
 }
 
-export const getCurrentUser = cache(async (): Promise<SessionUser> => {
+export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   const session = await auth();
 
-  if (session?.user?.id) {
-    const userRole = (session.user as any).role as StaffRole;
-    const firstName = (session.user as any).firstName as string;
-    const lastName = (session.user as any).lastName as string;
-
-    // Si les données sont déjà dans le token JWT, on évite tout aller-retour SQL (0 ms)
-    if (userRole && firstName !== undefined) {
-      return {
-        id: session.user.id,
-        email: session.user.email || "",
-        firstName: firstName || "Utilisateur",
-        lastName: lastName || "",
-        role: userRole,
-        assignableAsTechnician: Boolean((session.user as any).assignableAsTechnician),
-        phone: (session.user as any).phone || null,
-      };
-    }
-
-    // Fallback de sécurité uniquement si le token est incomplet
-    try {
-      const dbUser = await db.user.findUnique({
-        where: { id: session.user.id },
-        select: {
-          id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-          role: true,
-          assignableAsTechnician: true,
-          phone: true,
-        },
-      });
-
-      if (dbUser) {
-        return {
-          id: dbUser.id,
-          email: dbUser.email,
-          firstName: dbUser.firstName,
-          lastName: dbUser.lastName,
-          role: dbUser.role,
-          assignableAsTechnician: dbUser.assignableAsTechnician,
-          phone: dbUser.phone,
-        };
-      }
-    } catch (e) {
-      console.error("Error reading session user from db:", e);
-    }
+  if (!session?.user?.id) {
+    return null;
   }
 
-  // Fallback invité (sera intercepté par middleware / redirect)
-  return {
-    id: "",
-    email: "",
-    firstName: "Utilisateur",
-    lastName: "",
-    role: StaffRole.RECEPTIONNISTE,
-    assignableAsTechnician: false,
-    phone: null,
-  };
+  const userRole = (session.user as any).role as StaffRole;
+  const firstName = (session.user as any).firstName as string;
+  const lastName = (session.user as any).lastName as string;
+
+  // Si les données sont déjà dans le token JWT, on évite tout aller-retour SQL (0 ms)
+  if (userRole && firstName !== undefined) {
+    return {
+      id: session.user.id,
+      email: session.user.email || "",
+      firstName: firstName || "Utilisateur",
+      lastName: lastName || "",
+      role: userRole,
+      assignableAsTechnician: Boolean((session.user as any).assignableAsTechnician),
+      phone: (session.user as any).phone || null,
+    };
+  }
+
+  // Fallback de sécurité uniquement si le token est incomplet
+  try {
+    const dbUser = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        assignableAsTechnician: true,
+        phone: true,
+      },
+    });
+
+    if (dbUser) {
+      return {
+        id: dbUser.id,
+        email: dbUser.email,
+        firstName: dbUser.firstName,
+        lastName: dbUser.lastName,
+        role: dbUser.role,
+        assignableAsTechnician: dbUser.assignableAsTechnician,
+        phone: dbUser.phone,
+      };
+    }
+  } catch (e) {
+    console.error("Error reading session user from db:", e);
+  }
+
+  return null;
 });
 
 export function hasPermission(

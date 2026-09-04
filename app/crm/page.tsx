@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { auth, getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { TicketStatusBadge } from "@/components/crm/TicketStatusBadge";
@@ -25,6 +26,9 @@ export const dynamic = "force-dynamic";
 
 export default async function CrmDashboardPage() {
   const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   // Requêtes adaptées selon le rôle
   let tickets: any[] = [];

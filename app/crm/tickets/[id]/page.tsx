@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
@@ -15,6 +15,9 @@ export default async function TicketDetailPage({
 }) {
   const { id } = await params;
   const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   let ticket: any = null;
   let technicians: any[] = [];

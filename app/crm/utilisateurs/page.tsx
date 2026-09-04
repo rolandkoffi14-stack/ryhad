@@ -11,7 +11,7 @@ export default async function CrmUtilisateursPage() {
   const user = await getCurrentUser();
 
   // Seul l'Administrateur accède à la gestion des utilisateurs
-  if (user.role !== StaffRole.ADMIN) {
+  if (!user || user.role !== StaffRole.ADMIN) {
     redirect("/crm");
   }
 

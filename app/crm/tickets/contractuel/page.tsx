@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { TicketFormContractuel } from "@/components/crm/TicketFormContractuel";
@@ -15,6 +16,9 @@ export default async function TicketsContractuelPage({
 }) {
   const { new: isNew, contractId } = await searchParams;
   const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   let tickets: any[] = [];
   let contracts: any[] = [];

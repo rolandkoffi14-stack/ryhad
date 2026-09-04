@@ -43,6 +43,6 @@
     "typescript": "^5.8.2"
   },
   "overrides": {
-    "deepmerge-ts": "^7.1.5"
+    "deepmerge-ts": "^8.0.0"
   }
 }

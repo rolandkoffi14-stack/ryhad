@@ -92,7 +92,7 @@ export async function PUT(
 
     if (data.password && data.password.trim().length >= 10) {
       const hashedPassword = await bcrypt.hash(data.password.trim(), 10);
-      updateData.password = hashedPassword;
+      updateData.passwordHash = hashedPassword;
     }
 
     const updatedUser = await db.user.update({

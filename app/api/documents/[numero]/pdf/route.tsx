@@ -8,6 +8,8 @@ import { DocumentType, FactureType } from "@prisma/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
+import { auth } from "@/lib/auth";
+
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
@@ -53,12 +55,38 @@ export async function GET(
       return NextResponse.json({ success: false, message: "Document non trouvé" }, { status: 404 });
     }
 
+    // Contrôle d'autorisation strict : session staff OU client vérifié par les 4 derniers chiffres
+    const session = await auth();
+    const isStaff = Boolean(session?.user);
+
     const client = doc.intervention?.client || doc.contract?.client || doc.demandeCommerciale?.client || {
       nom: "Client RyHaD",
       telephone: "+229 01 90 88 13 14",
       email: null,
       adresse: "Cotonou, Bénin",
     };
+
+    if (!isStaff) {
+      const url = new URL(request.url);
+      const phoneParam = url.searchParams.get("phoneSuffix") || url.searchParams.get("phone") || "";
+      const cleanInput = phoneParam.replace(/\D/g, "");
+      const cleanClientPhone = (client.telephone || "").replace(/\D/g, "");
+
+      const isOwner =
+        cleanInput.length >= 4 &&
+        cleanClientPhone.length >= 4 &&
+        cleanClientPhone.endsWith(cleanInput.slice(-4));
+
+      if (!isOwner) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: "Accès refusé : session membre requise ou vérification par les 4 derniers chiffres du téléphone (?phoneSuffix=XXXX).",
+          },
+          { status: 403 }
+        );
+      }
+    }
 
     // Recalcul dynamique pour garantir la conformité mathématique parfaite
     let docMontant = doc.montant;

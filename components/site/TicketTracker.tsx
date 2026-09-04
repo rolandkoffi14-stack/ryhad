@@ -407,7 +407,7 @@ export function TicketTracker({ initialNumero }: Props) {
               {/* Boutons d'action client */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
                 <a
-                  href={`/api/documents/${ticket.devis.numero}/pdf`}
+                  href={`/api/documents/${ticket.devis.numero}/pdf?phoneSuffix=${encodeURIComponent(phoneSuffix.trim())}`}
                   target="_blank"
                   rel="noreferrer"
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border border-gray-300 text-brand-dark px-4 py-3 rounded-xl text-xs font-bold shadow-xs transition-all"

@@ -26,6 +26,9 @@ export default async function CrmLayout({
   }
 
   const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   return (
     <CrmLayoutClient user={user}>

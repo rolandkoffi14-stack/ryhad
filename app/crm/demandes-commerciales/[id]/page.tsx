@@ -12,6 +12,9 @@ interface Props {
 
 export default async function CrmDemandeCommercialeDetailPage({ params }: Props) {
   const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   if (user.role === StaffRole.TECHNICIEN) {
     redirect("/crm");

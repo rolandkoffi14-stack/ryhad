@@ -31,6 +31,17 @@ function validateEnv() {
       throw new Error("Variables d'environnement critiques manquantes.");
     }
   }
+
+  if (
+    process.env.NODE_ENV === "production" &&
+    !process.env.NEXTAUTH_SECRET &&
+    !process.env.AUTH_SECRET
+  ) {
+    throw new Error(
+      "AUTH_SECRET ou NEXTAUTH_SECRET est obligatoire en environnement de production pour sécuriser les sessions."
+    );
+  }
+
   return parsed.success ? parsed.data : (process.env as unknown as z.infer<typeof envSchema>);
 }
 

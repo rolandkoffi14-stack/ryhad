@@ -205,7 +205,7 @@ export async function sendPasswordResetEmail({
   resetUrl: string;
 }) {
   if (!resend) {
-    console.log(`[EMAIL DEV MODE] Lien de réinitialisation pour ${email} : ${resetUrl}`);
+    console.log(`[EMAIL DEV MODE] Demande de réinitialisation de mot de passe traitée pour ${email}`);
     return { success: true, mocked: true };
   }
 

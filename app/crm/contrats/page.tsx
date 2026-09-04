@@ -8,6 +8,9 @@ export const dynamic = "force-dynamic";
 
 export default async function CrmContratsPage() {
   const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   // Seul l'Administrateur accède aux contrats de maintenance (Section 3 parcours-et-rbac.md)
   if (user.role !== StaffRole.ADMIN) {

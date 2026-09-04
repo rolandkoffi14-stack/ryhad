@@ -8,6 +8,9 @@ export const dynamic = "force-dynamic";
 
 export default async function CrmDemandesCommercialesPage() {
   const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   // Réservé à la Direction et à la Réception
   if (user.role === StaffRole.TECHNICIEN) {

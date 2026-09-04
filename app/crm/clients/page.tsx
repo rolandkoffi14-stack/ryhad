@@ -8,6 +8,9 @@ export const dynamic = "force-dynamic";
 
 export default async function CrmClientsPage() {
   const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   // Seuls Admin et Réceptionniste accèdent au répertoire client
   if (user.role === StaffRole.TECHNICIEN) {
