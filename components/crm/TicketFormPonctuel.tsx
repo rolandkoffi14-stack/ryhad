@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { TypeMateriel, ModeIntervention, ClientType } from "@prisma/client";
 import { Wrench, Plus, UserPlus, Save, ArrowLeft, CheckCircle2, X, AlertCircle } from "lucide-react";
@@ -31,6 +32,10 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
 
   // État Modale Création Rapide Client
   const [showClientModal, setShowClientModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [clientLoading, setClientLoading] = useState(false);
   const [clientError, setClientError] = useState<string | null>(null);
   const [newClient, setNewClient] = useState<{
@@ -290,9 +295,9 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
       </form>
 
       {/* MODALE : CRÉATION RAPIDE DE CLIENT */}
-      {showClientModal && (
+      {showClientModal && mounted && createPortal(
         <div
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+          className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
           onClick={(e) => {
             if (e.target === e.currentTarget && !clientLoading) {
               setShowClientModal(false);
@@ -430,7 +435,8 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

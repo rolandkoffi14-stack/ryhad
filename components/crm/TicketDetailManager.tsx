@@ -107,13 +107,20 @@ interface Props {
   ticket: TicketDetail;
   technicians: { id: string; firstName: string; lastName: string }[];
   userRole: StaffRole;
+  currentUserId?: string;
 }
 
-export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
+export function TicketDetailManager({ ticket, technicians, userRole, currentUserId }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  const isAssignedTech =
+    ticket.technicienAssigne?.id === currentUserId ||
+    (ticket as any).technicienAssigneId === currentUserId;
+  const canStartContractuel =
+    userRole === StaffRole.ADMIN || (userRole === StaffRole.TECHNICIEN && isAssignedTech);
 
   // States
   const [diagnostic, setDiagnostic] = useState(ticket.diagnosticTechnicien || "");
@@ -196,15 +203,21 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
           return false;
         }
 
-        // Règle de verrouillage contractuel : le technicien ne peut démarrer que le jour J
-        if (st === InterventionStatut.EN_INTERVENTION && ticket.dateProgrammee) {
-          const targetDay = new Date(ticket.dateProgrammee);
-          targetDay.setHours(0, 0, 0, 0);
-          const currentDay = new Date();
-          currentDay.setHours(0, 0, 0, 0);
-
-          if (currentDay < targetDay && userRole === StaffRole.TECHNICIEN) {
+        // Règle de verrouillage contractuel : seul le technicien assigné ou l'admin peut démarrer, et uniquement si la date est arrivée
+        if (st === InterventionStatut.EN_INTERVENTION && ticket.type === InterventionType.CONTRACTUEL) {
+          if (!canStartContractuel) {
             return false;
+          }
+
+          if (ticket.dateProgrammee) {
+            const targetDay = new Date(ticket.dateProgrammee);
+            targetDay.setHours(0, 0, 0, 0);
+            const currentDay = new Date();
+            currentDay.setHours(0, 0, 0, 0);
+
+            if (currentDay < targetDay) {
+              return false;
+            }
           }
         }
 
@@ -246,7 +259,13 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
           })} : Démarrage verrouillé jusqu'au jour prévu`;
         }
       }
-      return userRole === StaffRole.TECHNICIEN
+      if (userRole === StaffRole.RECEPTIONNISTE) {
+        return "Intervention contractuelle : Démarrage réservé au technicien assigné ou à l'administrateur.";
+      }
+      if (userRole === StaffRole.TECHNICIEN && !isAssignedTech) {
+        return "Intervention contractuelle : Assignée à un autre technicien.";
+      }
+      return userRole === StaffRole.TECHNICIEN || userRole === StaffRole.ADMIN
         ? "Action requise : Cliquez sur 'Démarrer Intervention' pour commencer"
         : "En attente de prise en charge par le technicien";
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   CreditCard,
   CheckCircle2,
@@ -89,6 +90,11 @@ export function PaymentConfirmationModal({
   const [selectedMethod, setSelectedMethod] = useState("ESPECES");
   const [reference, setReference] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -102,7 +108,7 @@ export function PaymentConfirmationModal({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, loading, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,9 +122,9 @@ export function PaymentConfirmationModal({
     }
   };
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget && !loading) {
           onClose();
@@ -244,6 +250,7 @@ export function PaymentConfirmationModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

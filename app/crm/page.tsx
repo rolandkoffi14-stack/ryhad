@@ -112,12 +112,17 @@ export default async function CrmDashboardPage() {
   if (user.role === StaffRole.TECHNICIEN) {
     // TECHNICIEN :
     // - Conserve tous ses tickets ponctuels atelier assignés
-    // - Pour les tickets contractuels : interventions en cours ou du mois,
-    //   plus UNIQUEMENT sa prochaine intervention contractuelle imminente programmée.
+    // - Pour les tickets contractuels :
+    //   * Toutes les pannes imprévues sous contrat (!t.dateProgrammee) qui lui sont assignées (y compris à l'état NOUVEAU)
+    //   * Les visites programmées en cours ou du mois en cours
+    //   * UNIQUEMENT sa prochaine visite programmée imminente pour les mois futurs.
+    const unexpectedTickets = allContractuelTickets.filter((t) => !t.dateProgrammee);
+
     const activeOrInProgress = allContractuelTickets.filter(
       (t) =>
+        t.dateProgrammee &&
         t.statut !== InterventionStatut.NOUVEAU &&
-        (!t.dateProgrammee || new Date(t.dateProgrammee) <= endOfMonth)
+        new Date(t.dateProgrammee) <= endOfMonth
     );
 
     // Prochaine intervention imminente parmi les tickets NOUVEAU programmés
@@ -128,7 +133,7 @@ export default async function CrmDashboardPage() {
     const nextImminent = upcoming.length > 0 ? [upcoming[0]] : [];
 
     visibleContractuelTickets = Array.from(
-      new Map([...activeOrInProgress, ...nextImminent].map((t) => [t.id, t])).values()
+      new Map([...unexpectedTickets, ...activeOrInProgress, ...nextImminent].map((t) => [t.id, t])).values()
     );
   } else {
     // ADMIN & RÉCEPTION :

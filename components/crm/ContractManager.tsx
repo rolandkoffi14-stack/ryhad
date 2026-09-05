@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -101,6 +102,31 @@ export function ContractManager({ contracts, clients }: Props) {
     montantMainOeuvre: 150000,
     equipementsCouverts: "",
   });
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const getMinEndDate = () => {
+    if (!formData.dateDebut) return undefined;
+    const d = new Date(formData.dateDebut);
+    if (formData.periodicite === Periodicite.MENSUEL) {
+      d.setMonth(d.getMonth() + 1);
+    } else if (formData.periodicite === Periodicite.TRIMESTRIEL) {
+      d.setMonth(d.getMonth() + 3);
+    } else if (formData.periodicite === Periodicite.ANNUEL) {
+      d.setMonth(d.getMonth() + 12);
+    }
+    return d.toISOString().split("T")[0];
+  };
+
+  const getMinDurationLabel = () => {
+    if (formData.periodicite === Periodicite.MENSUEL) return "1 mois";
+    if (formData.periodicite === Periodicite.TRIMESTRIEL) return "3 mois";
+    if (formData.periodicite === Periodicite.ANNUEL) return "12 mois (1 an)";
+    return "selon périodicité";
+  };
 
   // Filtrage
   const filteredContracts = useMemo(() => {
@@ -541,8 +567,8 @@ export function ContractManager({ contracts, clients }: Props) {
       />
 
       {/* Modale de création d'un contrat */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
+      {showModal && mounted && createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-5 border-b border-gray-100 bg-brand-slate/60 flex items-center justify-between">
               <h2 className="text-sm font-extrabold text-brand-dark">Nouveau Contrat de Maintenance</h2>
@@ -626,18 +652,13 @@ export function ContractManager({ contracts, clients }: Props) {
                   </label>
                   <input
                     type="date"
-                    min={(() => {
-                      if (!formData.dateDebut) return undefined;
-                      const d = new Date(formData.dateDebut);
-                      d.setMonth(d.getMonth() + 3);
-                      return d.toISOString().split("T")[0];
-                    })()}
+                    min={getMinEndDate()}
                     value={formData.dateFin}
                     onChange={(e) => setFormData({ ...formData, dateFin: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none text-xs"
                   />
                   <p className="text-[10px] text-gray-500 mt-1">
-                    Laissez vide pour un CDI. Si spécifiée, durée minimale de 3 mois.
+                    Laissez vide pour un CDI (configuré sur 12 mois par défaut). Si spécifiée, durée minimale de {getMinDurationLabel()}.
                   </p>
                 </div>
               </div>
@@ -677,7 +698,8 @@ export function ContractManager({ contracts, clients }: Props) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

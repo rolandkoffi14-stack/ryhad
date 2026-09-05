@@ -75,21 +75,44 @@ export const contractFormSchema = z
     montantMainOeuvre: z.number().min(0, "Montant invalide"),
     equipementsCouverts: z.string().min(3, "Description des équipements requise"),
   })
-  .refine(
-    (data) => {
-      if (!data.dateFin || data.dateFin.trim() === "") return true;
-      const start = new Date(data.dateDebut);
-      const end = new Date(data.dateFin);
-      if (isNaN(start.getTime()) || isNaN(end.getTime())) return false;
-      const minEnd = new Date(start);
-      minEnd.setMonth(minEnd.getMonth() + 3);
-      return end >= minEnd;
-    },
-    {
-      message: "Pour un contrat à durée déterminée, la durée doit être d'au moins 3 mois.",
-      path: ["dateFin"],
+  .superRefine((data, ctx) => {
+    if (!data.dateFin || data.dateFin.trim() === "") return;
+    const start = new Date(data.dateDebut);
+    const end = new Date(data.dateFin);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Format de date invalide",
+        path: ["dateFin"],
+      });
+      return;
     }
-  );
+
+    const minEnd = new Date(start);
+    let minMonths = 1;
+    let label = "1 mois";
+
+    if (data.periodicite === Periodicite.MENSUEL) {
+      minMonths = 1;
+      label = "1 mois";
+    } else if (data.periodicite === Periodicite.TRIMESTRIEL) {
+      minMonths = 3;
+      label = "3 mois";
+    } else if (data.periodicite === Periodicite.ANNUEL) {
+      minMonths = 12;
+      label = "12 mois (1 an)";
+    }
+
+    minEnd.setMonth(minEnd.getMonth() + minMonths);
+
+    if (end < minEnd) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Pour un contrat ${data.periodicite.toLowerCase()}, la durée minimale doit être d'au moins ${label}.`,
+        path: ["dateFin"],
+      });
+    }
+  });
 
 export type ContractFormInput = z.infer<typeof contractFormSchema>;
 

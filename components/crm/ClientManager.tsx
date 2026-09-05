@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -62,6 +63,10 @@ export function ClientManager({ clients, userRole }: Props) {
   const [pageSize, setPageSize] = useState(10);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [editingClient, setEditingClient] = useState<ClientData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -529,9 +534,9 @@ export function ClientManager({ clients, userRole }: Props) {
       />
 
       {/* Modale Création / Modification Client */}
-      {showCreateModal && (
+      {showCreateModal && mounted && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
           onClick={(e) => {
             if (e.target === e.currentTarget && !loading) setShowCreateModal(false);
           }}
@@ -659,7 +664,8 @@ export function ClientManager({ clients, userRole }: Props) {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Confirmation de suppression client */}

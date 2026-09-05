@@ -119,7 +119,10 @@ export async function POST(
       const diffMonths =
         (endDate.getFullYear() - startDate.getFullYear()) * 12 +
         (endDate.getMonth() - startDate.getMonth());
-      totalMonths = Math.max(3, diffMonths); // Minimum 3 mois pour un CDD
+      let minDuration = 1;
+      if (contract.periodicite === "TRIMESTRIEL") minDuration = 3;
+      else if (contract.periodicite === "ANNUEL") minDuration = 12;
+      totalMonths = Math.max(minDuration, diffMonths);
     }
 
     const quotaTotalVisites = totalMonths * freqNum;

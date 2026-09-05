@@ -29,11 +29,17 @@ export async function POST(request: Request) {
     if (validated.dateFin && validated.dateFin.trim() !== "") {
       finalEndDate = new Date(validated.dateFin);
       const minEnd = new Date(startDate);
-      minEnd.setMonth(minEnd.getMonth() + 3);
+      let minMonths = 1;
+      if (validated.periodicite === Periodicite.TRIMESTRIEL) minMonths = 3;
+      else if (validated.periodicite === Periodicite.ANNUEL) minMonths = 12;
+      minEnd.setMonth(minEnd.getMonth() + minMonths);
 
       if (finalEndDate < minEnd) {
         return NextResponse.json(
-          { success: false, message: "Pour un contrat à durée déterminée, la durée doit être d'au moins 3 mois." },
+          {
+            success: false,
+            message: `Pour une périodicité ${validated.periodicite.toLowerCase()}, la durée minimale du contrat est de ${minMonths} mois.`,
+          },
           { status: 400 }
         );
       }

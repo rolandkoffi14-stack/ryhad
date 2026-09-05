@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   UserPlus,
@@ -38,6 +39,11 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -153,11 +159,11 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+      className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget && !loading) {
           onClose();
@@ -398,6 +404,7 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

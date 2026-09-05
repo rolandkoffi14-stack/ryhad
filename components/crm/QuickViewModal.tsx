@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
   Eye,
@@ -48,6 +49,12 @@ interface Props {
 }
 
 export function QuickViewModal({ isOpen, onClose, data }: Props) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
@@ -60,13 +67,13 @@ export function QuickViewModal({ isOpen, onClose, data }: Props) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen || !data) return null;
+  if (!isOpen || !data || !mounted) return null;
 
   const clientCleanPhone = data.clientPhone ? data.clientPhone.replace(/[^0-9]/g, "") : "";
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -195,6 +202,7 @@ export function QuickViewModal({ isOpen, onClose, data }: Props) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

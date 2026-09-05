@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   UserCheck,
@@ -62,6 +63,11 @@ export function UserEditModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -188,9 +194,11 @@ export function UserEditModal({
     }
   };
 
-  return (
+  if (!isOpen || !user || !mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
+      className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-150"
       onClick={(e) => {
         if (e.target === e.currentTarget && !loading) {
           onClose();
@@ -473,6 +481,7 @@ export function UserEditModal({
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

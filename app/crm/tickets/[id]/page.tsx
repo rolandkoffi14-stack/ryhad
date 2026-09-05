@@ -81,7 +81,12 @@ export default async function TicketDetailPage({
         </Link>
       </div>
 
-      <TicketDetailManager ticket={ticket} technicians={technicians} userRole={user.role} />
+      <TicketDetailManager
+        ticket={ticket}
+        technicians={technicians}
+        userRole={user.role}
+        currentUserId={user.id}
+      />
     </div>
   );
 }

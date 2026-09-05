@@ -31,13 +31,15 @@ import {
   CreditCard,
   Eye,
   MessageCircle,
+  Laptop,
 } from "lucide-react";
 import { formatFCFA } from "@/lib/format";
 import { format, isToday, isBefore, isAfter, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PaymentConfirmationModal } from "@/components/crm/PaymentConfirmationModal";
 import { QuickViewModal, QuickViewData } from "@/components/crm/QuickViewModal";
-import { StaffRole } from "@prisma/client";
+import { TicketStatusBadge } from "@/components/crm/TicketStatusBadge";
+import { StaffRole, InterventionStatut } from "@prisma/client";
 
 interface ContractEnterprise {
   id: string;
@@ -63,6 +65,7 @@ interface ContractEnterprise {
     id: string;
     numero: string;
     type: string;
+    typeMateriel?: string;
     panneDeclaree: string;
     statut: string;
     dateCreation: string;
@@ -580,14 +583,20 @@ export function ContractEnterpriseView({
             <button
               type="button"
               onClick={() => setActiveTab("PREVENTIF")}
-              className={`pb-3 text-sm font-extrabold transition-all border-b-2 flex items-center gap-2 ${
+              className={`pb-3 text-sm font-extrabold transition-all border-b-2 flex items-center gap-2 focus:outline-none focus-visible:text-brand-blue ${
                 activeTab === "PREVENTIF"
                   ? "border-brand-blue text-brand-blue"
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <span>1. Visites Programmées (Préventif)</span>
-              <span className="bg-brand-blue/10 text-brand-blue text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+              <span>Programmés</span>
+              <span
+                className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full transition-colors ${
+                  activeTab === "PREVENTIF"
+                    ? "bg-brand-blue/10 text-brand-blue"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
                 {preventifTickets.length}
               </span>
             </button>
@@ -595,14 +604,20 @@ export function ContractEnterpriseView({
             <button
               type="button"
               onClick={() => setActiveTab("PONCTUEL")}
-              className={`pb-3 text-sm font-extrabold transition-all border-b-2 flex items-center gap-2 ${
+              className={`pb-3 text-sm font-extrabold transition-all border-b-2 flex items-center gap-2 focus:outline-none focus-visible:text-brand-blue ${
                 activeTab === "PONCTUEL"
                   ? "border-brand-blue text-brand-blue"
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
-              <span>2. Pannes Imprévues sous contrat</span>
-              <span className="bg-slate-100 text-slate-600 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+              <span>Imprévus</span>
+              <span
+                className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full transition-colors ${
+                  activeTab === "PONCTUEL"
+                    ? "bg-brand-blue/10 text-brand-blue"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
                 {ponctuelTickets.length}
               </span>
             </button>
@@ -611,14 +626,20 @@ export function ContractEnterpriseView({
               <button
                 type="button"
                 onClick={() => setActiveTab("FACTURES")}
-                className={`pb-3 text-sm font-extrabold transition-all border-b-2 flex items-center gap-2 ${
+                className={`pb-3 text-sm font-extrabold transition-all border-b-2 flex items-center gap-2 focus:outline-none focus-visible:text-brand-blue ${
                   activeTab === "FACTURES"
-                    ? "border-brand-green text-brand-green"
+                    ? "border-brand-blue text-brand-blue"
                     : "border-transparent text-slate-500 hover:text-slate-800"
                 }`}
               >
-                <span>3. Facturation du Contrat</span>
-                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                <span>Factures périodiques</span>
+                <span
+                  className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full transition-colors ${
+                    activeTab === "FACTURES"
+                      ? "bg-brand-blue/10 text-brand-blue"
+                      : "bg-slate-100 text-slate-600"
+                  }`}
+                >
                   {selectedContract.facturesPeriodiques.length}
                 </span>
               </button>
@@ -786,7 +807,7 @@ export function ContractEnterpriseView({
                                   <Eye className="w-3.5 h-3.5" />
                                 </button>
 
-                                {/* Action principale */}
+                                {/* Action principale : Gérer pour tout le monde (ou Rapport si terminé) */}
                                 {isDone ? (
                                   <Link
                                     href={`/crm/tickets/${ticket.id}`}
@@ -795,37 +816,13 @@ export function ContractEnterpriseView({
                                     <span>Rapport</span>
                                     <ArrowRight className="w-3 h-3 text-brand-green" />
                                   </Link>
-                                ) : isInProgress ? (
+                                ) : (
                                   <Link
                                     href={`/crm/tickets/${ticket.id}`}
                                     className="inline-flex items-center gap-1 bg-brand-blue hover:bg-brand-blue-dark text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all shadow-2xs"
                                   >
-                                    <span>{isTechnician ? "Reprendre" : "Gérer"}</span>
-                                    <ArrowRight className="w-3 h-3 text-white" />
-                                  </Link>
-                                ) : isReception ? (
-                                  <Link
-                                    href={`/crm/tickets/${ticket.id}`}
-                                    className="inline-flex items-center gap-1 bg-brand-slate hover:bg-brand-blue hover:text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all text-brand-dark shadow-2xs"
-                                  >
-                                    <span>Consulter</span>
+                                    <span>Gérer</span>
                                     <ArrowRight className="w-3 h-3 text-brand-green" />
-                                  </Link>
-                                ) : isLocked && isTechnician ? (
-                                  <div
-                                    title="Intervention verrouillée jusqu'à la date d'intervention prévue."
-                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 text-slate-400 text-xs font-bold select-none cursor-not-allowed border border-slate-200"
-                                  >
-                                    <Lock className="w-3.5 h-3.5 text-slate-400" />
-                                    <span>Bloqué</span>
-                                  </div>
-                                ) : (
-                                  <Link
-                                    href={`/crm/tickets/${ticket.id}`}
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-brand-green hover:bg-emerald-600 text-white shadow-2xs transition-all"
-                                  >
-                                    <Play className="w-3.5 h-3.5" />
-                                    <span>Démarrer</span>
                                   </Link>
                                 )}
                               </div>
@@ -842,7 +839,7 @@ export function ContractEnterpriseView({
         )}
 
         {/* ------------------------------------------------------------- */}
-        {/* ONGLET 2 : PANNES PONCTUELLES DÉCLARÉES SOUS CONTRAT          */}
+        {/* ONGLET 2 : PANNES IMPRÉVUES SOUS CONTRAT                      */}
         {/* ------------------------------------------------------------- */}
         {activeTab === "PONCTUEL" && (
           <div className="space-y-4">
@@ -855,7 +852,7 @@ export function ContractEnterpriseView({
                 className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-sm transition-all"
               >
                 <Plus className="w-4 h-4 text-brand-green" />
-                <span>+ Déclarer une panne ponctuelle</span>
+                <span>+ Déclarer une panne imprévue</span>
               </Link>
             </div>
 
@@ -863,7 +860,7 @@ export function ContractEnterpriseView({
               <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-2">
                 <Wrench className="w-10 h-10 text-slate-300 mx-auto" />
                 <h3 className="text-base font-extrabold text-slate-800">
-                  Aucune panne ponctuelle enregistrée
+                  Aucune panne imprévue enregistrée
                 </h3>
                 <p className="text-xs text-slate-400">
                   Le parc fonctionne parfaitement. Toutes les interventions sont pour l&apos;instant
@@ -872,39 +869,152 @@ export function ContractEnterpriseView({
               </div>
             ) : (
               <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-500">
-                    <tr>
-                      <th className="py-4 px-6">N° Ticket</th>
-                      <th className="py-4 px-6">Date Panne</th>
-                      <th className="py-4 px-6">Description Panne</th>
-                      <th className="py-4 px-6">Statut</th>
-                      <th className="py-4 px-6 text-right">Détail</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {ponctuelTickets.map((t) => (
-                      <tr key={t.id} className="hover:bg-slate-50 transition-colors">
-                        <td className="py-4 px-6 font-extrabold text-brand-blue">
-                          <Link href={`/crm/tickets/${t.id}`}>{t.numero}</Link>
-                        </td>
-                        <td className="py-4 px-6 font-semibold text-slate-600">
-                          {format(new Date(t.dateCreation), "dd/MM/yyyy")}
-                        </td>
-                        <td className="py-4 px-6 font-bold text-slate-900">{t.panneDeclaree}</td>
-                        <td className="py-4 px-6 font-extrabold text-xs">{t.statut}</td>
-                        <td className="py-4 px-6 text-right">
-                          <Link
-                            href={`/crm/tickets/${t.id}`}
-                            className="text-xs font-bold text-brand-blue hover:underline"
-                          >
-                            Consulter →
-                          </Link>
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[10px] border-b border-slate-100">
+                      <tr>
+                        <th className="px-5 py-3.5">Réf. & Matériel</th>
+                        <th className="px-5 py-3.5">Client</th>
+                        <th className="px-5 py-3.5">Technicien</th>
+                        <th className="px-5 py-3.5">Statut</th>
+                        <th className="px-5 py-3.5 text-right">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                      {ponctuelTickets.map((t) => {
+                        const clientPhone = selectedContract.client.telephone || "";
+                        const clientCleanPhone = clientPhone.replace(/[^0-9]/g, "");
+
+                        return (
+                          <tr key={t.id} className="hover:bg-slate-50/70 transition-colors">
+                            {/* 1. Réf. & Matériel */}
+                            <td className="px-5 py-3.5">
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0">
+                                  <Laptop className="w-4 h-4" />
+                                </div>
+                                <div>
+                                  <Link
+                                    href={`/crm/tickets/${t.id}`}
+                                    className="font-extrabold text-brand-dark hover:text-brand-blue transition-colors text-xs"
+                                  >
+                                    {t.numero}
+                                  </Link>
+                                  <span className="text-[11px] text-gray-500 block">
+                                    {(t.typeMateriel || "MATÉRIEL").replace(/_/g, " ")}
+                                  </span>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* 2. Client & Contact rapide */}
+                            <td className="px-5 py-3.5">
+                              <div className="font-bold text-brand-dark">
+                                {selectedContract.client.nom}
+                              </div>
+                              {clientPhone && (
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  <span className="text-[11px] text-gray-500">{clientPhone}</span>
+                                  <a
+                                    href={`https://wa.me/${clientCleanPhone}?text=${encodeURIComponent(
+                                      `Bonjour ${selectedContract.client.nom}, point concernant votre matériel (${(t.typeMateriel || "matériel").replace(/_/g, " ")}) sous le dossier ${t.numero} chez RyHaD Tic-Medic.`
+                                    )}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    title="WhatsApp"
+                                    className="text-[#25D366] hover:opacity-80 p-0.5"
+                                  >
+                                    <MessageCircle className="w-3.5 h-3.5" />
+                                  </a>
+                                </div>
+                              )}
+                            </td>
+
+                            {/* 3. Technicien */}
+                            <td className="px-5 py-3.5">
+                              {t.technicienAssigne ? (
+                                <div className="flex items-center gap-1.5">
+                                  <div className="w-6 h-6 rounded-full bg-brand-green/20 text-brand-green-dark font-extrabold text-[10px] flex items-center justify-center shrink-0">
+                                    {t.technicienAssigne.firstName.charAt(0)}
+                                  </div>
+                                  <span className="font-semibold text-brand-dark text-xs">
+                                    {t.technicienAssigne.firstName} {t.technicienAssigne.lastName}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-[11px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200 font-bold">
+                                  Non assigné
+                                </span>
+                              )}
+                            </td>
+
+                            {/* 4. Statut */}
+                            <td className="px-5 py-3.5">
+                              <TicketStatusBadge statut={t.statut as any} />
+                            </td>
+
+                            {/* 5. Actions (Œil aperçu + Bouton Gérer) */}
+                            <td className="px-5 py-3.5 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                {/* Bouton ŒIL d'aperçu rapide */}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setQuickViewData({
+                                      type: "TICKET",
+                                      title: `Dossier ${t.numero}`,
+                                      subtitle: `${(t.typeMateriel || "MATÉRIEL").replace(/_/g, " ")} — Déposé le ${format(
+                                        new Date(t.dateCreation),
+                                        "dd/MM/yyyy",
+                                        { locale: fr }
+                                      )}`,
+                                      status: t.statut as any,
+                                      linkHref: `/crm/tickets/${t.id}`,
+                                      linkLabel: "Gérer le dossier complet →",
+                                      clientName: selectedContract.client.nom,
+                                      clientPhone: selectedContract.client.telephone,
+                                      details: [
+                                        {
+                                          label: "Matériel",
+                                          value: (t.typeMateriel || "MATÉRIEL").replace(/_/g, " "),
+                                        },
+                                        {
+                                          label: "Client",
+                                          value: `${selectedContract.client.nom} (${selectedContract.client.telephone})`,
+                                        },
+                                        {
+                                          label: "Technicien assigné",
+                                          value: t.technicienAssigne
+                                            ? `${t.technicienAssigne.firstName} ${t.technicienAssigne.lastName}`
+                                            : "Non assigné",
+                                        },
+                                        { label: "Panne déclarée", value: t.panneDeclaree },
+                                      ],
+                                    });
+                                    setIsQuickViewOpen(true);
+                                  }}
+                                  title="Aperçu rapide"
+                                  className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-blue hover:border-brand-blue hover:bg-brand-blue/5 transition-all shadow-2xs"
+                                >
+                                  <Eye className="w-3.5 h-3.5" />
+                                </button>
+
+                                {/* Bouton Gérer vers la fiche complète */}
+                                <Link
+                                  href={`/crm/tickets/${t.id}`}
+                                  className="inline-flex items-center gap-1 bg-brand-blue hover:bg-brand-blue-dark text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all shadow-2xs"
+                                >
+                                  <span>Gérer</span>
+                                  <ArrowRight className="w-3 h-3 text-brand-green" />
+                                </Link>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </div>
@@ -1019,7 +1129,7 @@ export function ContractEnterpriseView({
       {/* MODAL CONFIGURATION & GÉNÉRATION DES INTERVENTIONS DU CONTRAT */}
       {/* ------------------------------------------------------------- */}
       {showGenerateModal && selectedContract && mounted && createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-lg w-full overflow-hidden">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-3">
