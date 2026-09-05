@@ -446,13 +446,13 @@ export function ContractManager({ contracts, clients }: Props) {
                           <span>Facturer</span>
                         </button>
 
-                        {/* Nouvelle intervention */}
+                        {/* Dossier des interventions */}
                         <Link
-                          href={`/crm/tickets/contractuel?new=true&contractId=${c.id}&clientId=${c.clientId}`}
-                          title="Planifier une intervention pour ce contrat"
+                          href={`/crm/tickets/contractuel?contractId=${c.id}`}
+                          title="Consulter le dossier d'interventions de cette entreprise"
                           className="inline-flex items-center gap-1 bg-brand-green hover:bg-brand-green-dark text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all shadow-2xs"
                         >
-                          <span>Intervention</span>
+                          <span>Dossier</span>
                           <ArrowRight className="w-3 h-3" />
                         </Link>
                       </div>

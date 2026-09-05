@@ -21,11 +21,13 @@ import {
   Lock,
   Eye,
   MessageCircle,
+  FileSpreadsheet,
 } from "lucide-react";
 import { ClientType, StaffRole } from "@prisma/client";
 import { PaginationControls } from "@/components/crm/PaginationControls";
 import { QuickViewModal, QuickViewData } from "@/components/crm/QuickViewModal";
 import { ConfirmationModal } from "@/components/crm/ConfirmationModal";
+import { ClientCsvExportModal } from "@/components/crm/ClientCsvExportModal";
 
 interface ClientData {
   id: string;
@@ -68,6 +70,9 @@ export function ClientManager({ clients, userRole }: Props) {
   // Quick View Modal
   const [quickViewData, setQuickViewData] = useState<QuickViewData | null>(null);
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+
+  // Modal Export CSV personnalisé
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // Formulaire de création / modification
   const [formData, setFormData] = useState<{
@@ -275,13 +280,24 @@ export function ClientManager({ clients, userRole }: Props) {
           </p>
         </div>
 
-        <button
-          onClick={openCreateModal}
-          className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all self-start sm:self-auto"
-        >
-          <UserPlus className="w-4 h-4 text-brand-green" />
-          <span>Nouveau Client</span>
-        </button>
+        <div className="flex items-center gap-2.5 self-start sm:self-auto flex-wrap">
+          <button
+            type="button"
+            onClick={() => setIsExportModalOpen(true)}
+            className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-2xs hover:border-slate-300 transition-all"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <span>Exporter en CSV</span>
+          </button>
+
+          <button
+            onClick={openCreateModal}
+            className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all"
+          >
+            <UserPlus className="w-4 h-4 text-brand-green" />
+            <span>Nouveau Client</span>
+          </button>
+        </div>
       </div>
 
       {/* Alertes & Toasts */}
@@ -660,6 +676,13 @@ export function ClientManager({ clients, userRole }: Props) {
         confirmLabel="Supprimer définitivement"
         variant="danger"
         loading={loading}
+      />
+
+      {/* Modal d'exportation CSV personnalisé */}
+      <ClientCsvExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        clients={filteredClients}
       />
     </div>
   );

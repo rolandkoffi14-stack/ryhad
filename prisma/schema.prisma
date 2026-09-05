@@ -76,6 +76,9 @@ model Contract {
   periodicite         Periodicite // MENSUEL | TRIMESTRIEL | ANNUEL
   montantMainOeuvre   Int         // FCFA, par période
   equipementsCouverts String      // description libre ou "tout le parc"
+  frequenceVisites    Int         @default(1) // nombre de visites par période (ex. 1 ou 2 fois/mois)
+  jourPassage         String?     // ex: "Le 1er et le 15 du mois"
+  termeFacturation    TermeFacturation @default(ECHU) // A_ECHOIR (début) ou ECHU (fin de période)
   statut              ContractStatus @default(ACTIF)
   client              Client      @relation(fields: [clientId], references: [id])
   visitesPlanifiees   VisitePlanifiee[]
@@ -84,6 +87,11 @@ model Contract {
 
   @@index([clientId])
   @@index([statut])
+}
+
+enum TermeFacturation {
+  A_ECHOIR
+  ECHU
 }
 
 enum Periodicite {
@@ -132,6 +140,8 @@ model Intervention {
   diagnosticTechnicien String?
   technicienAssigneId String?
   dateCreation      DateTime            @default(now())
+  dateProgrammee    DateTime?           // date prévue pour intervention contractuelle
+  checklistPrevue   String?             // consignes / checklist préventive convenue
   dateCloture       DateTime?
   client            Client              @relation(fields: [clientId], references: [id])
   contract          Contract?           @relation(fields: [contractId], references: [id])
@@ -146,6 +156,7 @@ model Intervention {
   @@index([clientId])
   @@index([contractId])
   @@index([dateCreation])
+  @@index([dateProgrammee])
 }
 
 enum InterventionType {

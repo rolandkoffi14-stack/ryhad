@@ -280,6 +280,28 @@ export async function PATCH(
         }
       }
 
+      // Règle 1b : Passer en EN_INTERVENTION exige d'être le jour programmé ou après (pour les techniciens)
+      if (
+        newStatut === InterventionStatut.EN_INTERVENTION &&
+        currentTicket.type === InterventionType.CONTRACTUEL &&
+        currentTicket.dateProgrammee
+      ) {
+        const targetDay = new Date(currentTicket.dateProgrammee);
+        targetDay.setHours(0, 0, 0, 0);
+        const currentDay = new Date();
+        currentDay.setHours(0, 0, 0, 0);
+
+        if (currentDay < targetDay && userRole === StaffRole.TECHNICIEN) {
+          return NextResponse.json(
+            {
+              success: false,
+              message: `Intervention verrouillée : cette visite est programmée pour le ${targetDay.toLocaleDateString("fr-FR")}. Vous ne pouvez la démarrer qu'à partir du jour prévu.`,
+            },
+            { status: 400 }
+          );
+        }
+      }
+
       // Règle 2 : DIAGNOSTIC_TERMINE -> Génère le DEVIS exact (MO ou Pièces en Ponctuel, Pièces seules en Contractuel)
       let createdDocNumero: string | null = null;
       if (newStatut === InterventionStatut.DIAGNOSTIC_TERMINE) {

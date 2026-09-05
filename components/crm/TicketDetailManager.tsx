@@ -78,6 +78,8 @@ interface TicketDetail {
   libelleMainOeuvre: string | null;
   diagnosticTechnicien: string | null;
   dateCreation: string;
+  dateProgrammee?: string | null;
+  checklistPrevue?: string | null;
   dateCloture: string | null;
   client: {
     id: string;
@@ -194,6 +196,18 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
           return false;
         }
 
+        // Règle de verrouillage contractuel : le technicien ne peut démarrer que le jour J
+        if (st === InterventionStatut.EN_INTERVENTION && ticket.dateProgrammee) {
+          const targetDay = new Date(ticket.dateProgrammee);
+          targetDay.setHours(0, 0, 0, 0);
+          const currentDay = new Date();
+          currentDay.setHours(0, 0, 0, 0);
+
+          if (currentDay < targetDay && userRole === StaffRole.TECHNICIEN) {
+            return false;
+          }
+        }
+
         if (userRole === StaffRole.ADMIN) return true;
         if (userRole === StaffRole.TECHNICIEN) return technicianAllowedStatuts.includes(st);
         if (userRole === StaffRole.RECEPTIONNISTE) return receptionAllowedStatuts.includes(st);
@@ -213,13 +227,25 @@ export function TicketDetailManager({ ticket, technicians, userRole }: Props) {
     }
     if (
       ticket.statut === InterventionStatut.FRAIS_DIAGNOSTIC_ENCAISSE ||
-      (ticket.statut === InterventionStatut.NOUVEAU && isDiagPaid)
+      (ticket.statut === InterventionStatut.NOUVEAU && isDiagPaid && ticket.type === InterventionType.PONCTUEL)
     ) {
       return userRole === StaffRole.TECHNICIEN
         ? "Frais de diagnostic réglés : Cliquez sur 'Démarrer Diagnostic' pour débuter"
         : "Frais de diagnostic réglés : En attente du démarrage du diagnostic par le technicien";
     }
     if (ticket.statut === InterventionStatut.NOUVEAU && ticket.type === InterventionType.CONTRACTUEL) {
+      if (ticket.dateProgrammee) {
+        const targetDay = new Date(ticket.dateProgrammee);
+        targetDay.setHours(0, 0, 0, 0);
+        const currentDay = new Date();
+        currentDay.setHours(0, 0, 0, 0);
+
+        if (currentDay < targetDay) {
+          return `🔒 Intervention programmée pour le ${format(targetDay, "dd MMMM yyyy", {
+            locale: fr,
+          })} : Démarrage verrouillé jusqu'au jour prévu`;
+        }
+      }
       return userRole === StaffRole.TECHNICIEN
         ? "Action requise : Cliquez sur 'Démarrer Intervention' pour commencer"
         : "En attente de prise en charge par le technicien";

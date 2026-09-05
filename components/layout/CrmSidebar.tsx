@@ -14,6 +14,7 @@ import {
   Wrench,
   ShoppingBag,
   UserCog,
+  CircleDollarSign,
   ArrowLeft,
   X,
 } from "lucide-react";
@@ -78,6 +79,13 @@ export function CrmSidebar({
       label: "Devis & Factures",
       icon: Receipt,
       roles: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE],
+    },
+    {
+      href: "/crm/comptabilite",
+      label: "Comptabilité",
+      icon: CircleDollarSign,
+      badge: "Admin",
+      roles: [StaffRole.ADMIN],
     },
     {
       href: "/crm/techniciens",
