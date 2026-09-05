@@ -5,7 +5,7 @@ import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 import { ArrowLeft, KeyRound } from "lucide-react";
 
 export const metadata = {
-  title: "Mot de passe oublié | RyHaD Tic-Medic",
+  title: "Mot de passe oublié",
 };
 
 export default function ForgotPasswordPage() {

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ShieldCheck, FileText, ArrowLeft } from "lucide-react";
 
 export const metadata = {
-  title: "Mentions Légales & Politique de Confidentialité",
+  title: "Mentions Légales",
   description: "Informations légales, conditions de garantie et politique de protection des données de RyHaD Tic-Medic.",
 };
 

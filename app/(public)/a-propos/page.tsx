@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ShieldCheck, Award, Users, MapPin, Clock, CheckCircle2, ArrowRight, HeartPulse, Wrench } from "lucide-react";
 
 export const metadata = {
-  title: "À Propos de RyHaD Tic-Medic — Atelier Technique Cotonou",
+  title: "À Propos de l'Atelier",
   description:
     "Découvrez l'histoire, les valeurs et l'équipe d'experts de RyHaD Tic-Medic, votre atelier de maintenance informatique, biomédicale et audiovisuelle à Cotonou, Bénin.",
 };

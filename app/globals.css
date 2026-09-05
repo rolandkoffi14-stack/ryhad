@@ -73,3 +73,17 @@ svg.lucide {
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
+
+@keyframes progress-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-progress {
+  animation: progress-loading 1.5s ease-in-out infinite;
+}
+

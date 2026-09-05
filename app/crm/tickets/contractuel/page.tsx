@@ -7,6 +7,10 @@ import { TicketsContractuelTable } from "@/components/crm/TicketsContractuelTabl
 import { Plus } from "lucide-react";
 import { InterventionType, ContractStatus, StaffRole } from "@prisma/client";
 
+export const metadata = {
+  title: "Tickets Contractuels",
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function TicketsContractuelPage({

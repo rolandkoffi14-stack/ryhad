@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, Search } from "lucide-react";
 
 export const metadata = {
-  title: "Détail du Suivi de Dossier",
+  title: "Détail du Suivi",
   description: "État d'avancement de votre réparation chez RyHaD Tic-Medic.",
 };
 

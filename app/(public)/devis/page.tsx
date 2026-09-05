@@ -3,7 +3,7 @@ import { CommercialRequestForm } from "@/components/site/CommercialRequestForm";
 import { ShoppingBag, Sparkles, CheckCircle2, ShieldCheck } from "lucide-react";
 
 export const metadata = {
-  title: "Demande de Devis Commercial — Vente, Location & Formation",
+  title: "Demande de Devis",
   description:
     "Obtenez un devis rapide pour l'achat de matériel informatique, la location de vidéoprojecteurs ou des formations techniques à Cotonou.",
 };

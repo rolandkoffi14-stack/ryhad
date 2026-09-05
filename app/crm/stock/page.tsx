@@ -1,6 +1,10 @@
 import { db } from "@/lib/db";
 import { Package, AlertTriangle, CheckCircle2, Plus } from "lucide-react";
 
+export const metadata = {
+  title: "Stock & Pièces",
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function CrmStockPage() {

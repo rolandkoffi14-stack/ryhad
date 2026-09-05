@@ -6,6 +6,10 @@ import { TicketDetailManager } from "@/components/crm/TicketDetailManager";
 import { ArrowLeft } from "lucide-react";
 import { StaffRole } from "@prisma/client";
 
+export const metadata = {
+  title: "Détail du Dossier",
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function TicketDetailPage({

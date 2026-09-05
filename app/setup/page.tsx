@@ -6,7 +6,7 @@ import { SetupForm } from "@/components/auth/SetupForm";
 import { ShieldCheck, ArrowLeft, Wrench } from "lucide-react";
 
 export const metadata = {
-  title: "Initialisation du CRM | RyHaD Tic-Medic",
+  title: "Initialisation CRM",
 };
 
 export const dynamic = "force-dynamic";

@@ -5,7 +5,7 @@ import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import { ArrowLeft, KeyRound } from "lucide-react";
 
 export const metadata = {
-  title: "Nouveau mot de passe | RyHaD Tic-Medic",
+  title: "Nouveau mot de passe",
 };
 
 export default function ResetPasswordPage() {

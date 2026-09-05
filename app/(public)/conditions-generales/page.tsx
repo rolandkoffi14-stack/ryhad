@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, FileText, CheckCircle2, AlertTriangle, ShieldCheck, HelpCircle } from "lucide-react";
 
 export const metadata = {
-  title: "Conditions Générales d'Intervention — RyHaD Tic-Medic",
+  title: "Conditions Générales d'Intervention",
   description: "Conditions générales de service, modalités de diagnostic, garanties et conditions de gardiennage des matériels chez RyHaD Tic-Medic à Cotonou, Bénin.",
 };
 

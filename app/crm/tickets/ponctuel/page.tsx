@@ -7,6 +7,10 @@ import { TicketsPonctuelTable } from "@/components/crm/TicketsPonctuelTable";
 import { Plus } from "lucide-react";
 import { InterventionType, StaffRole } from "@prisma/client";
 
+export const metadata = {
+  title: "Tickets Ponctuels",
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function TicketsPonctuelPage({

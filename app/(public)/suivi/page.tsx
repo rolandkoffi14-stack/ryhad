@@ -2,7 +2,7 @@ import { TicketTracker } from "@/components/site/TicketTracker";
 import { Search, ShieldCheck, CheckCircle2, Clock } from "lucide-react";
 
 export const metadata = {
-  title: "Suivre ma Réparation en Direct",
+  title: "Suivi de Réparation",
   description:
     "Consultez l'état d'avancement de votre réparation informatique, biomédicale ou audiovisuelle en temps réel sans authentification.",
 };

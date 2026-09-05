@@ -22,6 +22,10 @@ import { InterventionStatut, InterventionType, ContractStatus, StaffRole, Docume
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
+export const metadata = {
+  title: "Tableau de bord",
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function CrmDashboardPage() {

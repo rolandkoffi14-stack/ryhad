@@ -3,13 +3,13 @@ import { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: "/crm",
-    name: "RyHaD CRM — Gestion & Maintenance",
+    name: "RyHaD CRM",
     short_name: "RyHaD CRM",
-    description: "Application de gestion interne des interventions, tickets, devis et factures de RyHaD Tic-Medic.",
+    description: "Gestion d'Atelier & Maintenance — RyHaD Tic-Medic",
     start_url: "/crm",
     scope: "/",
     display: "standalone",
-    background_color: "#F4F6F8",
+    background_color: "#FFFFFF",
     theme_color: "#1E4D8B",
     orientation: "portrait-primary",
     categories: ["business", "productivity"],

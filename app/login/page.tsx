@@ -7,7 +7,7 @@ import { LoginForm } from "@/components/auth/LoginForm";
 import { ShieldCheck, ArrowLeft } from "lucide-react";
 
 export const metadata = {
-  title: "Connexion Staff & CRM | RyHaD Tic-Medic",
+  title: "Connexion Staff & CRM",
 };
 
 export const dynamic = "force-dynamic";

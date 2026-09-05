@@ -2,7 +2,7 @@ import { FAQAccordion } from "@/components/site/FAQAccordion";
 import { HelpCircle } from "lucide-react";
 
 export const metadata = {
-  title: "Foire Aux Questions (FAQ) | RyHaD Tic-Medic Cotonou",
+  title: "Questions Fréquentes (FAQ)",
   description:
     "Retrouvez toutes les réponses à vos questions : déroulement du diagnostic, délais, tarifs, garanties, contrats de maintenance entreprises, matériel biomédical et audiovisuel à Cotonou.",
 };

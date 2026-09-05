@@ -3,7 +3,7 @@ import { InterventionRequestForm } from "@/components/site/InterventionRequestFo
 import { Wrench, Clock, ShieldCheck, MapPin } from "lucide-react";
 
 export const metadata = {
-  title: "Demande d'Intervention & Dépannage en Ligne",
+  title: "Demande d'Intervention",
   description:
     "Déposez votre demande de réparation informatique, biomédicale ou audiovisuelle. Obtenez immédiatement votre numéro de suivi de dossier.",
 };

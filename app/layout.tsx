@@ -10,11 +10,12 @@ const montserrat = Montserrat({
 });
 
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
+import { PwaSplashScreen } from "@/components/pwa/PwaSplashScreen";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | RyHaD Tic-Medic — Maintenance & Solutions Tech Cotonou",
-    default: "RyHaD Tic-Medic | Maintenance Informatique, Biomédicale & Audiovisuelle à Cotonou",
+    template: "%s | RyHaD Tic-Medic",
+    default: "RyHaD Tic-Medic | Maintenance & Solutions Tech à Cotonou",
   },
   description:
     "Expert en maintenance informatique (PC, serveurs), biomédicale, audiovisuelle (TV, vidéoprojecteurs), réseaux, vidéosurveillance et vente de matériel à Cotonou, Bénin.",
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "RyHaD",
+    title: "RyHaD CRM",
   },
   openGraph: {
     title: "RyHaD Tic-Medic — Maintenance & Solutions Tech à Cotonou",
@@ -108,6 +109,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ServiceWorkerRegister />
+        <PwaSplashScreen />
         {children}
       </body>
     </html>

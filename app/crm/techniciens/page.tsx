@@ -4,6 +4,10 @@ import { db } from "@/lib/db";
 import { StaffRole } from "@prisma/client";
 import { TechniciansGrid } from "@/components/crm/TechniciansGrid";
 
+export const metadata = {
+  title: "Équipe Technique",
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function CrmTechniciensPage() {

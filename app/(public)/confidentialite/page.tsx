@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, ShieldCheck, Lock, Eye, FileText, CheckCircle2, UserCheck } from "lucide-react";
 
 export const metadata = {
-  title: "Politique de Confidentialité & Protection des Données — RyHaD Tic-Medic",
+  title: "Politique de Confidentialité",
   description: "Politique de confidentialité et protection des données à caractère personnel de RyHaD Tic-Medic, en conformité avec la réglementation en République du Bénin.",
 };
 

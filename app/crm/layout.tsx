@@ -4,8 +4,8 @@ import { CrmLayoutClient } from "@/components/layout/CrmLayoutClient";
 
 export const metadata = {
   title: {
-    template: "%s | CRM RyHaD Tic-Medic",
-    default: "CRM & Gestion d'Atelier | RyHaD Tic-Medic",
+    template: "%s | RyHaD CRM",
+    default: "RyHaD CRM",
   },
   robots: {
     index: false,

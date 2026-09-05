@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "Nos Services de Maintenance & Prestations Tech",
+  title: "Services & Prestations Tech",
   description:
     "Découvrez l'ensemble de nos expertises : maintenance informatique, matériel biomédical, vidéoprojecteurs, TV, topographie, réseaux, vidéosurveillance et vente à Cotonou.",
 };

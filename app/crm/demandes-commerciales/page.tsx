@@ -4,6 +4,10 @@ import { db } from "@/lib/db";
 import { CommercialRequestsTable } from "@/components/crm/CommercialRequestsTable";
 import { StaffRole } from "@prisma/client";
 
+export const metadata = {
+  title: "Demandes Commerciales",
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function CrmDemandesCommercialesPage() {

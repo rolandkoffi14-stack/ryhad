@@ -4,6 +4,10 @@ import { db } from "@/lib/db";
 import { CommercialDetailManager } from "@/components/crm/CommercialDetailManager";
 import { StaffRole } from "@prisma/client";
 
+export const metadata = {
+  title: "Détail Demande Commerciale",
+};
+
 export const dynamic = "force-dynamic";
 
 interface Props {
