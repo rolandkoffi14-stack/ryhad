@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Download, CheckSquare, Square, FileSpreadsheet, SlidersHorizontal } from "lucide-react";
 import { ClientType } from "@prisma/client";
 
@@ -118,11 +119,16 @@ const DEFAULT_SELECTED_COLUMNS = [
 ];
 
 export function ClientCsvExportModal({ isOpen, onClose, clients }: Props) {
+  const [mounted, setMounted] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState<string[]>(DEFAULT_SELECTED_COLUMNS);
   const [separator, setSeparator] = useState<";" | ",">(";");
   const [isExporting, setIsExporting] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
 
   const toggleColumn = (colId: string) => {
     setSelectedColumns((prev) =>
@@ -186,7 +192,7 @@ export function ClientCsvExportModal({ isOpen, onClose, clients }: Props) {
 
   const categories = ["Identité", "Coordonnées", "Activité & Contrats"] as const;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
       <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-xl w-full overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
@@ -345,6 +351,7 @@ export function ClientCsvExportModal({ isOpen, onClose, clients }: Props) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

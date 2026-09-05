@@ -48,6 +48,24 @@ export default async function CrmDocumentsPage() {
     console.error("Error loading documents:", e);
   }
 
+  // Désengorgement ciblé des factures de contrat :
+  // Les devis, réparations atelier et factures commerciales restent visibles intégralement.
+  // Pour les factures périodiques de contrat pré-générées pour l'année, seules celles échues, payées
+  // ou du mois en cours apparaissent ici. Les échéances futures restent dans l'onglet du contrat.
+  const now = new Date();
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  const visibleDocuments = documents.filter((doc) => {
+    const isContractInvoice =
+      doc.typeFacture === "CONTRAT" ||
+      Boolean(doc.contractId) ||
+      doc.type === "FACTURE_PERIODIQUE";
+
+    if (!isContractInvoice) return true;
+    if (doc.statutPaiement === "PAYE") return true;
+    return new Date(doc.dateEmission) <= endOfMonth;
+  });
+
   return (
     <div className="space-y-6">
       <div>
@@ -59,7 +77,7 @@ export default async function CrmDocumentsPage() {
         </p>
       </div>
 
-      <DocumentsTable documents={documents as any} />
+      <DocumentsTable documents={visibleDocuments as any} />
     </div>
   );
 }

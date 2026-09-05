@@ -66,15 +66,30 @@ export const clientFormSchema = z.object({
 
 export type ClientFormInput = z.infer<typeof clientFormSchema>;
 
-// Création / Modification de Contrat
-export const contractFormSchema = z.object({
-  clientId: z.string().min(1, "Client requis"),
-  dateDebut: z.string().min(1, "Date de début requise"),
-  dateFin: z.string().optional(),
-  periodicite: z.nativeEnum(Periodicite),
-  montantMainOeuvre: z.number().min(0, "Montant invalide"),
-  equipementsCouverts: z.string().min(3, "Description des équipements requise"),
-});
+export const contractFormSchema = z
+  .object({
+    clientId: z.string().min(1, "Client requis"),
+    dateDebut: z.string().min(1, "Date de début requise"),
+    dateFin: z.string().nullable().optional(),
+    periodicite: z.nativeEnum(Periodicite),
+    montantMainOeuvre: z.number().min(0, "Montant invalide"),
+    equipementsCouverts: z.string().min(3, "Description des équipements requise"),
+  })
+  .refine(
+    (data) => {
+      if (!data.dateFin || data.dateFin.trim() === "") return true;
+      const start = new Date(data.dateDebut);
+      const end = new Date(data.dateFin);
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) return false;
+      const minEnd = new Date(start);
+      minEnd.setMonth(minEnd.getMonth() + 3);
+      return end >= minEnd;
+    },
+    {
+      message: "Pour un contrat à durée déterminée, la durée doit être d'au moins 3 mois.",
+      path: ["dateFin"],
+    }
+  );
 
 export type ContractFormInput = z.infer<typeof contractFormSchema>;
 

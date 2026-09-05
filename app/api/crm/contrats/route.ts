@@ -24,10 +24,25 @@ export async function POST(request: Request) {
     const validated = contractFormSchema.parse(body);
 
     const startDate = new Date(validated.dateDebut);
-    // Durée par défaut 1 an si non précisée
+    let finalEndDate: Date | null = null;
+
+    if (validated.dateFin && validated.dateFin.trim() !== "") {
+      finalEndDate = new Date(validated.dateFin);
+      const minEnd = new Date(startDate);
+      minEnd.setMonth(minEnd.getMonth() + 3);
+
+      if (finalEndDate < minEnd) {
+        return NextResponse.json(
+          { success: false, message: "Pour un contrat à durée déterminée, la durée doit être d'au moins 3 mois." },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Durée de projection pour les visites initiales : durée du CDD ou 1 an pour un CDI
     const defaultEnd = new Date(startDate);
     defaultEnd.setFullYear(defaultEnd.getFullYear() + 1);
-    const endDate = validated.dateFin ? new Date(validated.dateFin) : defaultEnd;
+    const horizonDate = finalEndDate || defaultEnd;
 
     // Calculer le pas d'intervalle en mois selon la périodicité
     let intervalMonths = 1;
@@ -38,7 +53,7 @@ export async function POST(request: Request) {
     const currentDate = new Date(startDate);
     currentDate.setMonth(currentDate.getMonth() + intervalMonths);
 
-    while (currentDate <= endDate) {
+    while (currentDate <= horizonDate) {
       visitesToCreate.push({
         datePrevue: new Date(currentDate),
         statut: VisiteStatus.PLANIFIEE,
@@ -59,7 +74,7 @@ export async function POST(request: Request) {
       data: {
         clientId: validated.clientId,
         dateDebut: startDate,
-        dateFin: validated.dateFin ? new Date(validated.dateFin) : endDate,
+        dateFin: finalEndDate, // null pour CDI
         periodicite: validated.periodicite,
         montantMainOeuvre: validated.montantMainOeuvre,
         equipementsCouverts: validated.equipementsCouverts,

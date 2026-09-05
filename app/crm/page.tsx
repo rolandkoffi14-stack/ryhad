@@ -100,25 +100,69 @@ export default async function CrmDashboardPage() {
     console.error("Dashboard data load error:", e);
   }
 
-  // Filtrages
-  const ponctuelTickets = tickets.filter((t) => t.type === InterventionType.PONCTUEL);
-  const contractuelTickets = tickets.filter((t) => t.type === InterventionType.CONTRACTUEL);
+  // Filtrages opérationnels & Désengorgement ciblé
+  const allPonctuelTickets = tickets.filter((t) => t.type === InterventionType.PONCTUEL);
+  const allContractuelTickets = tickets.filter((t) => t.type === InterventionType.CONTRACTUEL);
 
-  const pendingDiagnosticCount = ponctuelTickets.filter(
+  const now = new Date();
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  let visibleContractuelTickets: any[] = [];
+
+  if (user.role === StaffRole.TECHNICIEN) {
+    // TECHNICIEN :
+    // - Conserve tous ses tickets ponctuels atelier assignés
+    // - Pour les tickets contractuels : interventions en cours ou du mois,
+    //   plus UNIQUEMENT sa prochaine intervention contractuelle imminente programmée.
+    const activeOrInProgress = allContractuelTickets.filter(
+      (t) =>
+        t.statut !== InterventionStatut.NOUVEAU &&
+        (!t.dateProgrammee || new Date(t.dateProgrammee) <= endOfMonth)
+    );
+
+    // Prochaine intervention imminente parmi les tickets NOUVEAU programmés
+    const upcoming = allContractuelTickets
+      .filter((t) => t.statut === InterventionStatut.NOUVEAU && t.dateProgrammee)
+      .sort((a, b) => new Date(a.dateProgrammee!).getTime() - new Date(b.dateProgrammee!).getTime());
+
+    const nextImminent = upcoming.length > 0 ? [upcoming[0]] : [];
+
+    visibleContractuelTickets = Array.from(
+      new Map([...activeOrInProgress, ...nextImminent].map((t) => [t.id, t])).values()
+    );
+  } else {
+    // ADMIN & RÉCEPTION :
+    // - Conserve l'intégralité des tickets ponctuels sans aucun filtre restrictif
+    // - Pour les tickets contractuels : interventions passées, en cours (EN_INTERVENTION),
+    //   ou programmées pour le mois en cours (dateProgrammee <= finDuMois).
+    //   Les tickets des mois futurs restent dans l'onglet dédié /crm/tickets/contractuel.
+    visibleContractuelTickets = allContractuelTickets.filter((t) => {
+      if (!t.dateProgrammee) return true; // Panne ponctuelle sous contrat
+      if (t.statut !== InterventionStatut.NOUVEAU) return true; // Déjà démarré ou traité
+      return new Date(t.dateProgrammee) <= endOfMonth;
+    });
+  }
+
+  // Liste finale affichée dans le tableau de bord
+  const visibleTickets = [...allPonctuelTickets, ...visibleContractuelTickets].sort(
+    (a, b) => new Date(b.dateCreation).getTime() - new Date(a.dateCreation).getTime()
+  );
+
+  const pendingDiagnosticCount = allPonctuelTickets.filter(
     (t) =>
       t.statut === InterventionStatut.FRAIS_DIAGNOSTIC_ENCAISSE ||
       t.statut === InterventionStatut.EN_DIAGNOSTIC
   ).length;
 
-  const activePonctuelCount = ponctuelTickets.filter(
+  const activePonctuelCount = allPonctuelTickets.filter(
     (t) => t.statut !== InterventionStatut.LIVRE_CLOTURE && t.statut !== InterventionStatut.CLOTURE
   ).length;
 
-  const activeContractuelCount = contractuelTickets.filter(
+  const activeContractuelCount = visibleContractuelTickets.filter(
     (t) => t.statut !== InterventionStatut.LIVRE_CLOTURE && t.statut !== InterventionStatut.CLOTURE
   ).length;
 
-  const completedTicketsCount = tickets.filter(
+  const completedTicketsCount = visibleTickets.filter(
     (t) =>
       t.statut === InterventionStatut.TERMINE ||
       t.statut === InterventionStatut.LIVRE_CLOTURE ||
@@ -285,7 +329,7 @@ export default async function CrmDashboardPage() {
           </div>
         </div>
 
-        <DashboardRecentTicketsTable tickets={tickets as any} userRole={user.role} />
+        <DashboardRecentTicketsTable tickets={visibleTickets as any} userRole={user.role} />
       </div>
     </div>
   );

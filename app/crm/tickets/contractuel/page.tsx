@@ -23,16 +23,30 @@ export default async function TicketsContractuelPage({
     redirect("/login");
   }
 
+  const isTechnician = user.role === StaffRole.TECHNICIEN;
   let contracts: any[] = [];
   let technicians: any[] = [];
 
   try {
+    const contractWhere: any = { statut: ContractStatus.ACTIF };
+    if (isTechnician) {
+      // Le technicien ne voit que les entreprises où il a au moins une intervention assignée
+      contractWhere.interventions = {
+        some: {
+          technicienAssigneId: user.id,
+        },
+      };
+    }
+
     const [fetchedContracts, fetchedTechnicians] = await Promise.all([
       db.contract.findMany({
-        where: { statut: ContractStatus.ACTIF },
+        where: contractWhere,
         include: {
           client: true,
           interventions: {
+            where: isTechnician
+              ? { technicienAssigneId: user.id }
+              : undefined,
             include: {
               technicienAssigne: {
                 select: { id: true, firstName: true, lastName: true },
@@ -44,9 +58,11 @@ export default async function TicketsContractuelPage({
               { dateCreation: "desc" },
             ],
           },
-          facturesPeriodiques: {
-            orderBy: { dateEmission: "desc" },
-          },
+          facturesPeriodiques: isTechnician
+            ? false
+            : {
+                orderBy: { dateEmission: "desc" },
+              },
         },
         orderBy: { dateDebut: "desc" },
       }),
@@ -60,13 +76,14 @@ export default async function TicketsContractuelPage({
       }),
     ]);
 
-    contracts = fetchedContracts;
+    contracts = fetchedContracts.map((c: any) => ({
+      ...c,
+      facturesPeriodiques: isTechnician ? [] : c.facturesPeriodiques || [],
+    }));
     technicians = fetchedTechnicians;
   } catch (e) {
     console.error("Tickets contractuel load error:", e);
   }
-
-  const isTechnician = user.role === StaffRole.TECHNICIEN;
 
   // Si on demande la création directe d'un ticket individuel via ?new=true
   if (isNew && !isTechnician) {

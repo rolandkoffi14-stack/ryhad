@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -28,11 +29,14 @@ import {
   SlidersHorizontal,
   X,
   CreditCard,
+  Eye,
+  MessageCircle,
 } from "lucide-react";
 import { formatFCFA } from "@/lib/format";
 import { format, isToday, isBefore, isAfter, startOfDay } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PaymentConfirmationModal } from "@/components/crm/PaymentConfirmationModal";
+import { QuickViewModal, QuickViewData } from "@/components/crm/QuickViewModal";
 import { StaffRole } from "@prisma/client";
 
 interface ContractEnterprise {
@@ -138,8 +142,90 @@ export function ContractEnterpriseView({
     montant: 0,
   });
 
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const [quickViewData, setQuickViewData] = useState<QuickViewData | null>(null);
+  const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const [reassigningTicketId, setReassigningTicketId] = useState<string | null>(null);
+
   const isAdmin = currentUser.role === StaffRole.ADMIN;
+  const isReception = currentUser.role === StaffRole.RECEPTIONNISTE;
   const isTechnician = currentUser.role === StaffRole.TECHNICIEN;
+  const canReassign = isAdmin || isReception;
+
+  const handleReassignTechnician = async (ticketId: string, techId: string) => {
+    setReassigningTicketId(ticketId);
+    try {
+      const res = await fetch(`/api/crm/tickets/${ticketId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          actionType: "reassign_technician",
+          technicienId: techId || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        alert(data.message || "Erreur lors de la réassignation");
+      } else {
+        router.refresh();
+      }
+    } catch (err) {
+      console.error("Erreur réassignation:", err);
+    } finally {
+      setReassigningTicketId(null);
+    }
+  };
+
+  const handleOpenQuickView = (ticket: any) => {
+    setQuickViewData({
+      type: "TICKET",
+      title: `${ticket.numero} — Intervention Préventive`,
+      subtitle: `${selectedContract?.client.nom} — ${
+        ticket.dateProgrammee
+          ? `Planifiée le ${format(new Date(ticket.dateProgrammee), "dd/MM/yyyy", { locale: fr })}`
+          : `Créée le ${format(new Date(ticket.dateCreation), "dd/MM/yyyy", { locale: fr })}`
+      }`,
+      badge: {
+        label: ticket.statut.replace(/_/g, " "),
+        className: "bg-emerald-100 text-brand-green-dark border-emerald-300 font-bold",
+      },
+      linkHref: `/crm/tickets/${ticket.id}`,
+      linkLabel: "Ouvrir la fiche complète d'intervention →",
+      clientName: selectedContract?.client.nom,
+      clientPhone: selectedContract?.client.telephone,
+      details: [
+        { label: "Numéro de référence", value: ticket.numero },
+        {
+          label: "Type d'intervention",
+          value: ticket.dateProgrammee ? "Visite Préventive Programmée" : "Panne Ponctuelle sous Contrat",
+        },
+        {
+          label: "Entreprise / Client",
+          value: `${selectedContract?.client.nom} (${selectedContract?.client.telephone})`,
+        },
+        { label: "Périmètre matériel", value: selectedContract?.equipementsCouverts || "Parc sous contrat" },
+        {
+          label: "Date de passage prévue",
+          value: ticket.dateProgrammee
+            ? format(new Date(ticket.dateProgrammee), "dd MMMM yyyy", { locale: fr })
+            : "Non programmée",
+        },
+        {
+          label: "Technicien assigné",
+          value: ticket.technicienAssigne
+            ? `${ticket.technicienAssigne.firstName} ${ticket.technicienAssigne.lastName}`
+            : "Non assigné",
+        },
+        { label: "Checklist / Consignes", value: ticket.checklistPrevue || "Maintenance standard" },
+        { label: "Statut d'exécution", value: ticket.statut.replace(/_/g, " ") },
+      ],
+    });
+    setIsQuickViewOpen(true);
+  };
 
   // Filtrage des contrats selon la recherche
   const filteredContracts = useMemo(() => {
@@ -450,10 +536,27 @@ export function ContractEnterpriseView({
                 Contrat {selectedContract.periodicite}
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-semibold mt-1">
-              Contact : {selectedContract.client.contactNom || "—"} • Tél :{" "}
-              {selectedContract.client.telephone} • {selectedContract.equipementsCouverts}
-            </p>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-semibold mt-1">
+              <span>Contact : {selectedContract.client.contactNom || "—"}</span>
+              <span>•</span>
+              <span>Tél : {selectedContract.client.telephone}</span>
+              {selectedContract.client.telephone && (
+                <a
+                  href={`https://wa.me/${selectedContract.client.telephone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                    `Bonjour ${selectedContract.client.nom}, point de suivi concernant votre contrat de maintenance chez RyHaD Tic-Medic.`
+                  )}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Contacter par WhatsApp"
+                  className="inline-flex items-center gap-1 text-[#25D366] hover:opacity-85 font-bold ml-1 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200 shadow-2xs transition-all"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  <span>WhatsApp</span>
+                </a>
+              )}
+              <span>•</span>
+              <span className="text-slate-700">{selectedContract.equipementsCouverts}</span>
+            </div>
           </div>
         </div>
 
@@ -504,20 +607,22 @@ export function ContractEnterpriseView({
               </span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => setActiveTab("FACTURES")}
-              className={`pb-3 text-sm font-extrabold transition-all border-b-2 flex items-center gap-2 ${
-                activeTab === "FACTURES"
-                  ? "border-brand-green text-brand-green"
-                  : "border-transparent text-slate-500 hover:text-slate-800"
-              }`}
-            >
-              <span>3. Facturation du Contrat</span>
-              <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
-                {selectedContract.facturesPeriodiques.length}
-              </span>
-            </button>
+            {!isTechnician && (
+              <button
+                type="button"
+                onClick={() => setActiveTab("FACTURES")}
+                className={`pb-3 text-sm font-extrabold transition-all border-b-2 flex items-center gap-2 ${
+                  activeTab === "FACTURES"
+                    ? "border-brand-green text-brand-green"
+                    : "border-transparent text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                <span>3. Facturation du Contrat</span>
+                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                  {selectedContract.facturesPeriodiques.length}
+                </span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -607,16 +712,34 @@ export function ContractEnterpriseView({
                             </td>
 
                             <td className="py-4 px-6 font-bold text-slate-700">
-                              {ticket.technicienAssigne ? (
+                              {canReassign ? (
+                                <div className="flex items-center gap-1.5">
+                                  <select
+                                    value={ticket.technicienAssigneId || ""}
+                                    onChange={(e) => handleReassignTechnician(ticket.id, e.target.value)}
+                                    disabled={reassigningTicketId === ticket.id}
+                                    className="text-xs font-semibold bg-white border border-slate-200 rounded-lg px-2 py-1 text-slate-800 hover:border-brand-blue focus:ring-1 focus:ring-brand-blue outline-none disabled:opacity-50 shadow-2xs"
+                                  >
+                                    <option value="">Non assigné</option>
+                                    {technicians.map((t) => (
+                                      <option key={t.id} value={t.id}>
+                                        {t.firstName} {t.lastName}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  {reassigningTicketId === ticket.id && (
+                                    <Clock className="w-3.5 h-3.5 animate-spin text-brand-blue" />
+                                  )}
+                                </div>
+                              ) : (
                                 <span className="inline-flex items-center gap-1">
                                   <User className="w-3.5 h-3.5 text-slate-400" />
                                   <span>
-                                    {ticket.technicienAssigne.firstName}{" "}
-                                    {ticket.technicienAssigne.lastName}
+                                    {ticket.technicienAssigne
+                                      ? `${ticket.technicienAssigne.firstName} ${ticket.technicienAssigne.lastName}`
+                                      : "Moi-même"}
                                   </span>
                                 </span>
-                              ) : (
-                                <span className="text-amber-600 italic">Non assigné</span>
                               )}
                             </td>
 
@@ -650,32 +773,62 @@ export function ContractEnterpriseView({
                               {ticket.checklistPrevue || "Maintenance standard"}
                             </td>
 
-                            {/* Action avec verrouillage temporel */}
+                            {/* Actions UI/UX Pro (Œil + Bouton selon rôle) */}
                             <td className="py-4 px-6 text-right">
-                              {isLocked ? (
-                                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 text-slate-400 text-xs font-bold select-none cursor-not-allowed border border-slate-200">
-                                  <Lock className="w-3.5 h-3.5 text-slate-400" />
-                                  <span>Bloqué jusqu&apos;au jour J</span>
-                                </div>
-                              ) : (
-                                <Link
-                                  href={`/crm/tickets/${ticket.id}`}
-                                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all shadow-2xs ${
-                                    isDone
-                                      ? "bg-slate-100 hover:bg-slate-200 text-slate-700"
-                                      : "bg-brand-green hover:bg-emerald-600 text-white"
-                                  }`}
+                              <div className="flex items-center justify-end gap-1.5">
+                                {/* Bouton ŒIL d'aperçu rapide */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenQuickView(ticket)}
+                                  title="Aperçu rapide"
+                                  className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-blue hover:border-brand-blue hover:bg-brand-blue/5 transition-all shadow-2xs"
                                 >
-                                  {isDone ? (
-                                    <span>Voir le rapport</span>
-                                  ) : (
-                                    <>
-                                      <Play className="w-3.5 h-3.5" />
-                                      <span>Démarrer</span>
-                                    </>
-                                  )}
-                                </Link>
-                              )}
+                                  <Eye className="w-3.5 h-3.5" />
+                                </button>
+
+                                {/* Action principale */}
+                                {isDone ? (
+                                  <Link
+                                    href={`/crm/tickets/${ticket.id}`}
+                                    className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all shadow-2xs"
+                                  >
+                                    <span>Rapport</span>
+                                    <ArrowRight className="w-3 h-3 text-brand-green" />
+                                  </Link>
+                                ) : isInProgress ? (
+                                  <Link
+                                    href={`/crm/tickets/${ticket.id}`}
+                                    className="inline-flex items-center gap-1 bg-brand-blue hover:bg-brand-blue-dark text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all shadow-2xs"
+                                  >
+                                    <span>{isTechnician ? "Reprendre" : "Gérer"}</span>
+                                    <ArrowRight className="w-3 h-3 text-white" />
+                                  </Link>
+                                ) : isReception ? (
+                                  <Link
+                                    href={`/crm/tickets/${ticket.id}`}
+                                    className="inline-flex items-center gap-1 bg-brand-slate hover:bg-brand-blue hover:text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all text-brand-dark shadow-2xs"
+                                  >
+                                    <span>Consulter</span>
+                                    <ArrowRight className="w-3 h-3 text-brand-green" />
+                                  </Link>
+                                ) : isLocked && isTechnician ? (
+                                  <div
+                                    title="Intervention verrouillée jusqu'à la date d'intervention prévue."
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-slate-100 text-slate-400 text-xs font-bold select-none cursor-not-allowed border border-slate-200"
+                                  >
+                                    <Lock className="w-3.5 h-3.5 text-slate-400" />
+                                    <span>Bloqué</span>
+                                  </div>
+                                ) : (
+                                  <Link
+                                    href={`/crm/tickets/${ticket.id}`}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-extrabold bg-brand-green hover:bg-emerald-600 text-white shadow-2xs transition-all"
+                                  >
+                                    <Play className="w-3.5 h-3.5" />
+                                    <span>Démarrer</span>
+                                  </Link>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         );
@@ -760,7 +913,7 @@ export function ContractEnterpriseView({
         {/* ------------------------------------------------------------- */}
         {/* ONGLET 3 : FACTURATION DU CONTRAT SELON LES CLAUSES            */}
         {/* ------------------------------------------------------------- */}
-        {activeTab === "FACTURES" && (
+        {activeTab === "FACTURES" && !isTechnician && (
           <div className="space-y-4">
             <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
               <div className="space-y-0.5">
@@ -865,7 +1018,7 @@ export function ContractEnterpriseView({
       {/* ------------------------------------------------------------- */}
       {/* MODAL CONFIGURATION & GÉNÉRATION DES INTERVENTIONS DU CONTRAT */}
       {/* ------------------------------------------------------------- */}
-      {showGenerateModal && selectedContract && (
+      {showGenerateModal && selectedContract && mounted && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-lg w-full overflow-hidden">
             <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
@@ -1005,56 +1158,75 @@ export function ContractEnterpriseView({
                 <span>Générer automatiquement les échéances de facturation associées</span>
               </label>
 
-              {/* Footer */}
+              {/* Footer avec verrouillage persistant du bouton */}
               <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowGenerateModal(false)}
-                  className="px-4 py-2 font-bold text-slate-500 hover:text-slate-800"
+                  disabled={generateLoading || Boolean(generateSuccess)}
+                  className="px-4 py-2 font-bold text-slate-500 hover:text-slate-800 disabled:opacity-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  disabled={generateLoading}
-                  className="bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2.5 rounded-xl font-extrabold shadow-sm disabled:opacity-50"
+                  disabled={generateLoading || Boolean(generateSuccess)}
+                  className="bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2.5 rounded-xl font-extrabold shadow-sm disabled:opacity-50 transition-all flex items-center gap-2"
                 >
-                  {generateLoading ? "Génération en cours..." : "Générer les Interventions"}
+                  {generateLoading && <Clock className="w-4 h-4 animate-spin text-white" />}
+                  <span>
+                    {generateLoading
+                      ? "Génération en cours..."
+                      : generateSuccess
+                      ? "Génération terminée !"
+                      : "Générer les Interventions"}
+                  </span>
                 </button>
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal d'enregistrement de règlement */}
-      <PaymentConfirmationModal
-        isOpen={paymentModal.isOpen}
-        onClose={() => setPaymentModal({ isOpen: false, docId: null, numero: "", montant: 0 })}
-        onConfirm={async (mode, ref) => {
-          if (!paymentModal.docId) return;
-          try {
-            const res = await fetch("/api/crm/documents/generate", {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                documentId: paymentModal.docId,
-                statutPaiement: "PAYE",
-                modePaiement: mode,
-                referencePaiement: ref,
-              }),
-            });
-            const data = await res.json();
-            if (!res.ok || !data.success) throw new Error(data.message || "Erreur validation paiement.");
-            setPaymentModal({ isOpen: false, docId: null, numero: "", montant: 0 });
-            router.refresh();
-          } catch (err) {
-            console.error("Erreur enregistrement paiement:", err);
-          }
-        }}
-        montant={paymentModal.montant}
-        titre={`Encaissement Facture ${paymentModal.numero}`}
-        description="Confirmez le mode de règlement de la facture périodique du contrat."
+      {mounted && paymentModal.isOpen && createPortal(
+        <PaymentConfirmationModal
+          isOpen={paymentModal.isOpen}
+          onClose={() => setPaymentModal({ isOpen: false, docId: null, numero: "", montant: 0 })}
+          onConfirm={async (mode, ref) => {
+            if (!paymentModal.docId) return;
+            try {
+              const res = await fetch("/api/crm/documents/generate", {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  documentId: paymentModal.docId,
+                  statutPaiement: "PAYE",
+                  modePaiement: mode,
+                  referencePaiement: ref,
+                }),
+              });
+              const data = await res.json();
+              if (!res.ok || !data.success) throw new Error(data.message || "Erreur validation paiement.");
+              setPaymentModal({ isOpen: false, docId: null, numero: "", montant: 0 });
+              router.refresh();
+            } catch (err) {
+              console.error("Erreur enregistrement paiement:", err);
+            }
+          }}
+          montant={paymentModal.montant}
+          titre={`Encaissement Facture ${paymentModal.numero}`}
+          description="Confirmez le mode de règlement de la facture périodique du contrat."
+        />,
+        document.body
+      )}
+
+      {/* Modal d'aperçu rapide QuickView */}
+      <QuickViewModal
+        isOpen={isQuickViewOpen}
+        onClose={() => setIsQuickViewOpen(false)}
+        data={quickViewData}
       />
     </div>
   );

@@ -48,6 +48,7 @@ interface ContractItem {
     numero: string;
     montant: number;
     statutPaiement: string;
+    dateEmission: string;
   }[];
 }
 
@@ -139,6 +140,18 @@ export function ContractManager({ contracts, clients }: Props) {
     setLoading(true);
     setError(null);
     setSuccessMsg(null);
+
+    if (formData.dateFin && formData.dateFin.trim() !== "") {
+      const start = new Date(formData.dateDebut);
+      const end = new Date(formData.dateFin);
+      const minEnd = new Date(start);
+      minEnd.setMonth(minEnd.getMonth() + 3);
+      if (end < minEnd) {
+        setError("Pour un contrat à durée déterminée, la durée minimale doit être d'au moins 3 mois.");
+        setLoading(false);
+        return;
+      }
+    }
 
     try {
       const res = await fetch("/api/crm/contrats", {
@@ -435,16 +448,41 @@ export function ContractManager({ contracts, clients }: Props) {
                           <Eye className="w-3.5 h-3.5" />
                         </button>
 
-                        {/* Émettre facture périodique */}
-                        <button
-                          onClick={() => handleGenerateInvoice(c.id)}
-                          disabled={loading}
-                          title="Émettre la facture de la période"
-                          className="inline-flex items-center gap-1 bg-brand-slate hover:bg-gray-200 text-gray-700 px-2 py-1.5 rounded-xl font-bold text-xs transition-all border border-gray-200 shadow-2xs"
-                        >
-                          <Receipt className="w-3.5 h-3.5 text-brand-green" />
-                          <span>Facturer</span>
-                        </button>
+                        {/* Émettre facture périodique ou indicateur si déjà facturé ce mois */}
+                        {(() => {
+                          const now = new Date();
+                          const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                          const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+                          const currentPeriodInvoice = c.facturesPeriodiques.find((f) => {
+                            const d = new Date(f.dateEmission);
+                            return d >= currentMonthStart && d <= currentMonthEnd;
+                          });
+
+                          if (currentPeriodInvoice) {
+                            return (
+                              <span
+                                title={`Facture ${currentPeriodInvoice.numero} déjà émise pour cette période (${currentPeriodInvoice.statutPaiement === "PAYE" ? "Réglée" : "En attente"})`}
+                                className="inline-flex items-center gap-1 bg-slate-100 text-slate-500 px-2 py-1.5 rounded-xl font-bold text-[11px] border border-slate-200 select-none cursor-default"
+                              >
+                                <Receipt className="w-3.5 h-3.5 text-slate-400" />
+                                <span>Facturé</span>
+                              </span>
+                            );
+                          }
+
+                          return (
+                            <button
+                              onClick={() => handleGenerateInvoice(c.id)}
+                              disabled={loading}
+                              title="Émettre la facture de la période"
+                              className="inline-flex items-center gap-1 bg-brand-slate hover:bg-gray-200 text-gray-700 px-2 py-1.5 rounded-xl font-bold text-xs transition-all border border-gray-200 shadow-2xs"
+                            >
+                              <Receipt className="w-3.5 h-3.5 text-brand-green" />
+                              <span>Facturer</span>
+                            </button>
+                          );
+                        })()}
 
                         {/* Dossier des interventions */}
                         <Link
@@ -584,14 +622,23 @@ export function ContractManager({ contracts, clients }: Props) {
                 </div>
                 <div>
                   <label className="font-bold text-gray-700 block mb-1">
-                    Date de Fin <span className="text-gray-400 font-normal">(Optionnelle)</span>
+                    Date de Fin <span className="text-gray-400 font-normal">(Optionnelle — CDI si vide)</span>
                   </label>
                   <input
                     type="date"
+                    min={(() => {
+                      if (!formData.dateDebut) return undefined;
+                      const d = new Date(formData.dateDebut);
+                      d.setMonth(d.getMonth() + 3);
+                      return d.toISOString().split("T")[0];
+                    })()}
                     value={formData.dateFin}
                     onChange={(e) => setFormData({ ...formData, dateFin: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none text-xs"
                   />
+                  <p className="text-[10px] text-gray-500 mt-1">
+                    Laissez vide pour un CDI. Si spécifiée, durée minimale de 3 mois.
+                  </p>
                 </div>
               </div>
 

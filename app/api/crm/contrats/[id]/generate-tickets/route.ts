@@ -1,7 +1,17 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { StaffRole, InterventionType, TypeMateriel, ModeIntervention, InterventionStatut, DocumentType, FactureType, StatutPaiement, TermeFacturation } from "@prisma/client";
+import {
+  StaffRole,
+  InterventionType,
+  TypeMateriel,
+  ModeIntervention,
+  InterventionStatut,
+  DocumentType,
+  FactureType,
+  StatutPaiement,
+  TermeFacturation,
+} from "@prisma/client";
 import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 export async function POST(
@@ -26,12 +36,13 @@ export async function POST(
     const body = await request.json();
 
     const {
-      frequenceVisites = 1, // 1 ou 2 fois par mois
+      frequenceVisites = 1, // 1, 2 ou 4 fois par mois
       jourPassage,
       termeFacturation = "ECHU",
       technicienAssigneId,
       checklistPrevue = "Dépoussiérage et soufflage complet, contrôle antivirus et mises à jour, vérification des sauvegardes, test des onduleurs et tensions électriques, vérification de l'intégrité du réseau local.",
       genererFactures = true,
+      remplacerExistants = true,
     } = body;
 
     const contract = await db.contract.findUnique({
@@ -47,53 +58,116 @@ export async function POST(
       return NextResponse.json({ success: false, message: "Contrat introuvable." }, { status: 404 });
     }
 
+    // 1. Détection anti-doublons
+    const existingScheduledTickets = contract.interventions.filter(
+      (i) => i.dateProgrammee !== null
+    );
+
+    if (existingScheduledTickets.length > 0) {
+      if (!remplacerExistants) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Ce contrat possède déjà ${existingScheduledTickets.length} intervention(s) programmée(s). Cochez l'option de remplacement pour régénérer le calendrier.`,
+            alreadyConfigured: true,
+            existingCount: existingScheduledTickets.length,
+          },
+          { status: 409 }
+        );
+      }
+
+      // Remplacement sécurisé : supprimer uniquement les interventions programmées encore à l'état NOUVEAU
+      await db.intervention.deleteMany({
+        where: {
+          contractId: contract.id,
+          type: InterventionType.CONTRACTUEL,
+          statut: InterventionStatut.NOUVEAU,
+          dateProgrammee: { not: null },
+        },
+      });
+    }
+
+    const freqNum = Number(frequenceVisites) || 1;
+    const resolvedJourPassage =
+      jourPassage ||
+      (freqNum === 2
+        ? "1er et 15 du mois"
+        : freqNum === 4
+        ? "Chaque semaine"
+        : "1er du mois");
+
     // Mettre à jour les clauses sur le contrat
     await db.contract.update({
       where: { id: contractId },
       data: {
-        frequenceVisites: Number(frequenceVisites),
-        jourPassage: jourPassage || (frequenceVisites === 2 ? "1er et 15 du mois" : "1er du mois"),
-        termeFacturation: termeFacturation === "A_ECHOIR" ? TermeFacturation.A_ECHOIR : TermeFacturation.ECHU,
+        frequenceVisites: freqNum,
+        jourPassage: resolvedJourPassage,
+        termeFacturation:
+          termeFacturation === "A_ECHOIR"
+            ? TermeFacturation.A_ECHOIR
+            : TermeFacturation.ECHU,
       },
     });
 
     const startDate = new Date(contract.dateDebut);
-    const defaultEnd = new Date(startDate);
-    defaultEnd.setFullYear(defaultEnd.getFullYear() + 1);
-    const endDate = contract.dateFin ? new Date(contract.dateFin) : defaultEnd;
 
-    // 1. Calculer les dates prévues d'interventions
-    const visitDates: Date[] = [];
-    const loopDate = new Date(startDate);
+    // 2. Calcul de la durée contractuelle et du quota total garanti
+    let totalMonths = 12; // Par défaut pour un CDI (cycle de 12 mois d'avance)
 
-    while (loopDate < endDate) {
-      const year = loopDate.getFullYear();
-      const month = loopDate.getMonth();
-
-      if (frequenceVisites === 2) {
-        // Deux fois par mois : le 5 et le 20
-        const date1 = new Date(year, month, 5, 9, 0, 0);
-        const date2 = new Date(year, month, 20, 9, 0, 0);
-
-        if (date1 >= startDate && date1 <= endDate) visitDates.push(date1);
-        if (date2 >= startDate && date2 <= endDate) visitDates.push(date2);
-      } else if (frequenceVisites === 1) {
-        // Une fois par mois : le 10 du mois
-        const date1 = new Date(year, month, 10, 9, 0, 0);
-        if (date1 >= startDate && date1 <= endDate) visitDates.push(date1);
-      } else if (frequenceVisites === 4) {
-        // Hebdomadaire (4 fois par mois) : les 7, 14, 21, 28
-        [7, 14, 21, 28].forEach((day) => {
-          const date = new Date(year, month, day, 9, 0, 0);
-          if (date >= startDate && date <= endDate) visitDates.push(date);
-        });
-      }
-
-      // Passer au mois suivant
-      loopDate.setMonth(loopDate.getMonth() + 1);
+    if (contract.dateFin) {
+      const endDate = new Date(contract.dateFin);
+      const diffMonths =
+        (endDate.getFullYear() - startDate.getFullYear()) * 12 +
+        (endDate.getMonth() - startDate.getMonth());
+      totalMonths = Math.max(3, diffMonths); // Minimum 3 mois pour un CDD
     }
 
-    // Récupérer le dernier numéro d'intervention séquentiel
+    const quotaTotalVisites = totalMonths * freqNum;
+
+    // 3. Jours réels de passage
+    let days: number[] = [1];
+    const passageLower = resolvedJourPassage.toLowerCase();
+
+    if (freqNum === 2) {
+      if (passageLower.includes("5") && passageLower.includes("20")) {
+        days = [5, 20];
+      } else {
+        days = [1, 15];
+      }
+    } else if (freqNum === 1) {
+      if (passageLower.includes("10")) {
+        days = [10];
+      } else if (passageLower.includes("15")) {
+        days = [15];
+      } else {
+        days = [1];
+      }
+    } else if (freqNum === 4) {
+      days = [1, 8, 15, 22];
+    }
+
+    // 4. Génération des dates avec report / rattrapage continu en fin de période
+    const visitDates: Date[] = [];
+    let loopYear = startDate.getFullYear();
+    let loopMonth = startDate.getMonth();
+
+    while (visitDates.length < quotaTotalVisites) {
+      for (const day of days) {
+        if (visitDates.length >= quotaTotalVisites) break;
+        const candidateDate = new Date(loopYear, loopMonth, day, 9, 0, 0);
+        // On ne garde que les dates à partir de la date de début
+        if (candidateDate >= startDate) {
+          visitDates.push(candidateDate);
+        }
+      }
+      loopMonth++;
+      if (loopMonth > 11) {
+        loopMonth = 0;
+        loopYear++;
+      }
+    }
+
+    // Récupérer le dernier numéro séquentiel d'intervention
     const currentYear = new Date().getFullYear();
     const lastTicket = await db.intervention.findFirst({
       where: { numero: { startsWith: `INT-${currentYear}-` } },
@@ -134,21 +208,24 @@ export async function POST(
       createdTickets.push(ticket);
     }
 
-    // 2. Générer les factures périodiques si demandé
+    // 5. Génération intelligente des factures périodiques
     let createdInvoicesCount = 0;
     if (genererFactures && contract.montantMainOeuvre > 0) {
-      // Calculer les périodes de facturation selon contract.periodicite
       let stepMonths = 1;
       if (contract.periodicite === "TRIMESTRIEL") stepMonths = 3;
       if (contract.periodicite === "ANNUEL") stepMonths = 12;
 
-      const invoiceDates: Date[] = [];
-      const billDate = new Date(startDate);
+      const totalInvoicesTarget = Math.max(1, Math.floor(totalMonths / stepMonths));
 
-      while (billDate < endDate) {
-        invoiceDates.push(new Date(billDate));
-        billDate.setMonth(billDate.getMonth() + stepMonths);
-      }
+      // Vérifier les factures déjà existantes pour ce contrat
+      const existingInvoices = await db.financialDocument.findMany({
+        where: {
+          contractId: contract.id,
+          type: DocumentType.FACTURE,
+          typeFacture: FactureType.CONTRAT,
+        },
+        select: { dateEmission: true },
+      });
 
       // Dernier numéro séquentiel de facture
       const lastInvoice = await db.financialDocument.findFirst({
@@ -163,7 +240,21 @@ export async function POST(
         if (!isNaN(seq)) invoiceSeq = seq + 1;
       }
 
-      for (const invDate of invoiceDates) {
+      for (let i = 0; i < totalInvoicesTarget; i++) {
+        const invDate = new Date(startDate);
+        invDate.setMonth(invDate.getMonth() + i * stepMonths);
+
+        // Vérifier si une facture existe déjà pour le même mois/année
+        const alreadyExists = existingInvoices.some((ef) => {
+          const d = new Date(ef.dateEmission);
+          return (
+            d.getFullYear() === invDate.getFullYear() &&
+            d.getMonth() === invDate.getMonth()
+          );
+        });
+
+        if (alreadyExists) continue;
+
         const paddedSeq = invoiceSeq.toString().padStart(4, "0");
         const invNum = `FAC-${currentYear}-${paddedSeq}`;
         invoiceSeq++;
@@ -189,24 +280,24 @@ export async function POST(
       data: {
         userId: (session.user as any).id,
         titre: "Tickets contractuels générés",
-        message: `${createdTickets.length} interventions programmées et ${createdInvoicesCount} factures générées pour le contrat de ${contract.client.nom}.`,
+        message: `${createdTickets.length} interventions programmées (${contract.dateFin ? "CDD de " + totalMonths + " mois" : "CDI — cycle initial de 12 mois"}) et ${createdInvoicesCount} factures générées pour le contrat de ${contract.client.nom}.`,
         type: "SYSTEME",
-        lien: `/crm/tickets/contractuel?contractId=${contract.id}`,
       },
     });
 
     broadcastCrmEvent("contrat:updated", contract.id);
+    broadcastCrmEvent("tickets:batch_created", contract.id);
 
     return NextResponse.json({
       success: true,
-      message: `${createdTickets.length} intervention(s) préventive(s) et ${createdInvoicesCount} facture(s) configurées avec succès.`,
+      message: `${createdTickets.length} interventions programmées (${contract.dateFin ? "CDD de " + totalMonths + " mois" : "CDI — cycle annuel de 12 mois"}) et ${createdInvoicesCount} factures générées avec succès.`,
       ticketsCount: createdTickets.length,
       invoicesCount: createdInvoicesCount,
     });
   } catch (error: any) {
-    console.error("Erreur génération tickets contractuels:", error);
+    console.error("Erreur génération tickets contrat:", error);
     return NextResponse.json(
-      { success: false, message: error.message || "Erreur serveur lors de la génération des tickets." },
+      { success: false, message: error.message || "Erreur lors de la configuration du contrat." },
       { status: 500 }
     );
   }

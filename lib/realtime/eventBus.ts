@@ -6,6 +6,7 @@ import { EventEmitter } from "events";
 export type CrmEventType =
   | "ticket:created"
   | "ticket:updated"
+  | "tickets:batch_created"
   | "document:created"
   | "document:updated"
   | "demande:created"

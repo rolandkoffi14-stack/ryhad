@@ -269,7 +269,7 @@ export function DocumentPdfTemplate({ data }: { data: PdfDocumentData }) {
 
           {data.intervention && (
             <Text style={[styles.clientDetails, { marginTop: 4, fontWeight: "bold" }]}>
-              Dossier lié : {data.intervention.numero} ({data.intervention.typeMateriel.replace(/_/g, " ")})
+              Dossier lié : {data.intervention.numero} ({data.intervention.typeMateriel ? data.intervention.typeMateriel.replace(/_/g, " ") : "MATÉRIEL"})
             </Text>
           )}
           {data.contract && (
