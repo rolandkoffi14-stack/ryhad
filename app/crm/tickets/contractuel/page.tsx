@@ -92,15 +92,17 @@ export default async function TicketsContractuelPage({
       {/* Header aéré & concis */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-brand-green font-extrabold text-[11px] uppercase tracking-wider mb-1">
-            <span className="w-2 h-2 rounded-full bg-brand-green"></span>
-            <span>{isTechnician ? "Mes Visites sous Contrat" : "Parcours Entreprises"}</span>
-          </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-            {isTechnician ? "Mes Interventions Contractuelles" : "Tickets sous Contrat de Maintenance"}
+            {isNew
+              ? "Nouveau Ticket sous Contrat"
+              : isTechnician
+              ? "Mes Interventions Contractuelles"
+              : "Tickets sous Contrat de Maintenance"}
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            {isTechnician
+            {isNew
+              ? "Prise en charge directe d'une panne ou visite pour une entreprise abonnée."
+              : isTechnician
               ? "Interventions préventives et curatives sur parcs d'entreprises sous contrat."
               : "Suivi des visites programmées, rapports et pièces éventuelles."}
           </p>

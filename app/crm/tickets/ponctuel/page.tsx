@@ -92,15 +92,17 @@ export default async function TicketsPonctuelPage({
       {/* Header aéré & concis */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-brand-blue font-extrabold text-[11px] uppercase tracking-wider mb-1">
-            <span className="w-2 h-2 rounded-full bg-brand-blue"></span>
-            <span>{isTechnician ? "Mes Interventions" : "Parcours Atelier"}</span>
-          </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-            {isTechnician ? "Mes Tickets Ponctuels" : "Tickets Ponctuels & Diagnostic"}
+            {isNew
+              ? "Nouveau Dépôt Atelier (Ponctuel)"
+              : isTechnician
+              ? "Mes Tickets Ponctuels"
+              : "Tickets Ponctuels & Diagnostic"}
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            {isTechnician
+            {isNew
+              ? "Enregistrement d'un matériel client pour diagnostic et devis."
+              : isTechnician
               ? "Dossiers de réparation en cours assignés à votre profil."
               : "Suivi des dépôts comptoir, diagnostics, devis et réparations."}
           </p>

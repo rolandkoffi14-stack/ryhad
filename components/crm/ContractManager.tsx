@@ -259,10 +259,10 @@ export function ContractManager({ contracts, clients }: Props) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-            Contrats de Maintenance Entreprises
+            Contrats de Maintenance PME & Entreprises
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Gestion des forfaits périodiques, visites de parcs et facturations régulières.
+            Gestion des parcs sous contrat, planification des visites périodiques et émission des factures récurrentes.
           </p>
         </div>
 

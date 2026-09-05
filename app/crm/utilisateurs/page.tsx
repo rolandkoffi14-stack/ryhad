@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { ShieldCheck } from "lucide-react";
 import { StaffRole } from "@prisma/client";
 import { UsersTable } from "@/components/crm/UsersTable";
 
@@ -39,10 +38,6 @@ export default async function CrmUtilisateursPage() {
     <div className="space-y-6">
       {/* En-tête aéré */}
       <div>
-        <div className="flex items-center gap-1.5 text-brand-blue font-bold text-xs uppercase tracking-wider mb-1">
-          <ShieldCheck className="w-4 h-4 text-brand-green" />
-          <span>Contrôle d&apos;Accès & Sécurité RBAC</span>
-        </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
           Gestion des Collaborateurs Staff
         </h1>

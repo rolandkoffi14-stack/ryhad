@@ -48,18 +48,5 @@ export default async function CrmContratsPage() {
     console.error("Error loading contracts:", e);
   }
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-          Contrats de Maintenance PME & Entreprises
-        </h1>
-        <p className="text-xs sm:text-sm text-gray-500 mt-1">
-          Gestion des parcs sous contrat, planification des visites périodiques et émission des factures récurrentes.
-        </p>
-      </div>
-
-      <ContractManager contracts={contracts} clients={clients} />
-    </div>
-  );
+  return <ContractManager contracts={contracts} clients={clients} />;
 }

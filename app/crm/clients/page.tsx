@@ -40,18 +40,5 @@ export default async function CrmClientsPage() {
     console.error("Error loading clients:", e);
   }
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-          Répertoire Clients & Entreprises
-        </h1>
-        <p className="text-xs sm:text-sm text-gray-500 mt-1">
-          Consultez les fiches clients, modifiez leurs coordonnées et créez directement des tickets d&apos;intervention.
-        </p>
-      </div>
-
-      <ClientManager clients={clients} userRole={user.role} />
-    </div>
-  );
+  return <ClientManager clients={clients} userRole={user.role} />;
 }

@@ -127,20 +127,6 @@ export default async function CrmDashboardPage() {
     <div className="space-y-8">
       {/* Top Banner adapté selon le rôle */}
       <div>
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider mb-1">
-          <span
-            className={`w-2 h-2 rounded-full ${
-              user.role === StaffRole.ADMIN
-                ? "bg-brand-blue"
-                : user.role === StaffRole.RECEPTIONNISTE
-                ? "bg-purple-600"
-                : "bg-brand-green"
-            }`}
-          ></span>
-          <span className="text-gray-500">
-            Espace {user.role === StaffRole.ADMIN ? "Direction" : user.role === StaffRole.RECEPTIONNISTE ? "Réception" : "Technicien"}
-          </span>
-        </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
           Bonjour, {user.firstName} {user.lastName}
         </h1>

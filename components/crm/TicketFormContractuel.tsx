@@ -88,16 +88,9 @@ export function TicketFormContractuel({ contracts, technicians, initialContractI
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 subtle-shadow space-y-6 max-w-3xl">
-      <div className="border-b border-gray-100 pb-4">
-        <div className="flex items-center gap-2 text-brand-green font-bold text-xs uppercase tracking-wider mb-1">
-          <span className="w-2 h-2 rounded-full bg-brand-green"></span>
-          <span>Parcours Contrat de Maintenance (0 FCFA Diagnostic)</span>
-        </div>
-        <h2 className="text-xl font-extrabold text-brand-dark">
-          Déclarer une Panne / Dépannage sous Contrat
-        </h2>
-        <p className="text-xs text-gray-500 mt-1">
-          Prise en charge directe pour les entreprises abonnées. Ce parcours ne facture aucun frais de diagnostic.
+      <div className="border-b border-gray-100 pb-3">
+        <p className="text-xs text-gray-500 font-medium">
+          Prise en charge directe pour les entreprises abonnées (0 FCFA de frais de diagnostic).
         </p>
       </div>
 

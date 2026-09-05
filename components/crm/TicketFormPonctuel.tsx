@@ -142,16 +142,9 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
   return (
     <>
       <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-6 sm:p-8 border border-gray-200 subtle-shadow space-y-6 max-w-3xl">
-        <div className="border-b border-gray-100 pb-4">
-          <div className="flex items-center gap-2 text-brand-blue font-bold text-xs uppercase tracking-wider mb-1">
-            <span className="w-2 h-2 rounded-full bg-brand-blue"></span>
-            <span>Parcours Ponctuel</span>
-          </div>
-          <h2 className="text-xl font-extrabold text-brand-dark">
-            Création d&apos;un Ticket Ponctuel (Atelier / Particulier / Hors-contrat)
-          </h2>
-          <p className="text-xs text-gray-500 mt-1">
-            Ce parcours suit le cycle complet : Frais de diagnostic → Diagnostic technique → Devis client → Réparation.
+        <div className="border-b border-gray-100 pb-3">
+          <p className="text-xs text-gray-500 font-medium">
+            Cycle atelier complet : Frais de diagnostic (1 000 FCFA min) → Diagnostic technique → Devis client → Réparation.
           </p>
         </div>
 

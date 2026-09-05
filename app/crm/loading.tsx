@@ -3,7 +3,6 @@ export default function CrmLoading() {
     <div className="space-y-8 animate-pulse">
       {/* Header Skeleton */}
       <div className="space-y-2.5">
-        <div className="h-4 w-32 bg-gray-200 rounded-full" />
         <div className="h-8 w-64 sm:w-80 bg-gray-200 rounded-xl" />
         <div className="h-4 w-96 max-w-full bg-gray-200 rounded-lg" />
       </div>
