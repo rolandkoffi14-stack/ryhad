@@ -568,6 +568,21 @@ export async function PATCH(
         );
       }
 
+      // Verrouillage absolu : aucune intervention tant que le ticket n'est pas démarré
+      if (
+        currentTicket.statut === InterventionStatut.NOUVEAU ||
+        currentTicket.statut === InterventionStatut.FRAIS_DIAGNOSTIC_ENCAISSE
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            message:
+              "Impossible d'intervenir : le ticket n'a pas encore été démarré. Veuillez d'abord démarrer le diagnostic ou l'intervention.",
+          },
+          { status: 400 }
+        );
+      }
+
       // Verrouillage si le diagnostic/intervention est déjà terminé (sauf ADMIN)
       const isEditableDiag =
         currentTicket.statut === InterventionStatut.EN_DIAGNOSTIC ||
@@ -620,6 +635,21 @@ export async function PATCH(
         return NextResponse.json(
           { success: false, message: "Accès refusé : ce dossier est assigné à un autre technicien." },
           { status: 403 }
+        );
+      }
+
+      // Verrouillage absolu : aucune intervention tant que le ticket n'est pas démarré
+      if (
+        currentTicket.statut === InterventionStatut.NOUVEAU ||
+        currentTicket.statut === InterventionStatut.FRAIS_DIAGNOSTIC_ENCAISSE
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            message:
+              "Impossible de chiffrer la main d'œuvre : le ticket n'a pas encore été démarré. Veuillez d'abord démarrer le diagnostic ou l'intervention.",
+          },
+          { status: 400 }
         );
       }
 
@@ -694,6 +724,21 @@ export async function PATCH(
         );
       }
 
+      // Verrouillage absolu : aucune intervention tant que le ticket n'est pas démarré
+      if (
+        currentTicket.statut === InterventionStatut.NOUVEAU ||
+        currentTicket.statut === InterventionStatut.FRAIS_DIAGNOSTIC_ENCAISSE
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            message:
+              "Impossible d'ajouter une pièce : le ticket n'a pas encore été démarré. Veuillez d'abord démarrer le diagnostic ou l'intervention.",
+          },
+          { status: 400 }
+        );
+      }
+
       const isEditablePieces =
         currentTicket.statut === InterventionStatut.EN_DIAGNOSTIC ||
         (currentTicket.type === InterventionType.CONTRACTUEL &&
@@ -752,6 +797,21 @@ export async function PATCH(
         return NextResponse.json(
           { success: false, message: "Accès refusé : ce dossier est assigné à un autre technicien." },
           { status: 403 }
+        );
+      }
+
+      // Verrouillage absolu : aucune intervention tant que le ticket n'est pas démarré
+      if (
+        currentTicket.statut === InterventionStatut.NOUVEAU ||
+        currentTicket.statut === InterventionStatut.FRAIS_DIAGNOSTIC_ENCAISSE
+      ) {
+        return NextResponse.json(
+          {
+            success: false,
+            message:
+              "Impossible de modifier les pièces : le ticket n'a pas encore été démarré. Veuillez d'abord démarrer le diagnostic ou l'intervention.",
+          },
+          { status: 400 }
         );
       }
 

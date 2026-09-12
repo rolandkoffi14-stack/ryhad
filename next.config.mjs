@@ -2,6 +2,23 @@
 const nextConfig = {
   reactStrictMode: true,
   serverExternalPackages: ["@prisma/client", "bcryptjs", "@react-pdf/renderer"],
+  images: {
+    qualities: [75, 85],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "media.ryhad.bj",
+      },
+      {
+        protocol: "https",
+        hostname: "**.r2.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+    ],
+  },
   async headers() {
     return [
       {
@@ -29,7 +46,7 @@ const nextConfig = {
           },
           {
             key: "Content-Security-Policy",
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://media.ryhad.bj https://images.unsplash.com; connect-src 'self' https: wss:; object-src 'self' blob: data:; base-uri 'self'; form-action 'self'; frame-ancestors 'self';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://media.ryhad.bj https://*.r2.dev https://images.unsplash.com; connect-src 'self' https: wss:; object-src 'self' blob: data:; base-uri 'self'; form-action 'self'; frame-ancestors 'self';",
           },
         ],
       },

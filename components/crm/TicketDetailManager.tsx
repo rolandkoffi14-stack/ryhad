@@ -156,8 +156,15 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
 
   const diagAmountFormatted = formatFCFA(diagDoc?.montant || ticket.montantDiagnostic || 1000);
 
-  // Verrouillage de la saisie technique (accessible en EN_DIAGNOSTIC ou en EN_INTERVENTION sous contrat)
+  // Indicateur : Le ticket a-t-il été démarré ?
+  const isTicketStarted =
+    ticket.statut !== InterventionStatut.NOUVEAU &&
+    ticket.statut !== InterventionStatut.FRAIS_DIAGNOSTIC_ENCAISSE;
+
+  // Verrouillage absolu de la saisie technique :
+  // Accessible UNIQUEMENT si le ticket est démarré, et uniquement en phase active (ou admin après démarrage)
   const isDiagnosticEditable =
+    isTicketStarted &&
     (ticket.statut === InterventionStatut.EN_DIAGNOSTIC ||
       (ticket.type === InterventionType.CONTRACTUEL &&
         ticket.statut === InterventionStatut.EN_INTERVENTION) ||
@@ -951,10 +958,19 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
             ) : (
               <span className="text-[10px] text-gray-500 font-semibold bg-gray-100 px-2 py-0.5 rounded flex items-center gap-1">
                 <Lock className="w-3 h-3" />
-                <span>Lecture seule</span>
+                <span>{!isTicketStarted ? "Non démarré" : "Lecture seule"}</span>
               </span>
             )}
           </div>
+
+          {!isTicketStarted && (
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="leading-relaxed">
+                <span className="font-bold">Intervention non démarrée :</span> Démarrez d&apos;abord le ticket via la barre d&apos;actions ci-dessus pour pouvoir rédiger le rapport technique.
+              </div>
+            </div>
+          )}
 
           {/* Formulaire de saisie pour technicien/admin ou affichage lecture seule */}
           {isDiagnosticEditable ? (
@@ -973,7 +989,11 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
               {ticket.diagnosticTechnicien ? (
                 <p className="whitespace-pre-wrap">{ticket.diagnosticTechnicien}</p>
               ) : (
-                <p className="text-gray-400 italic">Aucun rapport technique rédigé pour le moment.</p>
+                <p className="text-gray-400 italic">
+                  {!isTicketStarted
+                    ? "Dossier en attente de démarrage. Le rapport technique sera rédigé une fois le ticket démarré."
+                    : "Aucun rapport technique rédigé pour le moment."}
+                </p>
               )}
             </div>
           )}
@@ -1005,6 +1025,15 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
             </div>
           </div>
 
+          {!isTicketStarted && (
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5">
+              <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div className="leading-relaxed">
+                <span className="font-bold">Chiffrage verrouillé :</span> Le ticket n&apos;a pas encore été démarré. Démarrez d&apos;abord le diagnostic ou l&apos;intervention pour chiffrer la main d&apos;œuvre ou ajouter des pièces au devis.
+              </div>
+            </div>
+          )}
+
           {/* 🛠️ BLOC 1 : MAIN D'ŒUVRE DE RÉPARATION */}
           {ticket.type === InterventionType.CONTRACTUEL ? (
             <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 flex items-center justify-between">
@@ -1032,12 +1061,18 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                 </div>
                 <span
                   className={`text-[10px] font-extrabold px-2 py-0.5 rounded ${
-                    currentMO > 0
+                    !isTicketStarted
+                      ? "bg-slate-100 text-slate-600 border border-slate-200"
+                      : currentMO > 0
                       ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                       : "bg-red-100 text-red-700 border border-red-300"
                   }`}
                 >
-                  {currentMO > 0 ? "Main d'œuvre chiffrée" : "Obligatoire pour devis"}
+                  {!isTicketStarted
+                    ? "Dossier non démarré"
+                    : currentMO > 0
+                    ? "Main d'œuvre chiffrée"
+                    : "Obligatoire pour devis"}
                 </span>
               </div>
 
