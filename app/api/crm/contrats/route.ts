@@ -104,6 +104,7 @@ export async function POST(request: Request) {
         dateFin: finalEndDate, // null pour CDI
         periodicite: validated.periodicite,
         montantMainOeuvre: validated.montantMainOeuvre,
+        frequenceVisites: validated.frequenceVisites || 1,
         equipementsCouverts: validated.equipementsCouverts,
         statut: ContractStatus.ACTIF,
         visitesPlanifiees: {

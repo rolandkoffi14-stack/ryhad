@@ -122,8 +122,15 @@ export function ContractEnterpriseView({
   const [generateLoading, setGenerateLoading] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [generateSuccess, setGenerateSuccess] = useState<string | null>(null);
-  const [generateForm, setGenerateForm] = useState({
-    frequenceVisites: 2,
+  const [generateForm, setGenerateForm] = useState<{
+    actionType: "INITIAL" | "AJUSTER" | "PROLONGER";
+    jourPassage: string;
+    termeFacturation: string;
+    technicienAssigneId: string;
+    checklistPrevue: string;
+    genererFactures: boolean;
+  }>({
+    actionType: "AJUSTER",
     jourPassage: "1er et 15 de chaque mois",
     termeFacturation: "ECHU",
     technicienAssigneId: technicians[0]?.id || "",
@@ -131,6 +138,30 @@ export function ContractEnterpriseView({
       "Dépoussiérage et soufflage complet, contrôle antivirus et mises à jour, vérification des sauvegardes, test des onduleurs et tensions électriques, vérification de l'intégrité du réseau local.",
     genererFactures: true,
   });
+
+  const handleOpenGenerateModal = () => {
+    if (!selectedContract) return;
+    setGenerateError(null);
+    setGenerateSuccess(null);
+    const hasScheduled = preventifTickets.length > 0;
+    setGenerateForm({
+      actionType: hasScheduled ? "AJUSTER" : "INITIAL",
+      jourPassage:
+        selectedContract.jourPassage ||
+        (selectedContract.frequenceVisites === 2
+          ? "1er et 15 du mois"
+          : selectedContract.frequenceVisites === 4
+          ? "Chaque semaine"
+          : "1er du mois"),
+      termeFacturation: selectedContract.termeFacturation || "ECHU",
+      technicienAssigneId: selectedContract.interventions[0]?.technicienAssigneId || technicians[0]?.id || "",
+      checklistPrevue:
+        selectedContract.interventions[0]?.checklistPrevue ||
+        "Dépoussiérage et soufflage complet, contrôle antivirus et mises à jour, vérification des sauvegardes, test des onduleurs et tensions électriques, vérification de l'intégrité du réseau local.",
+      genererFactures: true,
+    });
+    setShowGenerateModal(true);
+  };
 
   // Modal d'encaissement de facture
   const [paymentModal, setPaymentModal] = useState<{
@@ -563,15 +594,15 @@ export function ContractEnterpriseView({
           </div>
         </div>
 
-        {/* Action Administrateur : Génération de tickets */}
+        {/* Action Administrateur : Configuration / Reconfiguration */}
         {isAdmin && (
           <button
             type="button"
-            onClick={() => setShowGenerateModal(true)}
-            className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all"
+            onClick={handleOpenGenerateModal}
+            className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all cursor-pointer"
           >
             <Sparkles className="w-4 h-4 text-brand-green" />
-            <span>Configurer & Générer les Interventions</span>
+            <span>{preventifTickets.length === 0 ? "Configurer" : "Reconfigurer"}</span>
           </button>
         )}
       </div>
@@ -1126,7 +1157,7 @@ export function ContractEnterpriseView({
       </div>
 
       {/* ------------------------------------------------------------- */}
-      {/* MODAL CONFIGURATION & GÉNÉRATION DES INTERVENTIONS DU CONTRAT */}
+      {/* MODAL CONFIGURATION / RECONFIGURATION DES INTERVENTIONS DU CONTRAT */}
       {/* ------------------------------------------------------------- */}
       {showGenerateModal && selectedContract && mounted && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
@@ -1138,7 +1169,9 @@ export function ContractEnterpriseView({
                 </div>
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900">
-                    Configuration des Interventions du Contrat
+                    {preventifTickets.length === 0
+                      ? "Configuration des Interventions"
+                      : "Reconfiguration du Planning"}
                   </h3>
                   <p className="text-xs text-slate-500 font-medium">
                     {selectedContract.client.nom}
@@ -1146,8 +1179,9 @@ export function ContractEnterpriseView({
                 </div>
               </div>
               <button
+                type="button"
                 onClick={() => setShowGenerateModal(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl"
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1165,30 +1199,67 @@ export function ContractEnterpriseView({
                 </div>
               )}
 
-              {/* Fréquence des visites */}
-              <div className="space-y-1.5">
-                <label className="font-extrabold text-slate-700">Fréquence des Interventions</label>
-                <select
-                  value={generateForm.frequenceVisites}
-                  onChange={(e) =>
-                    setGenerateForm({
-                      ...generateForm,
-                      frequenceVisites: Number(e.target.value),
-                      jourPassage:
-                        Number(e.target.value) === 2
-                          ? "1er et 15 du mois"
-                          : Number(e.target.value) === 1
-                          ? "10 de chaque mois"
-                          : "Chaque semaine",
-                    })
-                  }
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"
-                >
-                  <option value={2}>2 fois par mois (ex. 24 visites/an)</option>
-                  <option value={1}>1 fois par mois (ex. 12 visites/an)</option>
-                  <option value={4}>Hebdomadaire (4 fois par mois)</option>
-                </select>
+              {/* Clause contractuelle fixe (lecture seule) */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                <div className="space-y-0.5">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                    Clause contractuelle fixe
+                  </span>
+                  <p className="font-extrabold text-slate-800">
+                    {selectedContract.frequenceVisites || 1} intervention(s) par mois • {formatFCFA(selectedContract.montantMainOeuvre)} / {selectedContract.periodicite.toLowerCase()}
+                  </p>
+                  <p className="text-[11px] text-slate-500">
+                    {selectedContract.dateFin
+                      ? `Contrat CDD jusqu'au ${format(new Date(selectedContract.dateFin), "dd/MM/yyyy", { locale: fr })}`
+                      : "Contrat CDI (Reconduction tacite)"}
+                  </p>
+                </div>
+                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
               </div>
+
+              {/* Sélecteur d'opération si reconfiguration */}
+              {preventifTickets.length > 0 && (
+                <div className="space-y-2">
+                  <label className="font-extrabold text-slate-700 block">Type d&apos;opération</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setGenerateForm({ ...generateForm, actionType: "AJUSTER" })}
+                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                        generateForm.actionType === "AJUSTER"
+                          ? "border-brand-blue bg-blue-50/70 ring-2 ring-brand-blue/20"
+                          : "border-slate-200 bg-white hover:bg-slate-50"
+                      }`}
+                    >
+                      <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                        <span>🔄 Réajuster le planning</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+                        Reprogramme les visites futures non démarrées du cycle en cours. Les factures sont préservées.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setGenerateForm({ ...generateForm, actionType: "PROLONGER" })}
+                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                        generateForm.actionType === "PROLONGER"
+                          ? "border-brand-green bg-emerald-50/70 ring-2 ring-brand-green/20"
+                          : "border-slate-200 bg-white hover:bg-slate-50"
+                      }`}
+                    >
+                      <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                        <span>📅 Prolonger le contrat</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+                        Ajoute un nouveau cycle ({selectedContract.dateFin ? "prolongation CDD" : "+12 mois CDI"}) à la suite du calendrier.
+                      </p>
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Jours convenus */}
               <div className="space-y-1.5">
@@ -1199,22 +1270,22 @@ export function ContractEnterpriseView({
                   onChange={(e) =>
                     setGenerateForm({ ...generateForm, jourPassage: e.target.value })
                   }
-                  placeholder="Ex: 5 et 20 de chaque mois"
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold"
+                  placeholder="Ex: 1er et 15 du mois, ou 5 et 20..."
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-blue"
                 />
               </div>
 
               {/* Technicien référent */}
               <div className="space-y-1.5">
                 <label className="font-extrabold text-slate-700">
-                  Technicien Référent par défaut
+                  Technicien Référent assigné
                 </label>
                 <select
                   value={generateForm.technicienAssigneId}
                   onChange={(e) =>
                     setGenerateForm({ ...generateForm, technicienAssigneId: e.target.value })
                   }
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-blue"
                 >
                   <option value="">Non assigné (assigner plus tard)</option>
                   {technicians.map((t) => (
@@ -1233,7 +1304,7 @@ export function ContractEnterpriseView({
                   onChange={(e) =>
                     setGenerateForm({ ...generateForm, termeFacturation: e.target.value })
                   }
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-blue"
                 >
                   <option value="ECHU">À terme échu (fin de période après visites)</option>
                   <option value="A_ECHOIR">À terme à échoir (début de période)</option>
@@ -1243,7 +1314,7 @@ export function ContractEnterpriseView({
               {/* Checklist / Consignes */}
               <div className="space-y-1.5">
                 <label className="font-extrabold text-slate-700">
-                  Checklist préventive par défaut
+                  Checklist préventive convenue
                 </label>
                 <textarea
                   rows={3}
@@ -1251,45 +1322,56 @@ export function ContractEnterpriseView({
                   onChange={(e) =>
                     setGenerateForm({ ...generateForm, checklistPrevue: e.target.value })
                   }
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-xs"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-xs text-slate-800 outline-none focus:ring-2 focus:ring-brand-blue"
                 />
               </div>
 
-              {/* Générer les factures périodiques */}
-              <label className="flex items-center gap-2 pt-1 font-bold text-slate-700 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={generateForm.genererFactures}
-                  onChange={(e) =>
-                    setGenerateForm({ ...generateForm, genererFactures: e.target.checked })
-                  }
-                  className="w-4 h-4 rounded text-brand-blue"
-                />
-                <span>Générer automatiquement les échéances de facturation associées</span>
-              </label>
+              {/* Section Factures : Masquée en réajustement, disponible en initial ou prolongation */}
+              {preventifTickets.length > 0 && generateForm.actionType === "AJUSTER" ? (
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-[11px] flex items-center gap-2">
+                  <Receipt className="w-4 h-4 text-slate-400 shrink-0" />
+                  <span>Les factures existantes sont sanctuarisées et ne subissent aucune modification lors d&apos;un réajustement.</span>
+                </div>
+              ) : (
+                <label className="flex items-center gap-2 pt-1 font-bold text-slate-700 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={generateForm.genererFactures}
+                    onChange={(e) =>
+                      setGenerateForm({ ...generateForm, genererFactures: e.target.checked })
+                    }
+                    className="w-4 h-4 rounded text-brand-blue"
+                  />
+                  <span>Générer automatiquement les échéances de facturation associées</span>
+                </label>
+              )}
 
-              {/* Footer avec verrouillage persistant du bouton */}
+              {/* Footer avec boutons explicites */}
               <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setShowGenerateModal(false)}
                   disabled={generateLoading || Boolean(generateSuccess)}
-                  className="px-4 py-2 font-bold text-slate-500 hover:text-slate-800 disabled:opacity-50"
+                  className="px-4 py-2 font-bold text-slate-500 hover:text-slate-800 disabled:opacity-50 cursor-pointer"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={generateLoading || Boolean(generateSuccess)}
-                  className="bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2.5 rounded-xl font-extrabold shadow-sm disabled:opacity-50 transition-all flex items-center gap-2"
+                  className="bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2.5 rounded-xl font-extrabold shadow-sm disabled:opacity-50 transition-all flex items-center gap-2 cursor-pointer"
                 >
                   {generateLoading && <Clock className="w-4 h-4 animate-spin text-white" />}
                   <span>
                     {generateLoading
-                      ? "Génération en cours..."
+                      ? "Traitement en cours..."
                       : generateSuccess
-                      ? "Génération terminée !"
-                      : "Générer les Interventions"}
+                      ? "Opération terminée !"
+                      : preventifTickets.length === 0
+                      ? "Générer les Interventions"
+                      : generateForm.actionType === "AJUSTER"
+                      ? "Regénérer le Planning"
+                      : "Prolonger le Contrat"}
                   </span>
                 </button>
               </div>

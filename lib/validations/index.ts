@@ -73,6 +73,7 @@ export const contractFormSchema = z
     dateFin: z.string().nullable().optional(),
     periodicite: z.nativeEnum(Periodicite),
     montantMainOeuvre: z.number().min(0, "Montant invalide"),
+    frequenceVisites: z.number().int().min(1).max(4).optional().default(1),
     equipementsCouverts: z.string().min(3, "Description des équipements requise"),
   })
   .superRefine((data, ctx) => {

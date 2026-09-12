@@ -109,6 +109,7 @@ export function ContractManager({ contracts, clients }: Props) {
     dateFin: string;
     periodicite: Periodicite;
     montantMainOeuvre: number;
+    frequenceVisites: number;
     equipementsCouverts: string;
   }>({
     clientId: availableClients[0]?.id || clients[0]?.id || "",
@@ -116,6 +117,7 @@ export function ContractManager({ contracts, clients }: Props) {
     dateFin: "",
     periodicite: Periodicite.MENSUEL,
     montantMainOeuvre: 150000,
+    frequenceVisites: 1,
     equipementsCouverts: "",
   });
 
@@ -134,6 +136,7 @@ export function ContractManager({ contracts, clients }: Props) {
       dateFin: "",
       periodicite: Periodicite.MENSUEL,
       montantMainOeuvre: 150000,
+      frequenceVisites: 1,
       equipementsCouverts: "",
     });
     setShowModal(true);
@@ -713,12 +716,12 @@ export function ContractManager({ contracts, clients }: Props) {
                 )}
               </div>
 
-              {/* Bloc Périodicité & Forfait */}
+              {/* Bloc Périodicité, Fréquence & Forfait */}
               <div className="bg-slate-50 p-3.5 sm:p-4 rounded-2xl border border-slate-200 space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
                     <label className="font-bold text-gray-700 block mb-1">
-                      Périodicité de facturation
+                      Périodicité
                     </label>
                     <select
                       value={formData.periodicite}
@@ -727,15 +730,32 @@ export function ContractManager({ contracts, clients }: Props) {
                       }
                       className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-green outline-none font-bold text-gray-800"
                     >
-                      <option value={Periodicite.MENSUEL}>MENSUEL (1 mois)</option>
-                      <option value={Periodicite.TRIMESTRIEL}>TRIMESTRIEL (3 mois)</option>
-                      <option value={Periodicite.ANNUEL}>ANNUEL (12 mois)</option>
+                      <option value={Periodicite.MENSUEL}>MENSUEL</option>
+                      <option value={Periodicite.TRIMESTRIEL}>TRIMESTRIEL</option>
+                      <option value={Periodicite.ANNUEL}>ANNUEL</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="font-bold text-gray-700 block mb-1">
-                      Forfait Périodique (FCFA) <span className="text-brand-red">*</span>
+                      Fréquence des visites <span className="text-brand-red">*</span>
+                    </label>
+                    <select
+                      value={formData.frequenceVisites}
+                      onChange={(e) =>
+                        setFormData({ ...formData, frequenceVisites: Number(e.target.value) })
+                      }
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-green outline-none font-bold text-gray-800"
+                    >
+                      <option value={1}>1 visite / mois (12/an)</option>
+                      <option value={2}>2 visites / mois (24/an)</option>
+                      <option value={4}>Hebdo - 4 / mois (48/an)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">
+                      Forfait (FCFA) <span className="text-brand-red">*</span>
                     </label>
                     <input
                       type="number"
@@ -761,7 +781,7 @@ export function ContractManager({ contracts, clients }: Props) {
                       Montants usuels :
                     </span>
                     <span className="text-[11px] font-extrabold text-brand-green">
-                      Soit {formatFCFA(formData.montantMainOeuvre)} / {formData.periodicite === Periodicite.MENSUEL ? "mois" : formData.periodicite === Periodicite.TRIMESTRIEL ? "trimestre" : "an"}
+                      Soit {formatFCFA(formData.montantMainOeuvre)} / {formData.periodicite === Periodicite.MENSUEL ? "mois" : formData.periodicite === Periodicite.TRIMESTRIEL ? "trimestre" : "an"} • {formData.frequenceVisites} visite(s)/mois
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -879,7 +899,7 @@ export function ContractManager({ contracts, clients }: Props) {
                     {clients.find((c) => c.id === formData.clientId)?.nom || "Sélectionnez un client"}
                   </div>
                   <div className="text-[11px] text-gray-600">
-                    {formatFCFA(formData.montantMainOeuvre)} / {formData.periodicite.toLowerCase()} •{" "}
+                    {formatFCFA(formData.montantMainOeuvre)} / {formData.periodicite.toLowerCase()} • {formData.frequenceVisites} visite(s)/mois •{" "}
                     {!formData.dateFin ? "CDI sans échéance" : `CDD jusqu'au ${formData.dateFin}`}
                   </div>
                 </div>
