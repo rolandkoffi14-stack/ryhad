@@ -129,8 +129,19 @@ export function PrintDocumentModal({
       <div className="absolute inset-0 -z-10" onClick={onClose} aria-hidden="true" />
 
       <div className="bg-slate-100 sm:rounded-3xl shadow-2xl border border-slate-300 w-full max-w-4xl h-full sm:h-[94vh] flex flex-col overflow-hidden relative">
-        {/* Barre Supérieure d'Actions */}
-        <div className="bg-white border-b border-slate-200 px-4 py-3 sm:px-6 sm:py-3.5 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-xs z-10">
+        {/* BOUTON FERMER ANCRÉ TOUT EN HAUT À DROITE — HAUT CONTRASTE & TOTALEMENT SÉPARÉ */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Fermer la fenêtre d'impression"
+          title="Fermer (Échap)"
+          className="absolute top-3 right-3 sm:top-3.5 sm:right-4 z-50 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900 hover:bg-red-600 text-white flex items-center justify-center shadow-lg hover:scale-105 transition-all cursor-pointer border-2 border-white focus:outline-hidden"
+        >
+          <X className="w-5 h-5" strokeWidth={2.5} />
+        </button>
+
+        {/* Barre Supérieure d'Actions (avec marge droite réservée au bouton fermer) */}
+        <div className="bg-white border-b border-slate-200 pl-4 pr-16 py-3 sm:pl-6 sm:pr-20 sm:py-3.5 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-xs z-10">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200">
               <Printer className="w-5 h-5" />
@@ -173,7 +184,7 @@ export function PrintDocumentModal({
             </button>
           </div>
 
-          {/* Boutons d'Action Clés + Fermeture Isolée */}
+          {/* Boutons d'Action Clés (TOTALEMENT SÉPARÉS DU BOUTON FERMER) */}
           <div className="flex items-center gap-2">
             {/* GROS BOUTON VERT D'IMPRESSION (OUVRE NOUVEL ONGLET PROPRE) */}
             <button
@@ -200,20 +211,6 @@ export function PrintDocumentModal({
                 <span>WhatsApp</span>
               </a>
             )}
-
-            {/* Séparateur visuel */}
-            <div className="h-6 w-px bg-slate-200 mx-1 hidden sm:block" />
-
-            {/* BOUTON FERMER DISTINCT ET HAUTEMENT VISIBLE */}
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Fermer la fenêtre d'impression"
-              title="Fermer (Échap)"
-              className="p-2 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 hover:border-red-200 transition-colors cursor-pointer"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
         </div>
 
