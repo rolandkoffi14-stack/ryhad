@@ -23,6 +23,27 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validated = contractFormSchema.parse(body);
 
+    // Règle d'unicité stricte : un client ne peut pas avoir plus d'un contrat actif
+    const existingActiveContract = await db.contract.findFirst({
+      where: {
+        clientId: validated.clientId,
+        statut: ContractStatus.ACTIF,
+      },
+      include: {
+        client: true,
+      },
+    });
+
+    if (existingActiveContract) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: `Le client ${existingActiveContract.client.nom} dispose déjà d'un contrat de maintenance actif. Un client ne peut pas avoir plus d'un contrat actif simultanément.`,
+        },
+        { status: 400 }
+      );
+    }
+
     const startDate = new Date(validated.dateDebut);
     let finalEndDate: Date | null = null;
 

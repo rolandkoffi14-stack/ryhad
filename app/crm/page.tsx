@@ -153,6 +153,106 @@ export default async function CrmDashboardPage() {
     (a, b) => new Date(b.dateCreation).getTime() - new Date(a.dateCreation).getTime()
   );
 
+  // Détermination précise des TICKETS EN ATTENTE (prêts à être démarrés par le tech mais pas encore démarrés)
+  const isTicketPending = (t: any) => {
+    if (
+      t.statut === InterventionStatut.LIVRE_CLOTURE ||
+      t.statut === InterventionStatut.CLOTURE ||
+      t.statut === InterventionStatut.ANNULE
+    ) {
+      return false;
+    }
+
+    if (t.type === InterventionType.PONCTUEL) {
+      const diagDoc = t.documents?.find(
+        (d: any) => d.type === DocumentType.RECU_DIAGNOSTIC || (d.type === DocumentType.FACTURE && d.montant <= 15000)
+      );
+      const isDiagPaid = diagDoc?.statutPaiement === StatutPaiement.PAYE;
+
+      // 1. Diagnostic prêt à être démarré (frais encaissés)
+      if (
+        t.statut === InterventionStatut.FRAIS_DIAGNOSTIC_ENCAISSE ||
+        (t.statut === InterventionStatut.NOUVEAU && isDiagPaid)
+      ) {
+        return true;
+      }
+
+      // 2. Réparation prête à être démarrée (devis accepté + facture réparation réglée)
+      if (t.statut === InterventionStatut.DEVIS_ACCEPTE) {
+        const repDoc = t.documents?.find(
+          (d: any) =>
+            d.type === DocumentType.FACTURE &&
+            d.statutPaiement === StatutPaiement.PAYE &&
+            d.id !== diagDoc?.id
+        );
+        if (repDoc) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    if (t.type === InterventionType.CONTRACTUEL) {
+      // Intervention contractuelle à l'état NOUVEAU :
+      // - Si non programmée (panne imprévue sous contrat) : prête immédiatement
+      // - Si programmée : prête dès que la date prévue est atteinte ou passée
+      if (t.statut === InterventionStatut.NOUVEAU) {
+        if (!t.dateProgrammee) return true;
+        const targetDay = new Date(t.dateProgrammee);
+        targetDay.setHours(0, 0, 0, 0);
+        const currentDay = new Date();
+        currentDay.setHours(0, 0, 0, 0);
+        return currentDay >= targetDay;
+      }
+      return false;
+    }
+
+    return false;
+  };
+
+  // Détermination précise des TICKETS EN COURS (démarrés mais pas clôturés/livrés)
+  const isTicketInProgress = (t: any) => {
+    if (
+      t.statut === InterventionStatut.LIVRE_CLOTURE ||
+      t.statut === InterventionStatut.CLOTURE ||
+      t.statut === InterventionStatut.ANNULE
+    ) {
+      return false;
+    }
+
+    // S'il est prêt à démarrer, il n'a pas encore débuté
+    if (isTicketPending(t)) {
+      return false;
+    }
+
+    // S'il est à l'état NOUVEAU sans encaissement préalable
+    if (
+      t.statut === InterventionStatut.NOUVEAU ||
+      t.statut === InterventionStatut.FRAIS_DIAGNOSTIC_EN_ATTENTE
+    ) {
+      return false;
+    }
+
+    // Tous les statuts démarrés et non clôturés
+    return [
+      InterventionStatut.EN_DIAGNOSTIC,
+      InterventionStatut.DIAGNOSTIC_TERMINE,
+      InterventionStatut.DEVIS_ENVOYE,
+      InterventionStatut.DEVIS_ACCEPTE,
+      InterventionStatut.EN_REPARATION,
+      InterventionStatut.EN_INTERVENTION,
+      InterventionStatut.EN_ATTENTE_PIECE,
+      InterventionStatut.EN_ATTENTE_VALIDATION_CLIENT,
+      InterventionStatut.TERMINE,
+    ].includes(t.statut);
+  };
+
+  // Compteurs adaptés aux droits de chaque rôle :
+  // Le technicien compte uniquement ses tickets assignés, admin/réception comptent l'ensemble
+  const pendingTicketsCount = tickets.filter(isTicketPending).length;
+  const inProgressTicketsCount = tickets.filter(isTicketInProgress).length;
+
   const pendingDiagnosticCount = allPonctuelTickets.filter(
     (t) =>
       t.statut === InterventionStatut.FRAIS_DIAGNOSTIC_ENCAISSE ||
@@ -173,8 +273,6 @@ export default async function CrmDashboardPage() {
       t.statut === InterventionStatut.LIVRE_CLOTURE ||
       t.statut === InterventionStatut.CLOTURE
   ).length;
-
-  const totalActiveTicketsCount = activePonctuelCount + activeContractuelCount;
 
   return (
     <div className="space-y-8">
@@ -198,34 +296,34 @@ export default async function CrmDashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
-              <span className="text-xs font-bold uppercase tracking-wider">Tickets Ponctuels</span>
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
-                <Wrench className="w-4 h-4" />
+              <span className="text-xs font-bold uppercase tracking-wider">Tickets en Attente</span>
+              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                <Clock className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-2xl font-extrabold text-slate-900">{activePonctuelCount}</div>
-            <Link href="/crm/tickets/ponctuel" className="text-[11px] text-blue-700 font-bold hover:underline block">
-              Voir mes dossiers atelier →
+            <div className="text-2xl font-extrabold text-slate-900">{pendingTicketsCount}</div>
+            <Link href="/crm/tickets/ponctuel" className="text-[11px] text-amber-700 font-bold hover:underline block">
+              Prêts à être démarrés par vous →
             </Link>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
-              <span className="text-xs font-bold uppercase tracking-wider">Interventions Contrat</span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                <Building2 className="w-4 h-4" />
+              <span className="text-xs font-bold uppercase tracking-wider">Tickets en Cours</span>
+              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                <Wrench className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-2xl font-extrabold text-slate-900">{activeContractuelCount}</div>
-            <Link href="/crm/tickets/contractuel" className="text-[11px] text-emerald-700 font-bold hover:underline block">
-              Voir mes visites entreprises →
+            <div className="text-2xl font-extrabold text-slate-900">{inProgressTicketsCount}</div>
+            <Link href="/crm/tickets/ponctuel" className="text-[11px] text-blue-700 font-bold hover:underline block">
+              En diagnostic ou travaux →
             </Link>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
               <span className="text-xs font-bold uppercase tracking-wider">Terminées</span>
-              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
@@ -236,12 +334,12 @@ export default async function CrmDashboardPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
               <span className="text-xs font-bold uppercase tracking-wider">À Diagnostiquer</span>
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
                 <Clock className="w-4 h-4" />
               </div>
             </div>
             <div className="text-2xl font-extrabold text-slate-900">{pendingDiagnosticCount}</div>
-            <Link href="/crm/tickets/ponctuel" className="text-[11px] text-amber-700 font-bold hover:underline block">
+            <Link href="/crm/tickets/ponctuel" className="text-[11px] text-slate-700 font-bold hover:underline block">
               Diagnostics en attente →
             </Link>
           </div>
@@ -251,57 +349,66 @@ export default async function CrmDashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
-              <span className="text-xs font-bold uppercase tracking-wider">Tickets Actifs</span>
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
-                <Ticket className="w-4 h-4" />
+              <span className="text-xs font-bold uppercase tracking-wider">Tickets en Attente</span>
+              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
+                <Clock className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-2xl font-extrabold text-slate-900">{totalActiveTicketsCount}</div>
-            <p className="text-[11px] text-slate-500">
-              {activePonctuelCount} ponctuel(s) • {activeContractuelCount} contrat(s)
+            <div className="text-2xl font-extrabold text-slate-900">{pendingTicketsCount}</div>
+            <p className="text-[11px] text-amber-700 font-bold">
+              Prêts à être démarrés par le tech
             </p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
-              <span className="text-xs font-bold uppercase tracking-wider">
-                {user.role === StaffRole.ADMIN ? "Contrats Actifs" : "Clients Actifs"}
-              </span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                <ClipboardList className="w-4 h-4" />
+              <span className="text-xs font-bold uppercase tracking-wider">Tickets en Cours</span>
+              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                <Wrench className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-2xl font-extrabold text-slate-900">
-              {user.role === StaffRole.ADMIN ? activeContractsCount : clientsCount}
-            </div>
+            <div className="text-2xl font-extrabold text-slate-900">{inProgressTicketsCount}</div>
             <p className="text-[11px] text-slate-500">
-              {user.role === StaffRole.ADMIN ? "Parcs informatiques sous contrat" : "Clients enregistrés"}
+              Démarrés, non clôturés
             </p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
               <span className="text-xs font-bold uppercase tracking-wider">Demandes Commerciales</span>
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
-                <Clock className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
+                <ClipboardList className="w-4 h-4" />
               </div>
             </div>
             <div className="text-2xl font-extrabold text-slate-900">{commercialRequestsCount}</div>
-            <p className="text-[11px] text-amber-700 font-semibold">À traiter (Vente/Location)</p>
+            <p className="text-[11px] text-purple-700 font-semibold">À traiter (Vente/Location)</p>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-xs font-bold uppercase tracking-wider">Chiffre d&apos;Affaires</span>
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center">
-                <Receipt className="w-4 h-4" />
+          {user.role === StaffRole.ADMIN ? (
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
+              <div className="flex items-center justify-between text-slate-500">
+                <span className="text-xs font-bold uppercase tracking-wider">Chiffre d&apos;Affaires</span>
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-brand-green flex items-center justify-center">
+                  <Receipt className="w-4 h-4" />
+                </div>
               </div>
+              <div className="text-2xl font-extrabold text-brand-green-dark">
+                {totalRevenue.toLocaleString("fr-FR")} <span className="text-xs font-bold text-slate-500">FCFA</span>
+              </div>
+              <p className="text-[11px] text-slate-500">Encaissé sur factures & diagnostics</p>
             </div>
-            <div className="text-2xl font-extrabold text-brand-blue">
-              {totalRevenue.toLocaleString("fr-FR")} <span className="text-xs font-bold text-slate-500">FCFA</span>
+          ) : (
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
+              <div className="flex items-center justify-between text-slate-500">
+                <span className="text-xs font-bold uppercase tracking-wider">Clients Enregistrés</span>
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                  <Users className="w-4 h-4" />
+                </div>
+              </div>
+              <div className="text-2xl font-extrabold text-slate-900">{clientsCount}</div>
+              <p className="text-[11px] text-slate-500">Particuliers & Entreprises</p>
             </div>
-            <p className="text-[11px] text-slate-500">Encaissé sur devis & factures</p>
-          </div>
+          )}
         </div>
       )}
 

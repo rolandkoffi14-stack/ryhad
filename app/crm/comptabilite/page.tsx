@@ -32,6 +32,10 @@ export default async function AccountingPage() {
             numero: true,
             type: true,
             typeMateriel: true,
+            montantMainOeuvre: true,
+            piecesUtilisees: {
+              select: { id: true, designation: true, quantite: true, prixUnitaire: true },
+            },
             client: {
               select: { id: true, nom: true, telephone: true, type: true, email: true },
             },

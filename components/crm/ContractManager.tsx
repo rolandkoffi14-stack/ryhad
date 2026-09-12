@@ -19,6 +19,7 @@ import {
   Eye,
   CreditCard,
   Download,
+  X,
 } from "lucide-react";
 import { Periodicite, ContractStatus, VisiteStatus } from "@prisma/client";
 import { formatFCFA } from "@/lib/format";
@@ -55,7 +56,7 @@ interface ContractItem {
 
 interface Props {
   contracts: ContractItem[];
-  clients: { id: string; nom: string }[];
+  clients: { id: string; nom: string; entreprise?: string | null; type?: string }[];
 }
 
 export function ContractManager({ contracts, clients }: Props) {
@@ -87,6 +88,21 @@ export function ContractManager({ contracts, clients }: Props) {
     montant: 0,
   });
 
+  // Clients possédant déjà un contrat actif (règle : 1 seul contrat actif simultané par client)
+  const clientsWithActiveContract = useMemo(() => {
+    const activeIds = new Set<string>();
+    contracts.forEach((c) => {
+      if (c.statut === ContractStatus.ACTIF) {
+        activeIds.add(c.clientId);
+      }
+    });
+    return activeIds;
+  }, [contracts]);
+
+  const availableClients = useMemo(() => {
+    return clients.filter((cl) => !clientsWithActiveContract.has(cl.id));
+  }, [clients, clientsWithActiveContract]);
+
   const [formData, setFormData] = useState<{
     clientId: string;
     dateDebut: string;
@@ -95,7 +111,7 @@ export function ContractManager({ contracts, clients }: Props) {
     montantMainOeuvre: number;
     equipementsCouverts: string;
   }>({
-    clientId: clients[0]?.id || "",
+    clientId: availableClients[0]?.id || clients[0]?.id || "",
     dateDebut: new Date().toISOString().split("T")[0],
     dateFin: "",
     periodicite: Periodicite.MENSUEL,
@@ -107,6 +123,21 @@ export function ContractManager({ contracts, clients }: Props) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleOpenCreateModal = () => {
+    setError(null);
+    setSuccessMsg(null);
+    const firstAvailable = availableClients[0]?.id || "";
+    setFormData({
+      clientId: firstAvailable,
+      dateDebut: new Date().toISOString().split("T")[0],
+      dateFin: "",
+      periodicite: Periodicite.MENSUEL,
+      montantMainOeuvre: 150000,
+      equipementsCouverts: "",
+    });
+    setShowModal(true);
+  };
 
   const getMinEndDate = () => {
     if (!formData.dateDebut) return undefined;
@@ -126,6 +157,24 @@ export function ContractManager({ contracts, clients }: Props) {
     if (formData.periodicite === Periodicite.TRIMESTRIEL) return "3 mois";
     if (formData.periodicite === Periodicite.ANNUEL) return "12 mois (1 an)";
     return "selon périodicité";
+  };
+
+  const calculatedDurationMonths = useMemo(() => {
+    if (!formData.dateDebut || !formData.dateFin) return null;
+    const start = new Date(formData.dateDebut);
+    const end = new Date(formData.dateFin);
+    if (end <= start) return 0;
+    const diffMonths = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+    return diffMonths > 0 ? diffMonths : 1;
+  }, [formData.dateDebut, formData.dateFin]);
+
+  const addEquipmentTag = (tag: string) => {
+    setFormData((prev) => {
+      const current = prev.equipementsCouverts.trim();
+      if (!current) return { ...prev, equipementsCouverts: tag };
+      if (current.includes(tag)) return prev;
+      return { ...prev, equipementsCouverts: `${current}\n• ${tag}` };
+    });
   };
 
   // Filtrage
@@ -167,13 +216,26 @@ export function ContractManager({ contracts, clients }: Props) {
     setError(null);
     setSuccessMsg(null);
 
+    // Règle d'unicité : un seul contrat actif par client
+    if (clientsWithActiveContract.has(formData.clientId)) {
+      setError("Ce client dispose déjà d'un contrat de maintenance actif. Il est impossible de lui rattacher un second contrat actif.");
+      setLoading(false);
+      return;
+    }
+
     if (formData.dateFin && formData.dateFin.trim() !== "") {
       const start = new Date(formData.dateDebut);
       const end = new Date(formData.dateFin);
       const minEnd = new Date(start);
-      minEnd.setMonth(minEnd.getMonth() + 3);
+      if (formData.periodicite === Periodicite.MENSUEL) {
+        minEnd.setMonth(minEnd.getMonth() + 1);
+      } else if (formData.periodicite === Periodicite.TRIMESTRIEL) {
+        minEnd.setMonth(minEnd.getMonth() + 3);
+      } else if (formData.periodicite === Periodicite.ANNUEL) {
+        minEnd.setMonth(minEnd.getMonth() + 12);
+      }
       if (end < minEnd) {
-        setError("Pour un contrat à durée déterminée, la durée minimale doit être d'au moins 3 mois.");
+        setError(`Pour un contrat à durée déterminée (${formData.periodicite.toLowerCase()}), la durée minimale doit être d'au moins ${getMinDurationLabel()}.`);
         setLoading(false);
         return;
       }
@@ -306,8 +368,8 @@ export function ContractManager({ contracts, clients }: Props) {
         </div>
 
         <button
-          onClick={() => setShowModal(true)}
-          className="inline-flex items-center gap-2 bg-brand-green hover:bg-brand-green-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all self-start sm:self-auto"
+          onClick={handleOpenCreateModal}
+          className="inline-flex items-center gap-2 bg-brand-green hover:bg-brand-green-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all self-start sm:self-auto cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Nouveau Contrat</span>
@@ -568,132 +630,287 @@ export function ContractManager({ contracts, clients }: Props) {
 
       {/* Modale de création d'un contrat */}
       {showModal && mounted && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="p-5 border-b border-gray-100 bg-brand-slate/60 flex items-center justify-between">
-              <h2 className="text-sm font-extrabold text-brand-dark">Nouveau Contrat de Maintenance</h2>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 max-w-xl w-full overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="p-5 border-b border-gray-100 bg-linear-to-r from-slate-50 via-white to-brand-green/5 flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-brand-green/10 text-brand-green flex items-center justify-center shrink-0 border border-brand-green/20 shadow-xs">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full inline-block mb-1">
+                    Parc Matériel & Entreprises
+                  </span>
+                  <h2 className="text-base font-extrabold text-brand-dark">Nouveau Contrat de Maintenance</h2>
+                </div>
+              </div>
               <button
+                type="button"
                 onClick={() => setShowModal(false)}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="p-1.5 rounded-xl text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                title="Fermer"
               >
-                ✕
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateContract} className="p-6 space-y-4 overflow-y-auto flex-1 text-xs">
-              <div>
-                <label className="font-bold text-gray-700 block mb-1">
-                  Client / Entreprise <span className="text-brand-red">*</span>
-                </label>
+            <form onSubmit={handleCreateContract} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1 text-xs">
+              {error && (
+                <div className="p-3.5 rounded-2xl bg-brand-red-light border border-brand-red/30 text-brand-red text-xs flex items-center gap-2 font-bold animate-in fade-in">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {/* Règle client unique */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-extrabold text-gray-800 flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5 text-brand-blue" />
+                    <span>Client / Entreprise partenaire</span>
+                    <span className="text-brand-red">*</span>
+                  </label>
+                  <span className="text-[10px] text-gray-500 font-medium">
+                    1 seul contrat actif par client
+                  </span>
+                </div>
+
                 <select
                   required
                   value={formData.clientId}
                   onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none font-semibold text-gray-800 bg-white"
                 >
-                  {clients.map((cl) => (
-                    <option key={cl.id} value={cl.id}>
-                      {cl.nom}
+                  {availableClients.length === 0 && (
+                    <option value="" disabled>
+                      Aucun client sans contrat actif disponible
                     </option>
-                  ))}
+                  )}
+                  {clients.map((cl) => {
+                    const hasActive = clientsWithActiveContract.has(cl.id);
+                    return (
+                      <option
+                        key={cl.id}
+                        value={cl.id}
+                        disabled={hasActive}
+                        className={hasActive ? "text-gray-400 bg-gray-50" : "text-gray-900 font-medium"}
+                      >
+                        {cl.nom} {cl.entreprise ? `(${cl.entreprise})` : ""} {hasActive ? "— ⛔ Contrat actif en cours" : ""}
+                      </option>
+                    );
+                  })}
                 </select>
+
+                {availableClients.length === 0 ? (
+                  <p className="text-[11px] text-amber-700 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+                    ⚠️ Tous vos clients enregistrés possèdent déjà un contrat actif. Vous devez créer un nouveau client ou résilier/renouveler un contrat expiré.
+                  </p>
+                ) : (
+                  <p className="text-[10px] text-gray-500">
+                    Sélectionnez l&apos;entreprise ou le professionnel bénéficiaire. Les clients ayant déjà un contrat actif sont automatiquement grisés.
+                  </p>
+                )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">Périodicité</label>
-                  <select
-                    value={formData.periodicite}
-                    onChange={(e) =>
-                      setFormData({ ...formData, periodicite: e.target.value as Periodicite })
-                    }
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none"
-                  >
-                    <option value={Periodicite.MENSUEL}>MENSUEL</option>
-                    <option value={Periodicite.TRIMESTRIEL}>TRIMESTRIEL</option>
-                    <option value={Periodicite.ANNUEL}>ANNUEL</option>
-                  </select>
+              {/* Bloc Périodicité & Forfait */}
+              <div className="bg-slate-50 p-3.5 sm:p-4 rounded-2xl border border-slate-200 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">
+                      Périodicité de facturation
+                    </label>
+                    <select
+                      value={formData.periodicite}
+                      onChange={(e) =>
+                        setFormData({ ...formData, periodicite: e.target.value as Periodicite })
+                      }
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-green outline-none font-bold text-gray-800"
+                    >
+                      <option value={Periodicite.MENSUEL}>MENSUEL (1 mois)</option>
+                      <option value={Periodicite.TRIMESTRIEL}>TRIMESTRIEL (3 mois)</option>
+                      <option value={Periodicite.ANNUEL}>ANNUEL (12 mois)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="font-bold text-gray-700 block mb-1">
+                      Forfait Périodique (FCFA) <span className="text-brand-red">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      step={5000}
+                      min={10000}
+                      value={formData.montantMainOeuvre}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          montantMainOeuvre: parseInt(e.target.value, 10) || 0,
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-green outline-none font-extrabold text-brand-dark"
+                    />
+                  </div>
                 </div>
+
+                {/* Boutons de montants rapides */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
+                      Montants usuels :
+                    </span>
+                    <span className="text-[11px] font-extrabold text-brand-green">
+                      Soit {formatFCFA(formData.montantMainOeuvre)} / {formData.periodicite === Periodicite.MENSUEL ? "mois" : formData.periodicite === Periodicite.TRIMESTRIEL ? "trimestre" : "an"}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[50000, 100000, 150000, 250000, 500000].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, montantMainOeuvre: preset })}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                          formData.montantMainOeuvre === preset
+                            ? "bg-brand-green text-white shadow-2xs"
+                            : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-100"
+                        }`}
+                      >
+                        {formatFCFA(preset)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bloc Dates */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="font-bold text-gray-700 block mb-1">
-                    Forfait Périodique (FCFA) <span className="text-brand-red">*</span>
+                    Date d&apos;effet (Début) <span className="text-brand-red">*</span>
                   </label>
-                  <input
-                    type="number"
-                    required
-                    step={5000}
-                    min={10000}
-                    value={formData.montantMainOeuvre}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        montantMainOeuvre: parseInt(e.target.value, 10) || 0,
-                      })
-                    }
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none font-bold text-brand-dark"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-gray-700 block mb-1">Date de Début</label>
                   <input
                     type="date"
                     required
                     value={formData.dateDebut}
                     onChange={(e) => setFormData({ ...formData, dateDebut: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none font-medium text-gray-800"
                   />
                 </div>
+
                 <div>
-                  <label className="font-bold text-gray-700 block mb-1">
-                    Date de Fin <span className="text-gray-400 font-normal">(Optionnelle — CDI si vide)</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="font-bold text-gray-700">Date de Fin</label>
+                    <span
+                      className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ${
+                        !formData.dateFin
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}
+                    >
+                      {!formData.dateFin ? "CDI (Tacite reconduction)" : `CDD (${calculatedDurationMonths || 1} mois)`}
+                    </span>
+                  </div>
                   <input
                     type="date"
                     min={getMinEndDate()}
                     value={formData.dateFin}
                     onChange={(e) => setFormData({ ...formData, dateFin: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none text-xs"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none text-xs text-gray-800"
                   />
                   <p className="text-[10px] text-gray-500 mt-1">
-                    Laissez vide pour un CDI (configuré sur 12 mois par défaut). Si spécifiée, durée minimale de {getMinDurationLabel()}.
+                    Laissez vide pour un CDI. Si spécifiée : min. {getMinDurationLabel()}.
                   </p>
                 </div>
               </div>
 
-              <div>
-                <label className="font-bold text-gray-700 block mb-1">
-                  Équipements & Périmètre Couvert <span className="text-brand-red">*</span>
-                </label>
+              {/* Équipements & Périmètre Couvert */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-gray-700 flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-brand-green" />
+                    <span>Équipements & Périmètre Couvert</span>
+                    <span className="text-brand-red">*</span>
+                  </label>
+                </div>
                 <textarea
                   required
                   rows={3}
-                  placeholder="Liste des équipements couverts"
+                  placeholder="Ex : 15 PC Portables HP ProBook, 2 Imprimantes réseau Canon, 1 Switch Cisco 24 ports, maintenance préventive mensuelle..."
                   value={formData.equipementsCouverts}
                   onChange={(e) =>
                     setFormData({ ...formData, equipementsCouverts: e.target.value })
                   }
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none text-xs"
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none text-xs leading-relaxed text-gray-800"
                 />
+
+                {/* Suggestions rapides */}
+                <div className="flex flex-wrap items-center gap-1 text-[11px]">
+                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mr-1">
+                    Ajouter :
+                  </span>
+                  {[
+                    "Postes informatiques (PC/Laptops)",
+                    "Imprimantes & Scanners",
+                    "Réseau local, Switch & Câblage",
+                    "Vidéoprojecteurs de salle",
+                    "Maintenance biomédicale",
+                    "Visites préventives mensuelles",
+                  ].map((chip) => (
+                    <button
+                      key={chip}
+                      type="button"
+                      onClick={() => addEquipmentTag(chip)}
+                      className="px-2 py-0.5 rounded-lg bg-gray-100 hover:bg-brand-green/10 hover:text-brand-green text-gray-600 text-[10px] font-bold transition-colors cursor-pointer"
+                    >
+                      + {chip}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="pt-3 border-t border-gray-100 flex items-center justify-end gap-2">
+              {/* Récapitulatif dynamique avant validation */}
+              <div className="p-3.5 rounded-2xl bg-brand-slate/80 border border-slate-200 flex items-center justify-between text-xs">
+                <div className="space-y-0.5">
+                  <div className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                    Récapitulatif de souscription
+                  </div>
+                  <div className="font-extrabold text-brand-dark">
+                    {clients.find((c) => c.id === formData.clientId)?.nom || "Sélectionnez un client"}
+                  </div>
+                  <div className="text-[11px] text-gray-600">
+                    {formatFCFA(formData.montantMainOeuvre)} / {formData.periodicite.toLowerCase()} •{" "}
+                    {!formData.dateFin ? "CDI sans échéance" : `CDD jusqu'au ${formData.dateFin}`}
+                  </div>
+                </div>
+                <div className="w-9 h-9 rounded-xl bg-brand-green/10 text-brand-green flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+              </div>
+
+              {/* Footer boutons */}
+              <div className="pt-3 border-t border-gray-100 flex items-center justify-end gap-2.5">
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
                   disabled={loading}
-                  className="px-4 py-2.5 rounded-xl border border-gray-200 font-bold text-gray-600 hover:bg-gray-50"
+                  className="px-4 py-2.5 rounded-xl border border-gray-200 font-bold text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="px-5 py-2.5 rounded-xl bg-brand-green hover:bg-brand-green-dark text-white font-extrabold shadow-sm disabled:opacity-50"
+                  disabled={loading || availableClients.length === 0 || !formData.clientId}
+                  className="px-5 py-2.5 rounded-xl bg-brand-green hover:bg-brand-green-dark text-white font-extrabold shadow-sm transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                 >
-                  {loading ? "Création..." : "Valider le Contrat"}
+                  {loading ? (
+                    <span>Création en cours...</span>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Valider le Contrat</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

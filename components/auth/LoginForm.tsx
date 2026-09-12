@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
-import { Lock, Mail, KeyRound, ShieldCheck, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { Lock, Mail, KeyRound, ShieldCheck, CheckCircle2, AlertCircle, Eye, EyeOff, Clock } from "lucide-react";
 
 export function LoginForm() {
   const router = useRouter();
@@ -12,6 +12,7 @@ export function LoginForm() {
   const callbackUrl = searchParams.get("callbackUrl") || "/crm";
   const isSetupSuccess = searchParams.get("setup") === "success";
   const isResetSuccess = searchParams.get("reset") === "success";
+  const isInactivity = searchParams.get("reason") === "inactivity";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -62,6 +63,15 @@ export function LoginForm() {
           <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-brand-green" />
           <span>
             <strong>Mot de passe modifié !</strong> Vous pouvez désormais vous connecter avec votre nouveau mot de passe.
+          </span>
+        </div>
+      )}
+
+      {isInactivity && (
+        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5 animate-fade-in">
+          <Clock className="w-4 h-4 shrink-0 mt-0.5 text-amber-600" />
+          <span>
+            <strong>Session expirée :</strong> Vous avez été déconnecté automatiquement après 1 heure d&apos;inactivité pour des raisons de sécurité. Veuillez vous reconnecter.
           </span>
         </div>
       )}

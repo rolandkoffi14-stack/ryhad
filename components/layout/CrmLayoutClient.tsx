@@ -5,6 +5,7 @@ import { CrmSidebar } from "./CrmSidebar";
 import { CrmHeader } from "./CrmHeader";
 import { SessionUser } from "@/lib/auth";
 import { CrmRealtimeProvider } from "@/components/crm/CrmRealtimeProvider";
+import { AutoLogoutTimer } from "@/components/crm/AutoLogoutTimer";
 
 interface Props {
   user: SessionUser;
@@ -16,6 +17,7 @@ export function CrmLayoutClient({ user, children }: Props) {
 
   return (
     <CrmRealtimeProvider>
+      <AutoLogoutTimer />
       <div className="flex min-h-screen bg-slate-100">
         {/* Sidebar Desktop & Mobile Drawer */}
         <CrmSidebar

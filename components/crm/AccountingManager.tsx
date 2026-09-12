@@ -22,6 +22,8 @@ import {
   Smartphone,
   Receipt,
   FileText,
+  Wrench,
+  Cpu,
 } from "lucide-react";
 import { formatFCFA } from "@/lib/format";
 import { format, differenceInDays } from "date-fns";
@@ -47,6 +49,8 @@ interface FinancialDoc {
     numero: string;
     type: string;
     typeMateriel: string;
+    montantMainOeuvre?: number | null;
+    piecesUtilisees?: { id: string; designation: string; quantite: number; prixUnitaire: number }[];
     client: { id: string; nom: string; telephone: string; type: string; email: string | null } | null;
   } | null;
   contract: {
@@ -69,7 +73,7 @@ interface Props {
 export function AccountingManager({ documents }: Props) {
   const router = useRouter();
   const [periodFilter, setPeriodFilter] = useState<"ALL" | "MONTH" | "QUARTER" | "YEAR">("MONTH");
-  const [activeTab, setActiveTab] = useState<"JOURNAL" | "CREANCES">("JOURNAL");
+  const [activeTab, setActiveTab] = useState<"JOURNAL" | "DEVIS" | "CREANCES">("JOURNAL");
   const [searchTerm, setSearchTerm] = useState("");
   const [paymentModeFilter, setPaymentModeFilter] = useState<string>("ALL");
   const [currentPage, setCurrentPage] = useState(1);
@@ -113,7 +117,7 @@ export function AccountingManager({ documents }: Props) {
     });
   }, [documents, periodFilter]);
 
-  // Calcul des métriques financières
+  // Calcul des métriques financières avec séparation Pièces vs Main d'œuvre
   const metrics = useMemo(() => {
     let totalEncaisse = 0;
     let totalFacture = 0;
@@ -124,6 +128,10 @@ export function AccountingManager({ documents }: Props) {
     let caPonctuel = 0;
     let caContrats = 0;
     let caCommercial = 0;
+
+    // Ventilation Main d'œuvre vs Pièces
+    let caMainOeuvre = 0;
+    let caPieces = 0;
 
     // Répartition par mode de paiement
     const parMode: Record<string, number> = {
@@ -147,13 +155,33 @@ export function AccountingManager({ documents }: Props) {
         if (doc.statutPaiement === "PAYE") {
           totalEncaisse += doc.montant;
 
-          // Ventilation par pôle
+          // Ventilation par pôle et par nature (Main d'œuvre vs Pièces)
           if (doc.contract) {
             caContrats += doc.montant;
+            caMainOeuvre += doc.montant; // Maintenance préventive sous contrat = 100% Main d'œuvre
           } else if (doc.demandeCommerciale) {
             caCommercial += doc.montant;
-          } else {
+            if (doc.demandeCommerciale.typeDemande === "VENTE_MATERIEL") {
+              caPieces += doc.montant;
+            } else {
+              caMainOeuvre += doc.montant;
+            }
+          } else if (doc.intervention) {
             caPonctuel += doc.montant;
+            if (doc.typeFacture === "DIAGNOSTIC" || doc.type === "RECU_DIAGNOSTIC") {
+              caMainOeuvre += doc.montant; // Frais de diagnostic = 100% prestation technique
+            } else {
+              const piecesTotal = (doc.intervention.piecesUtilisees || []).reduce(
+                (acc, p) => acc + p.quantite * p.prixUnitaire,
+                0
+              );
+              const partPieces = Math.min(piecesTotal, doc.montant);
+              const partMO = doc.montant - partPieces;
+              caPieces += partPieces;
+              caMainOeuvre += partMO;
+            }
+          } else {
+            caMainOeuvre += doc.montant;
           }
 
           // Ventilation par mode
@@ -176,6 +204,9 @@ export function AccountingManager({ documents }: Props) {
     const tauxRecouvrement =
       totalFacture > 0 ? Math.round((totalEncaisse / totalFacture) * 100) : 100;
 
+    const pctMainOeuvre = totalEncaisse > 0 ? Math.round((caMainOeuvre / totalEncaisse) * 100) : 0;
+    const pctPieces = totalEncaisse > 0 ? Math.round((caPieces / totalEncaisse) * 100) : 0;
+
     return {
       totalEncaisse,
       totalFacture,
@@ -185,6 +216,10 @@ export function AccountingManager({ documents }: Props) {
       caPonctuel,
       caContrats,
       caCommercial,
+      caMainOeuvre,
+      caPieces,
+      pctMainOeuvre,
+      pctPieces,
       parMode,
     };
   }, [periodFilteredDocs]);
@@ -213,53 +248,91 @@ export function AccountingManager({ documents }: Props) {
       .sort((a, b) => b.daysLate - a.daysLate);
   }, [periodFilteredDocs]);
 
-  // Liste filtrée pour le Journal des Ventes
+  // Liste filtrée pour le Journal des Ventes (FACTURES RÉELLES UNIQUEMENT - Devis exclus)
   const journalList = useMemo(() => {
-    return periodFilteredDocs.filter((doc) => {
-      // Filtre mode paiement
-      if (paymentModeFilter !== "ALL") {
-        if (doc.modePaiement !== paymentModeFilter) return false;
-      }
-
-      // Recherche texte
-      if (searchTerm.trim()) {
-        const term = searchTerm.toLowerCase();
-        const num = doc.numero.toLowerCase();
-        const clientNom = (
-          doc.intervention?.client?.nom ||
-          doc.contract?.client?.nom ||
-          doc.demandeCommerciale?.client?.nom ||
-          ""
-        ).toLowerCase();
-        const ref = (doc.referencePaiement || "").toLowerCase();
-
-        if (!num.includes(term) && !clientNom.includes(term) && !ref.includes(term)) {
-          return false;
+    return periodFilteredDocs
+      .filter((doc) => doc.type !== "DEVIS")
+      .filter((doc) => {
+        // Filtre mode paiement
+        if (paymentModeFilter !== "ALL") {
+          if (doc.modePaiement !== paymentModeFilter) return false;
         }
-      }
 
-      return true;
-    });
+        // Recherche texte
+        if (searchTerm.trim()) {
+          const term = searchTerm.toLowerCase();
+          const num = doc.numero.toLowerCase();
+          const clientNom = (
+            doc.intervention?.client?.nom ||
+            doc.contract?.client?.nom ||
+            doc.demandeCommerciale?.client?.nom ||
+            ""
+          ).toLowerCase();
+          const ref = (doc.referencePaiement || "").toLowerCase();
+
+          if (!num.includes(term) && !clientNom.includes(term) && !ref.includes(term)) {
+            return false;
+          }
+        }
+
+        return true;
+      });
   }, [periodFilteredDocs, paymentModeFilter, searchTerm]);
 
-  // Pagination pour le journal
-  const totalItems = activeTab === "JOURNAL" ? journalList.length : creancesList.length;
+  // Liste dédiée pour les Devis Estimatifs
+  const devisList = useMemo(() => {
+    return periodFilteredDocs
+      .filter((doc) => doc.type === "DEVIS")
+      .filter((doc) => {
+        if (searchTerm.trim()) {
+          const term = searchTerm.toLowerCase();
+          const num = doc.numero.toLowerCase();
+          const clientNom = (
+            doc.intervention?.client?.nom ||
+            doc.contract?.client?.nom ||
+            doc.demandeCommerciale?.client?.nom ||
+            ""
+          ).toLowerCase();
+
+          if (!num.includes(term) && !clientNom.includes(term)) {
+            return false;
+          }
+        }
+        return true;
+      });
+  }, [periodFilteredDocs, searchTerm]);
+
+  // Pagination pour le journal, devis et créances
+  const totalItems =
+    activeTab === "JOURNAL"
+      ? journalList.length
+      : activeTab === "DEVIS"
+      ? devisList.length
+      : creancesList.length;
+
   const paginatedDocs = useMemo(() => {
-    const list = activeTab === "JOURNAL" ? journalList : creancesList;
+    const list =
+      activeTab === "JOURNAL"
+        ? journalList
+        : activeTab === "DEVIS"
+        ? devisList
+        : creancesList;
     const start = (currentPage - 1) * pageSize;
     return list.slice(start, start + pageSize);
-  }, [activeTab, journalList, creancesList, currentPage, pageSize]);
+  }, [activeTab, journalList, devisList, creancesList, currentPage, pageSize]);
 
   // Export CSV du grand livre / journal des ventes
   const handleExportJournalCsv = () => {
     const headers = [
       "Date Émission",
-      "N° Document",
-      "Type",
+      "N° Facture",
+      "Type Document",
       "Catégorie",
       "Client",
       "Téléphone",
-      "Montant (FCFA)",
+      "Total TTC (FCFA)",
+      "Part Main d'œuvre (FCFA)",
+      "Part Pièces (FCFA)",
       "Statut Règlement",
       "Mode Paiement",
       "Réf Paiement",
@@ -277,6 +350,22 @@ export function AccountingManager({ documents }: Props) {
         ? "Commercial / Vente"
         : "Atelier Ponctuel";
 
+      let partPieces = 0;
+      let partMO = doc.montant;
+      if (doc.contract) {
+        partMO = doc.montant;
+      } else if (doc.demandeCommerciale?.typeDemande === "VENTE_MATERIEL") {
+        partPieces = doc.montant;
+        partMO = 0;
+      } else if (doc.intervention && doc.typeFacture !== "DIAGNOSTIC" && doc.type !== "RECU_DIAGNOSTIC") {
+        const pTotal = (doc.intervention.piecesUtilisees || []).reduce(
+          (acc, p) => acc + p.quantite * p.prixUnitaire,
+          0
+        );
+        partPieces = Math.min(pTotal, doc.montant);
+        partMO = doc.montant - partPieces;
+      }
+
       return [
         `"${dateStr}"`,
         `"${doc.numero}"`,
@@ -285,6 +374,8 @@ export function AccountingManager({ documents }: Props) {
         `"${clientNom.replace(/"/g, '""')}"`,
         `"${tel}"`,
         `"${doc.montant}"`,
+        `"${partMO}"`,
+        `"${partPieces}"`,
         `"${doc.statutPaiement}"`,
         `"${doc.modePaiement || "Non renseigné"}"`,
         `"${(doc.referencePaiement || "").replace(/"/g, '""')}"`,
@@ -394,13 +485,13 @@ export function AccountingManager({ documents }: Props) {
         </div>
       </div>
 
-      {/* Cartes KPIs Financiers */}
+      {/* Cartes KPIs Financiers avec séparation Main d'œuvre vs Pièces */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* CA Encaissé */}
+        {/* CA Encaissé Global */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-emerald-300 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              CA Encaissé (Réel)
+              CA Encaissé (Total)
             </span>
             <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-brand-green flex items-center justify-center">
               <Banknote className="w-5 h-5" />
@@ -418,25 +509,52 @@ export function AccountingManager({ documents }: Props) {
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-brand-green" />
         </div>
 
-        {/* Total Facturé */}
+        {/* CA Main d'œuvre & Services */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-brand-blue/30 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Total Facturé (Émis)
+              CA Main d&apos;œuvre & Services
             </span>
-            <div className="w-10 h-10 rounded-2xl bg-brand-blue/10 text-brand-blue flex items-center justify-center">
-              <Receipt className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-brand-blue flex items-center justify-center">
+              <Wrench className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-4">
-            <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">
-              {formatFCFA(metrics.totalFacture)}
+            <h3 className="text-2xl font-extrabold text-brand-blue tracking-tight">
+              {formatFCFA(metrics.caMainOeuvre)}
             </h3>
-            <p className="text-xs text-slate-400 font-semibold mt-2">
-              Factures émises sur la période
+            <p className="text-xs text-brand-blue font-bold mt-2 flex items-center justify-between">
+              <span>Diagnostics, rép. & contrats</span>
+              <span className="bg-blue-100 text-brand-blue px-2 py-0.5 rounded-full text-[10px] font-extrabold">
+                {metrics.pctMainOeuvre}% du CA
+              </span>
             </p>
           </div>
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-brand-blue" />
+        </div>
+
+        {/* CA Pièces Détachées & Matériel */}
+        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-purple-300 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              CA Pièces & Composants
+            </span>
+            <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+              <Cpu className="w-5 h-5" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <h3 className="text-2xl font-extrabold text-purple-900 tracking-tight">
+              {formatFCFA(metrics.caPieces)}
+            </h3>
+            <p className="text-xs text-purple-700 font-bold mt-2 flex items-center justify-between">
+              <span>Composants & vente matériel</span>
+              <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
+                {metrics.pctPieces}% du CA
+              </span>
+            </p>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-purple-600" />
         </div>
 
         {/* Créances / Impayés */}
@@ -459,97 +577,55 @@ export function AccountingManager({ documents }: Props) {
           </div>
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-500" />
         </div>
-
-        {/* Devis en Négociation */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-purple-300 transition-all">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Devis en Cours
-            </span>
-            <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
-              <FileText className="w-5 h-5" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <h3 className="text-2xl font-extrabold text-purple-900 tracking-tight">
-              {formatFCFA(metrics.totalDevisEnAttente)}
-            </h3>
-            <p className="text-xs text-purple-700 font-semibold mt-2">
-              Potentiel commercial en attente
-            </p>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-purple-600" />
-        </div>
       </div>
 
       {/* Ventilation Chiffre d'Affaires & Flux de Caisse */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Répartition par Pôle d'Activité */}
+        {/* Répartition Main d'œuvre vs Pièces & Pôles */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
           <h3 className="text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-brand-blue" />
-            <span>Répartition du CA Encaissé par Activité</span>
+            <span>Répartition du CA : Main d&apos;œuvre vs Pièces Détachées</span>
           </h3>
 
           <div className="space-y-3 pt-2">
-            {/* Atelier Ponctuel */}
+            {/* Main d'œuvre & Services */}
             <div className="space-y-1">
               <div className="flex justify-between text-xs font-bold">
-                <span className="text-slate-700">Maintenance & Réparation Atelier</span>
-                <span className="text-slate-900">{formatFCFA(metrics.caPonctuel)}</span>
+                <span className="text-slate-700 flex items-center gap-1.5">
+                  <Wrench className="w-3.5 h-3.5 text-brand-blue" />
+                  <span>Main d&apos;œuvre & Services ({metrics.pctMainOeuvre}%)</span>
+                </span>
+                <span className="text-brand-blue font-extrabold">{formatFCFA(metrics.caMainOeuvre)}</span>
               </div>
-              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-brand-blue rounded-full"
-                  style={{
-                    width: `${
-                      metrics.totalEncaisse > 0
-                        ? (metrics.caPonctuel / metrics.totalEncaisse) * 100
-                        : 0
-                    }%`,
-                  }}
+                  className="h-full bg-brand-blue rounded-full transition-all"
+                  style={{ width: `${metrics.pctMainOeuvre}%` }}
                 />
               </div>
             </div>
 
-            {/* Contrats Entreprises */}
+            {/* Pièces détachées & Composants */}
             <div className="space-y-1">
               <div className="flex justify-between text-xs font-bold">
-                <span className="text-slate-700">Contrats de Maintenance Préventive</span>
-                <span className="text-slate-900">{formatFCFA(metrics.caContrats)}</span>
+                <span className="text-slate-700 flex items-center gap-1.5">
+                  <Cpu className="w-3.5 h-3.5 text-purple-600" />
+                  <span>Pièces détachées & Matériel ({metrics.pctPieces}%)</span>
+                </span>
+                <span className="text-purple-700 font-extrabold">{formatFCFA(metrics.caPieces)}</span>
               </div>
-              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-brand-green rounded-full"
-                  style={{
-                    width: `${
-                      metrics.totalEncaisse > 0
-                        ? (metrics.caContrats / metrics.totalEncaisse) * 100
-                        : 0
-                    }%`,
-                  }}
+                  className="h-full bg-purple-600 rounded-full transition-all"
+                  style={{ width: `${metrics.pctPieces}%` }}
                 />
               </div>
             </div>
 
-            {/* Ventes & Commercial */}
-            <div className="space-y-1">
-              <div className="flex justify-between text-xs font-bold">
-                <span className="text-slate-700">Vente de Matériel & Consommables</span>
-                <span className="text-slate-900">{formatFCFA(metrics.caCommercial)}</span>
-              </div>
-              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-purple-600 rounded-full"
-                  style={{
-                    width: `${
-                      metrics.totalEncaisse > 0
-                        ? (metrics.caCommercial / metrics.totalEncaisse) * 100
-                        : 0
-                    }%`,
-                  }}
-                />
-              </div>
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
+              <span>Total facturé émis : {formatFCFA(metrics.totalFacture)}</span>
+              <span>Total devis en cours : {formatFCFA(metrics.totalDevisEnAttente)}</span>
             </div>
           </div>
         </div>
@@ -618,6 +694,25 @@ export function AccountingManager({ documents }: Props) {
             <button
               type="button"
               onClick={() => {
+                setActiveTab("DEVIS");
+                setCurrentPage(1);
+              }}
+              className={`pb-3 text-sm font-extrabold transition-all border-b-2 flex items-center gap-1.5 ${
+                activeTab === "DEVIS"
+                  ? "border-purple-600 text-purple-600"
+                  : "border-transparent text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              <span>Devis Estimatifs</span>
+              {devisList.length > 0 && (
+                <span className="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                  {devisList.length}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
                 setActiveTab("CREANCES");
                 setCurrentPage(1);
               }}
@@ -636,8 +731,8 @@ export function AccountingManager({ documents }: Props) {
             </button>
           </div>
 
-          {/* Recherche & Filtre rapide si Journal */}
-          {activeTab === "JOURNAL" && (
+          {/* Recherche & Filtre rapide */}
+          {(activeTab === "JOURNAL" || activeTab === "DEVIS") && (
             <div className="flex items-center gap-3 pb-3">
               <div className="relative">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -785,6 +880,100 @@ export function AccountingManager({ documents }: Props) {
               </table>
             </div>
 
+            <div className="p-4 border-t border-slate-100">
+              <PaginationControls
+                currentPage={currentPage}
+                totalItems={totalItems}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                onPageSizeChange={(newSize) => {
+                  setPageSize(newSize);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+          </div>
+        ) : activeTab === "DEVIS" ? (
+          /* Tableau Devis Estimatifs */
+          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">
+                  <tr>
+                    <th className="py-4 px-6">N° Devis</th>
+                    <th className="py-4 px-6">Date Émission</th>
+                    <th className="py-4 px-6">Client / Entreprise</th>
+                    <th className="py-4 px-6">Appareil / Prestation</th>
+                    <th className="py-4 px-6">Montant Estimatif</th>
+                    <th className="py-4 px-6">Statut Commercial</th>
+                    <th className="py-4 px-6 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {paginatedDocs.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-12 text-center text-slate-400 font-semibold">
+                        Aucun devis estimatif émis pour cette période.
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedDocs.map((doc) => {
+                      const client = getClientData(doc);
+                      return (
+                        <tr key={doc.id} className="hover:bg-slate-50/80 transition-colors">
+                          <td className="py-4 px-6 font-extrabold text-purple-700">
+                            {doc.numero}
+                          </td>
+                          <td className="py-4 px-6 font-semibold text-slate-600">
+                            {format(new Date(doc.dateEmission), "dd MMM yyyy", { locale: fr })}
+                          </td>
+                          <td className="py-4 px-6">
+                            <p className="font-extrabold text-slate-900">{client?.nom || "Client"}</p>
+                            {client?.telephone && (
+                              <p className="text-[11px] text-slate-400 font-medium">{client.telephone}</p>
+                            )}
+                          </td>
+                          <td className="py-4 px-6 font-semibold text-slate-700">
+                            {doc.intervention?.typeMateriel?.replace(/_/g, " ") || "Intervention technique"}
+                          </td>
+                          <td className="py-4 px-6 font-extrabold text-slate-900 text-sm">
+                            {formatFCFA(doc.montant)}
+                          </td>
+                          <td className="py-4 px-6">
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold ${
+                                doc.statutPaiement === "PAYE"
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : doc.statutPaiement === "REFUSE"
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-amber-100 text-amber-800"
+                              }`}
+                            >
+                              {doc.statutPaiement === "PAYE"
+                                ? "ACCEPTÉ"
+                                : doc.statutPaiement === "REFUSE"
+                                ? "REFUSÉ"
+                                : "EN ATTENTE"}
+                            </span>
+                          </td>
+                          <td className="py-4 px-6 text-right">
+                            <a
+                              href={`/api/documents/${doc.numero}/pdf`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-slate-400 hover:text-brand-blue p-1.5 rounded-lg hover:bg-slate-100 transition-colors inline-flex"
+                              title="Télécharger Devis PDF"
+                            >
+                              <Download className="w-4 h-4" />
+                            </a>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
             <div className="p-4 border-t border-slate-100">
               <PaginationControls
                 currentPage={currentPage}

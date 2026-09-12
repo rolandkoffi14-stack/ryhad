@@ -39,15 +39,13 @@ export default async function CrmContratsPage() {
         orderBy: { dateDebut: "desc" },
       }),
       db.client.findMany({
-        select: { id: true, nom: true, type: true },
-        orderBy: { nom: "asc" },
+        select: { id: true, nom: true, type: true, entreprise: true },
+        orderBy: [{ type: "desc" }, { nom: "asc" }],
       }),
     ]);
 
     contracts = fetchedContracts;
-    // Prioriser les entreprises, sinon tous les clients
-    const entrepriseClients = fetchedClients.filter((c) => c.type === ClientType.ENTREPRISE);
-    clients = entrepriseClients.length > 0 ? entrepriseClients : fetchedClients;
+    clients = fetchedClients;
   } catch (e) {
     console.error("Error loading contracts:", e);
   }
