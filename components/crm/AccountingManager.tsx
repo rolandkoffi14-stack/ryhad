@@ -40,6 +40,7 @@ interface FinancialDoc {
   type: string;
   typeFacture: string | null;
   montant: number;
+  montantPaye?: number;
   statutPaiement: string;
   modePaiement: string | null;
   referencePaiement: string | null;
@@ -87,6 +88,9 @@ export function AccountingManager({ documents }: Props) {
     docId: string | null;
     numero: string;
     montant: number;
+    montantTotal?: number;
+    dejaPaye?: number;
+    allowPartial?: boolean;
   }>({
     isOpen: false,
     docId: null,
@@ -166,47 +170,57 @@ export function AccountingManager({ documents }: Props) {
       if (isFacture) {
         totalFacture += doc.montant;
 
-        if (doc.statutPaiement === "PAYE") {
-          totalEncaisse += doc.montant;
+        const montantPayeReel =
+          doc.statutPaiement === "PAYE"
+            ? doc.montant
+            : doc.statutPaiement === "PARTIEL"
+            ? (doc.montantPaye || 0)
+            : 0;
+
+        const resteDu = Math.max(0, doc.montant - montantPayeReel);
+
+        totalEncaisse += montantPayeReel;
+        totalCreances += resteDu;
+
+        if (doc.statutPaiement === "PAYE" || doc.statutPaiement === "PARTIEL") {
+          const encaisseCeDoc = montantPayeReel;
 
           // Ventilation par pôle et par nature (Main d'œuvre vs Pièces)
           if (doc.contract) {
-            caContrats += doc.montant;
-            caMainOeuvre += doc.montant; // Maintenance préventive sous contrat = 100% Main d'œuvre
+            caContrats += encaisseCeDoc;
+            caMainOeuvre += encaisseCeDoc; // Maintenance préventive sous contrat = 100% Main d'œuvre
           } else if (doc.demandeCommerciale) {
-            caCommercial += doc.montant;
+            caCommercial += encaisseCeDoc;
             if (doc.demandeCommerciale.typeDemande === "VENTE_MATERIEL") {
-              caPieces += doc.montant;
+              caPieces += encaisseCeDoc;
             } else {
-              caMainOeuvre += doc.montant;
+              caMainOeuvre += encaisseCeDoc;
             }
           } else if (doc.intervention) {
-            caPonctuel += doc.montant;
+            caPonctuel += encaisseCeDoc;
             if (doc.typeFacture === "DIAGNOSTIC" || doc.type === "RECU_DIAGNOSTIC") {
-              caMainOeuvre += doc.montant; // Frais de diagnostic = 100% prestation technique
+              caMainOeuvre += encaisseCeDoc; // Frais de diagnostic = 100% prestation technique
             } else {
               const piecesTotal = (doc.intervention.piecesUtilisees || []).reduce(
                 (acc, p) => acc + p.quantite * p.prixUnitaire,
                 0
               );
-              const partPieces = Math.min(piecesTotal, doc.montant);
-              const partMO = doc.montant - partPieces;
+              const partPieces = Math.min(piecesTotal, encaisseCeDoc);
+              const partMO = encaisseCeDoc - partPieces;
               caPieces += partPieces;
               caMainOeuvre += partMO;
             }
           } else {
-            caMainOeuvre += doc.montant;
+            caMainOeuvre += encaisseCeDoc;
           }
 
           // Ventilation par mode
           const mode = doc.modePaiement || "AUTRE";
           if (parMode[mode] !== undefined) {
-            parMode[mode] += doc.montant;
+            parMode[mode] += encaisseCeDoc;
           } else {
-            parMode.AUTRE += doc.montant;
+            parMode.AUTRE += encaisseCeDoc;
           }
-        } else if (doc.statutPaiement === "EN_ATTENTE" || doc.statutPaiement === "PARTIEL") {
-          totalCreances += doc.montant;
         }
       } else if (doc.type === "DEVIS") {
         if (doc.statutPaiement === "EN_ATTENTE") {
@@ -838,6 +852,12 @@ export function AccountingManager({ documents }: Props) {
                           </td>
                           <td className="py-4 px-6 font-extrabold text-slate-900 text-sm">
                             {formatFCFA(doc.montant)}
+                            {doc.statutPaiement === "PARTIEL" && (
+                              <div className="text-[10px] space-y-0.5 mt-0.5">
+                                <span className="text-emerald-700 font-bold block">Payé: {formatFCFA(doc.montantPaye || 0)}</span>
+                                <span className="text-amber-800 font-bold block">Reste: {formatFCFA(Math.max(0, doc.montant - (doc.montantPaye || 0)))}</span>
+                              </div>
+                            )}
                           </td>
                           <td className="py-4 px-6">
                             <div className="space-y-0.5">
@@ -845,10 +865,12 @@ export function AccountingManager({ documents }: Props) {
                                 className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-extrabold ${
                                   isPaid
                                     ? "bg-emerald-100 text-emerald-800"
-                                    : "bg-amber-100 text-amber-800"
+                                    : doc.statutPaiement === "PARTIEL"
+                                    ? "bg-amber-100 text-amber-800 border border-amber-300"
+                                    : "bg-slate-100 text-slate-800"
                                 }`}
                               >
-                                {isPaid ? "RÉGLÉ" : "EN ATTENTE"}
+                                {isPaid ? "RÉGLÉ" : doc.statutPaiement === "PARTIEL" ? "PARTIEL" : "EN ATTENTE"}
                               </span>
                               {doc.modePaiement && (
                                 <p className="text-[10px] font-bold text-slate-400">
@@ -862,17 +884,22 @@ export function AccountingManager({ documents }: Props) {
                               {!isPaid && (
                                 <button
                                   type="button"
-                                  onClick={() =>
+                                  onClick={() => {
+                                    const dejaPaye = doc.montantPaye || 0;
+                                    const reste = Math.max(0, doc.montant - dejaPaye);
                                     setPaymentModal({
                                       isOpen: true,
                                       docId: doc.id,
                                       numero: doc.numero,
-                                      montant: doc.montant,
-                                    })
-                                  }
+                                      montant: reste,
+                                      montantTotal: doc.montant,
+                                      dejaPaye: dejaPaye,
+                                      allowPartial: true,
+                                    });
+                                  }}
                                   className="text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-brand-green px-2.5 py-1 rounded-lg transition-colors"
                                 >
-                                  Encaisser
+                                  {doc.statutPaiement === "PARTIEL" ? "Solder" : "Encaisser"}
                                 </button>
                               )}
                               <button
@@ -1167,17 +1194,26 @@ export function AccountingManager({ documents }: Props) {
       <PaymentConfirmationModal
         isOpen={paymentModal.isOpen}
         onClose={() => setPaymentModal({ isOpen: false, docId: null, numero: "", montant: 0 })}
-        onConfirm={async (mode, ref) => {
+        montant={paymentModal.montant}
+        montantTotal={paymentModal.montantTotal}
+        dejaPaye={paymentModal.dejaPaye}
+        allowPartial={paymentModal.allowPartial}
+        titre={`Encaissement Document ${paymentModal.numero}`}
+        description="Enregistrez le mode de paiement et le montant du versement."
+        onConfirm={async (mode, ref, montantVerse, note) => {
           if (!paymentModal.docId) return;
           try {
+            const isFullSettle = !montantVerse || montantVerse >= paymentModal.montant;
             const res = await fetch("/api/crm/documents/generate", {
               method: "PATCH",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 documentId: paymentModal.docId,
-                statutPaiement: "PAYE",
+                statutPaiement: isFullSettle ? "PAYE" : "PARTIEL",
                 modePaiement: mode,
                 referencePaiement: ref,
+                montantVerse,
+                note,
               }),
             });
             const data = await res.json();
@@ -1186,7 +1222,7 @@ export function AccountingManager({ documents }: Props) {
             const encNum = paymentModal.numero;
             setPaymentModal({ isOpen: false, docId: null, numero: "", montant: 0 });
             
-            // Déclencher la modale d'impression pour délivrer immédiatement la facture soldée
+            // Déclencher la modale d'impression pour délivrer immédiatement la facture
             if (encNum) {
               setPrintModalState({
                 isOpen: true,

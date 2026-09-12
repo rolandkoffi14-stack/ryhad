@@ -52,6 +52,9 @@ export default async function PublicDocumentPage({ params, searchParams }: Props
           client: true,
         },
       },
+      transactions: {
+        orderBy: { datePaiement: "asc" },
+      },
     },
   });
 
@@ -110,6 +113,16 @@ export default async function PublicDocumentPage({ params, searchParams }: Props
     modePaiement: doc.modePaiement,
     referencePaiement: doc.referencePaiement,
     montant: docMontant,
+    montantPaye: doc.montantPaye || 0,
+    resteAPayer: Math.max(0, docMontant - (doc.montantPaye || 0)),
+    transactions: (doc.transactions || []).map((t) => ({
+      id: t.id,
+      montant: t.montant,
+      modePaiement: t.modePaiement,
+      referencePaiement: t.referencePaiement,
+      datePaiement: format(new Date(t.datePaiement), "dd/MM/yyyy 'à' HH:mm", { locale: fr }),
+      note: t.note,
+    })),
     client: {
       nom: client.nom || "Client",
       telephone: client.telephone || "",

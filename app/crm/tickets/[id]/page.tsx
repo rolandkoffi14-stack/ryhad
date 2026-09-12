@@ -34,7 +34,13 @@ export default async function TicketDetailPage({
         contract: true,
         technicienAssigne: true,
         piecesUtilisees: true,
-        documents: true,
+        documents: {
+          include: {
+            transactions: {
+              orderBy: { datePaiement: "desc" },
+            },
+          },
+        },
         historique: {
           include: { auteur: true },
           orderBy: { createdAt: "desc" },

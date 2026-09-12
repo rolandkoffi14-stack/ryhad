@@ -54,8 +54,17 @@ interface DocItem {
   type: DocumentType;
   typeFacture?: FactureType | null;
   montant: number;
+  montantPaye?: number;
   statutPaiement: string;
   dateEmission: string;
+  transactions?: Array<{
+    id?: string;
+    montant: number;
+    modePaiement: string;
+    referencePaiement?: string | null;
+    datePaiement: string;
+    note?: string | null;
+  }>;
 }
 
 interface HistoryItem {
@@ -150,10 +159,13 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
 
   const devisDoc = ticket.documents.find((d) => d.type === DocumentType.DEVIS);
   const repDoc = ticket.documents.find(
-    (d) => d.type === DocumentType.FACTURE && d.typeFacture === FactureType.REPARATION
+    (d) => d.type === DocumentType.FACTURE && (d.typeFacture === FactureType.REPARATION || !d.typeFacture)
   );
   // La réparation est payée s'il n'y a pas de facture de réparation émise ou si celle-ci porte le statut PAYE
   const isRepPaid = !repDoc || repDoc.statutPaiement === "PAYE";
+  const isRepPartial = repDoc?.statutPaiement === "PARTIEL";
+  const repMontantPaye = repDoc?.montantPaye || 0;
+  const repResteAPayer = repDoc ? Math.max(0, repDoc.montant - repMontantPaye) : 0;
 
   const diagAmountFormatted = formatFCFA(diagDoc?.montant || ticket.montantDiagnostic || 1000);
 
@@ -207,7 +219,17 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
         if (st === InterventionStatut.EN_DIAGNOSTIC && ticket.type === InterventionType.PONCTUEL && !isDiagPaid) {
           return false;
         }
-        if (st === InterventionStatut.EN_REPARATION && !isRepPaid) {
+        // EN_REPARATION : Débloqué dès qu'un acompte ou la totalité a été encaissé
+        if (st === InterventionStatut.EN_REPARATION && !isRepPaid && !isRepPartial) {
+          return false;
+        }
+        // LIVRE_CLOTURE / CLOTURE : Strictement verrouillé tant que le solde restant est supérieur à 0
+        if (
+          (st === InterventionStatut.LIVRE_CLOTURE || st === InterventionStatut.CLOTURE) &&
+          ticket.type === InterventionType.PONCTUEL &&
+          repDoc &&
+          (repDoc.statutPaiement !== "PAYE" || repResteAPayer > 0)
+        ) {
           return false;
         }
 
@@ -300,14 +322,14 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
         : "En attente de l'accord du client sur le devis";
     }
     if (ticket.statut === InterventionStatut.DEVIS_ACCEPTE) {
-      if (!isRepPaid) {
+      if (!isRepPaid && !isRepPartial) {
         return userRole === StaffRole.TECHNICIEN
-          ? `Action suivante réservée à la réception : Encaissement de la facture (${repDoc ? formatFCFA(repDoc.montant) : ""})`
-          : `Action requise : Encaisser la facture (${repDoc ? formatFCFA(repDoc.montant) : ""}) pour autoriser les travaux`;
+          ? `Action suivante réservée à la réception : Encaissement de l'acompte ou de la facture (${repDoc ? formatFCFA(repDoc.montant) : ""})`
+          : `Action requise : Encaisser un acompte ou la totalité (${repDoc ? formatFCFA(repDoc.montant) : ""}) pour autoriser les travaux`;
       }
       return userRole === StaffRole.TECHNICIEN
-        ? "Facture réglée : Cliquez sur 'Démarrer Réparation' pour débuter les travaux"
-        : "Facture réglée : En attente du démarrage effectif des travaux par le technicien";
+        ? "Feu vert accordé : Cliquez sur 'Démarrer Réparation' pour débuter les travaux"
+        : "Feu vert accordé : En attente du démarrage effectif des travaux par le technicien";
     }
     if (ticket.statut === InterventionStatut.EN_REPARATION) {
       return userRole === StaffRole.RECEPTIONNISTE
@@ -315,9 +337,14 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
         : "Réparation en cours : Cliquez sur 'Terminer Réparation' une fois les tests OK";
     }
     if (ticket.statut === InterventionStatut.TERMINE) {
+      if (repDoc && (!isRepPaid || repResteAPayer > 0)) {
+        return userRole === StaffRole.TECHNICIEN
+          ? `Matériel prêt : En attente de l'encaissement du solde restant (${formatFCFA(repResteAPayer)}) par la réception au comptoir.`
+          : `Action requise au comptoir : Encaisser le solde (${formatFCFA(repResteAPayer)}) avant remise du matériel.`;
+      }
       return userRole === StaffRole.TECHNICIEN
-        ? "Action suivante réservée à la réception : Clôture du dossier"
-        : "Matériel prêt : Clôturer le dossier";
+        ? "Action suivante réservée à la réception : Remise du matériel & Clôture du dossier"
+        : "Matériel prêt & facture soldée : Remettre au client et clôturer le dossier";
     }
     return "Aucune transition immédiate disponible";
   };
@@ -425,6 +452,9 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
     isOpen: boolean;
     type: "DIAGNOSTIC" | "REPARATION";
     montant: number;
+    montantTotal?: number;
+    dejaPaye?: number;
+    allowPartial?: boolean;
     titre: string;
     description: string;
   }>({
@@ -447,7 +477,12 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
     defaultFormat: "ticket",
   });
 
-  const handleConfirmPayment = async (modePaiement: string, referencePaiement?: string) => {
+  const handleConfirmPayment = async (
+    modePaiement: string,
+    referencePaiement?: string,
+    montantVerse?: number,
+    note?: string
+  ) => {
     setLoading(true);
     setError(null);
     setSuccessMsg(null);
@@ -462,16 +497,14 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
           actionType,
           modePaiement,
           referencePaiement,
+          montantVerse,
+          note,
         }),
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || "Erreur lors de l'encaissement.");
 
-      setSuccessMsg(
-        isDiag
-          ? `Frais de diagnostic (${diagAmountFormatted}) encaissés via ${modePaiement.replace(/_/g, " ")}. Le technicien peut démarrer.`
-          : `Facture encaissée avec succès via ${modePaiement.replace(/_/g, " ")}. Le technicien peut démarrer la réparation.`
-      );
+      setSuccessMsg(data.message || "Règlement encaissé avec succès.");
       setTimeout(() => setSuccessMsg(null), 4000);
 
       // Ouvrir immédiatement la modale d'impression du reçu ou de la facture pour la délivrer au client
@@ -744,7 +777,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
         </div>
       )}
 
-      {/* 4. Devis Accepté : Facture de réparation en attente d'encaissement */}
+      {/* 4. Devis Accepté : Facture de réparation en attente d'acompte ou de solde */}
       {ticket.statut === InterventionStatut.DEVIS_ACCEPTE && repDoc && !isRepPaid && (
         <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 border border-emerald-300 flex items-start gap-3">
           <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
@@ -752,14 +785,47 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
           </div>
           <div className="flex-1">
             <h3 className="text-xs font-extrabold text-emerald-950 uppercase tracking-wide">
-              Étape 5 : Devis accepté — Facture {repDoc.numero} ({formatFCFA(repDoc.montant)}) à encaisser
+              {isRepPartial
+                ? `Étape 5 : Acompte perçu (${formatFCFA(repMontantPaye)}) • Reste à solder au retrait : ${formatFCFA(repResteAPayer)}`
+                : `Étape 5 : Devis accepté — Facture ${repDoc.numero} (${formatFCFA(repDoc.montant)})`}
             </h3>
             <p className="text-[11px] text-emerald-800 mt-0.5 font-medium">
-              {userRole === StaffRole.TECHNICIEN
-                ? "La réparation pourra débuter dès confirmation de l'encaissement de la facture par la réception."
-                : "Encaissez le règlement pour débloquer le démarrage des travaux par le technicien."}
+              {isRepPartial
+                ? "L'acompte a été versé. Le technicien a le feu vert pour démarrer les travaux. Le client soldera le reste lors du retrait."
+                : userRole === StaffRole.TECHNICIEN
+                ? "La réparation pourra débuter dès confirmation d'un acompte ou de la facture par la réception."
+                : "Encaissez un acompte (ou la totalité) pour débloquer le démarrage des travaux par le technicien."}
             </p>
             <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              {userRole !== StaffRole.TECHNICIEN && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPaymentModalState({
+                      isOpen: true,
+                      type: "REPARATION",
+                      montant: repResteAPayer,
+                      montantTotal: repDoc.montant,
+                      dejaPaye: repMontantPaye,
+                      allowPartial: true,
+                      titre: isRepPartial
+                        ? `Encaisser Solde Facture ${repDoc.numero}`
+                        : `Encaissement Facture ${repDoc.numero}`,
+                      description: isRepPartial
+                        ? "Enregistrez le règlement complémentaire ou le solde de la facture."
+                        : "Le client peut verser un acompte ou solder la totalité de la facture.",
+                    })
+                  }
+                  className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>
+                    {isRepPartial
+                      ? `💰 Encaisser un complément / solde (${formatFCFA(repResteAPayer)})`
+                      : `💰 Encaisser Acompte / Totalité (${formatFCFA(repDoc.montant)})`}
+                  </span>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() =>
@@ -770,9 +836,9 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                     titre: `Facture de Réparation (${repDoc.numero})`,
                   })
                 }
-                className="inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
+                className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
               >
-                <Printer className="w-3.5 h-3.5 text-emerald-200" />
+                <Printer className="w-3.5 h-3.5 text-slate-500" />
                 <span>🖨️ Imprimer Facture ({repDoc.numero})</span>
               </button>
             </div>
@@ -780,19 +846,91 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
         </div>
       )}
 
-      {/* 5. Terminé : Prêt à être livré */}
+      {/* 5. Terminé : Prêt à être livré & Contrôle du solde */}
       {ticket.statut === InterventionStatut.TERMINE && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 border border-emerald-300 flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 mt-0.5">
-            <PackageCheck className="w-5 h-5" />
+        <div
+          className={`p-4 sm:p-5 rounded-2xl border flex items-start gap-3 ${
+            repDoc && (!isRepPaid || repResteAPayer > 0)
+              ? "bg-amber-50/90 border-amber-300"
+              : "bg-emerald-50/70 border-emerald-300"
+          }`}
+        >
+          <div
+            className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+              repDoc && (!isRepPaid || repResteAPayer > 0)
+                ? "bg-amber-600 text-white"
+                : "bg-emerald-600 text-white"
+            }`}
+          >
+            {repDoc && (!isRepPaid || repResteAPayer > 0) ? (
+              <AlertCircle className="w-5 h-5" />
+            ) : (
+              <PackageCheck className="w-5 h-5" />
+            )}
           </div>
-          <div>
-            <h3 className="text-xs font-extrabold text-emerald-950 uppercase tracking-wide">
-              Étape Finale : Travaux validés & Matériel prêt
+          <div className="flex-1">
+            <h3
+              className={`text-xs font-extrabold uppercase tracking-wide ${
+                repDoc && (!isRepPaid || repResteAPayer > 0)
+                  ? "text-amber-950"
+                  : "text-emerald-950"
+              }`}
+            >
+              {repDoc && (!isRepPaid || repResteAPayer > 0)
+                ? `Solde restant à régler au retrait : ${formatFCFA(repResteAPayer)}`
+                : "Travaux terminés & Facture intégralement soldée (Solde : 0 FCFA)"}
             </h3>
-            <p className="text-[11px] text-emerald-800 mt-0.5 font-medium">
-              Le matériel est prêt pour remise au client. Clôturez le dossier lors de la restitution.
+            <p
+              className={`text-[11px] mt-0.5 font-medium ${
+                repDoc && (!isRepPaid || repResteAPayer > 0)
+                  ? "text-amber-800"
+                  : "text-emerald-800"
+              }`}
+            >
+              {repDoc && (!isRepPaid || repResteAPayer > 0)
+                ? "La facture présente un solde à payer. Veuillez encaisser ce solde avant de remettre l'appareil au client et de clôturer."
+                : "Le matériel a été testé et validé. Tous les règlements sont en règle. Vous pouvez remettre l'appareil au client et clôturer le dossier."}
             </p>
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              {repDoc && (!isRepPaid || repResteAPayer > 0) && userRole !== StaffRole.TECHNICIEN && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPaymentModalState({
+                      isOpen: true,
+                      type: "REPARATION",
+                      montant: repResteAPayer,
+                      montantTotal: repDoc.montant,
+                      dejaPaye: repMontantPaye,
+                      allowPartial: true,
+                      titre: `Encaisser le Solde au Retrait (${repDoc.numero})`,
+                      description: `Règlement final du solde restant dû de ${formatFCFA(repResteAPayer)} par le client.`,
+                    })
+                  }
+                  className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>💰 Encaisser le solde restant ({formatFCFA(repResteAPayer)})</span>
+                </button>
+              )}
+              {repDoc && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setPrintModalState({
+                      isOpen: true,
+                      numero: repDoc.numero,
+                      defaultFormat: "a4",
+                      titre: `Facture de Réparation (${repDoc.numero})`,
+                    })
+                  }
+                  className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5 text-slate-500" />
+                  <span>🖨️ Imprimer Facture ({repDoc.numero})</span>
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -852,8 +990,8 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                   <span>Action suivante réservée à la réception : Encaissement des frais de diagnostic</span>
                 </span>
               )
-            ) : ticket.statut === InterventionStatut.DEVIS_ACCEPTE && repDoc && !isRepPaid ? (
-              /* 2. Cas Spécial : Encaissement de la facture de réparation / pièces */
+            ) : ticket.statut === InterventionStatut.DEVIS_ACCEPTE && repDoc && !isRepPaid && !isRepPartial ? (
+              /* 2. Cas Spécial : Encaissement de l'acompte ou de la totalité avant début des réparations */
               userRole !== StaffRole.TECHNICIEN ? (
                 <button
                   onClick={() =>
@@ -861,20 +999,51 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                       isOpen: true,
                       type: "REPARATION",
                       montant: repDoc.montant,
+                      montantTotal: repDoc.montant,
+                      dejaPaye: 0,
+                      allowPartial: true,
                       titre: `Encaissement Facture ${repDoc.numero}`,
-                      description: "Enregistrez le mode de règlement de la facture de réparation validée par le client.",
+                      description: "Enregistrez le versement d'un acompte ou le règlement intégral de la facture validée.",
                     })
                   }
                   disabled={loading}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-xs transition-all bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
                 >
                   <CreditCard className="w-3.5 h-3.5" />
-                  <span>Encaisser Facture ({formatFCFA(repDoc.montant)})</span>
+                  <span>Encaisser Acompte / Facture ({formatFCFA(repDoc.montant)})</span>
                 </button>
               ) : (
                 <span className="text-xs font-bold text-slate-600 bg-white px-3.5 py-2 rounded-lg border border-slate-200 shadow-xs flex items-center gap-2">
                   <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span>Action suivante réservée à la réception : Encaissement de la facture ({formatFCFA(repDoc.montant)})</span>
+                  <span>Action suivante réservée à la réception : Encaissement de l'acompte ({formatFCFA(repDoc.montant)})</span>
+                </span>
+              )
+            ) : ticket.statut === InterventionStatut.TERMINE && repDoc && (!isRepPaid || repResteAPayer > 0) ? (
+              /* 2b. Cas Spécial : Encaissement obligatoire du solde restant au comptoir avant remise */
+              userRole !== StaffRole.TECHNICIEN ? (
+                <button
+                  onClick={() =>
+                    setPaymentModalState({
+                      isOpen: true,
+                      type: "REPARATION",
+                      montant: repResteAPayer,
+                      montantTotal: repDoc.montant,
+                      dejaPaye: repMontantPaye,
+                      allowPartial: true,
+                      titre: `Encaisser le Solde au Retrait (${repDoc.numero})`,
+                      description: `Règlement final du solde restant dû de ${formatFCFA(repResteAPayer)} par le client.`,
+                    })
+                  }
+                  disabled={loading}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-xs transition-all bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  <span>💰 Encaisser le Solde ({formatFCFA(repResteAPayer)})</span>
+                </button>
+              ) : (
+                <span className="text-xs font-bold text-slate-600 bg-white px-3.5 py-2 rounded-lg border border-slate-200 shadow-xs flex items-center gap-2">
+                  <Lock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span>Solde de {formatFCFA(repResteAPayer)} à encaisser au comptoir par la réception avant clôture</span>
                 </span>
               )
             ) : nextStatuts.length > 0 ? (
@@ -1384,6 +1553,11 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                       <div className="font-extrabold text-brand-dark text-xs">
                         {formatFCFA(doc.montant)}
                       </div>
+                      {doc.statutPaiement === "PARTIEL" && (
+                        <div className="text-[10px] text-emerald-700 font-bold">
+                          Payé: {formatFCFA(doc.montantPaye || 0)}
+                        </div>
+                      )}
                       <div className="flex items-center justify-end gap-1.5">
                         <span className={`text-[9px] px-2 py-0.5 rounded border ${badgeClass}`}>
                           {badgeLabel}
@@ -1476,6 +1650,9 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
         }
         onConfirm={handleConfirmPayment}
         montant={paymentModalState.montant}
+        montantTotal={paymentModalState.montantTotal}
+        dejaPaye={paymentModalState.dejaPaye}
+        allowPartial={paymentModalState.allowPartial}
         titre={paymentModalState.titre}
         description={paymentModalState.description}
         loading={loading}

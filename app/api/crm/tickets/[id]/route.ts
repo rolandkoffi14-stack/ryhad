@@ -167,7 +167,7 @@ export async function PATCH(
     }
 
     // --------------------------------------------------------------------------
-    // ACTION : Encaissement de la facture de RÉPARATION
+    // ACTION : Encaissement de la facture de RÉPARATION (Acompte ou Solde complet)
     // --------------------------------------------------------------------------
     if (actionType === "encaisser_reparation") {
       const validated = ticketEncaisserRepSchema.parse(body);
@@ -178,9 +178,19 @@ export async function PATCH(
         );
       }
 
-      const repDoc = currentTicket.documents.find(
-        (d) => d.type === DocumentType.FACTURE && (d.typeFacture === FactureType.REPARATION || !d.typeFacture)
-      );
+      const repDoc = await db.financialDocument.findFirst({
+        where: {
+          interventionId: currentTicket.id,
+          type: DocumentType.FACTURE,
+          OR: [
+            { typeFacture: FactureType.REPARATION },
+            { typeFacture: null },
+          ],
+        },
+        include: {
+          transactions: true,
+        },
+      });
 
       if (!repDoc) {
         return NextResponse.json(
@@ -192,40 +202,109 @@ export async function PATCH(
       const modePaiement = validated.modePaiement || "ESPECES";
       const referencePaiement = validated.referencePaiement || null;
 
+      const montantTotal = repDoc.montant;
+      const dejaPaye = repDoc.montantPaye || 0;
+      const resteAPayer = Math.max(0, montantTotal - dejaPaye);
+
+      if (resteAPayer <= 0 && repDoc.statutPaiement === StatutPaiement.PAYE) {
+        return NextResponse.json(
+          { success: false, message: "Cette facture de réparation est déjà intégralement soldée." },
+          { status: 400 }
+        );
+      }
+
+      const montantVerse = validated.montantVerse !== undefined
+        ? Number(validated.montantVerse)
+        : resteAPayer;
+
+      if (isNaN(montantVerse) || montantVerse <= 0) {
+        return NextResponse.json(
+          { success: false, message: "Le montant du versement doit être supérieur à 0 FCFA." },
+          { status: 400 }
+        );
+      }
+
+      if (montantVerse > resteAPayer) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Le versement (${formatFCFA(montantVerse)}) dépasse le solde restant dû (${formatFCFA(resteAPayer)}).`,
+          },
+          { status: 400 }
+        );
+      }
+
+      const nouveauMontantPaye = dejaPaye + montantVerse;
+      const isSolde = nouveauMontantPaye >= montantTotal;
+      const newStatutPaiement = isSolde ? StatutPaiement.PAYE : StatutPaiement.PARTIEL;
+      const nouveauReste = Math.max(0, montantTotal - nouveauMontantPaye);
+
+      const notePaiement =
+        validated.note ||
+        (isSolde
+          ? dejaPaye > 0
+            ? "Solde final au retrait"
+            : "Règlement intégral"
+          : "Acompte sur travaux");
+
+      // 1. Créer la transaction de règlement
+      await db.paymentTransaction.create({
+        data: {
+          documentId: repDoc.id,
+          montant: montantVerse,
+          modePaiement,
+          referencePaiement,
+          encaisseParId: userId,
+          note: notePaiement,
+        },
+      });
+
+      // 2. Mettre à jour la facture de réparation
       await db.financialDocument.update({
         where: { id: repDoc.id },
         data: {
-          statutPaiement: StatutPaiement.PAYE,
+          montantPaye: nouveauMontantPaye,
+          statutPaiement: newStatutPaiement,
           modePaiement,
           referencePaiement,
           datePaiement: new Date(),
         },
       });
 
-      // Enregistrer l'encaissement dans l'historique sans forcer le statut (c'est le technicien qui démarrera la réparation)
+      // 3. Enregistrer l'événement d'encaissement dans l'historique du ticket
+      const libelleAction = isSolde
+        ? dejaPaye > 0
+          ? `Solde de réparation encaissé (${formatFCFA(montantVerse)}) via ${modePaiement.replace(/_/g, " ")}${referencePaiement ? ` (Réf: ${referencePaiement})` : ""} - Facture intégralement soldée`
+          : `Facture de réparation ${repDoc.numero} réglée intégralement (${formatFCFA(montantVerse)}) via ${modePaiement.replace(/_/g, " ")}${referencePaiement ? ` (Réf: ${referencePaiement})` : ""}`
+        : `Acompte de ${formatFCFA(montantVerse)} encaissé via ${modePaiement.replace(/_/g, " ")}${referencePaiement ? ` (Réf: ${referencePaiement})` : ""} sur la facture ${repDoc.numero} (Reste à payer : ${formatFCFA(nouveauReste)})`;
+
+      const noteAudit = isSolde
+        ? `Règlement du solde encaissé par ${userName} (${userRole}). Facture soldée (Solde : 0 FCFA). L'appareil peut être restitué au client.`
+        : `Acompte encaissé par ${userName} (${userRole}). Feu vert pour démarrer les réparations. Le solde de ${formatFCFA(nouveauReste)} sera perçu au retrait.`;
+
       await db.intervention.update({
         where: { id },
         data: {
           historique: {
             create: [
               {
-                action: `Facture de réparation ${repDoc.numero} encaissée (${formatFCFA(repDoc.montant)}) via ${modePaiement.replace(/_/g, " ")}${referencePaiement ? ` (Réf: ${referencePaiement})` : ""}`,
-                note: `Règlement encaissé par ${userName} (${userRole}). Le technicien peut maintenant démarrer les travaux.`,
+                action: libelleAction,
+                note: noteAudit,
               },
             ],
           },
         },
       });
 
-      // Alerter le technicien assigné (Feu vert pour les réparations)
+      // 4. Alerter le technicien assigné
       if (currentTicket.technicienAssigneId) {
         notifyPaymentReceivedToTech({
           ticketId: currentTicket.id,
           numero: currentTicket.numero,
           clientNom: currentTicket.client.nom,
           typeMateriel: currentTicket.typeMateriel,
-          typeFactureLibelle: "facture de réparation",
-          montant: repDoc.montant,
+          typeFactureLibelle: isSolde ? "solde facture de réparation" : "acompte sur facture de réparation",
+          montant: montantVerse,
           technicienAssigneId: currentTicket.technicienAssigneId,
           actorId: userId,
         }).catch((err) => console.error("Erreur notification encaissement réparation:", err));
@@ -235,8 +314,13 @@ export async function PATCH(
 
       return NextResponse.json({
         success: true,
-        message: `Facture ${repDoc.numero} encaissée avec succès.`,
+        message: isSolde
+          ? `Facture ${repDoc.numero} intégralement soldée avec succès.`
+          : `Acompte de ${formatFCFA(montantVerse)} encaissé sur la facture ${repDoc.numero}. Reste à payer au retrait : ${formatFCFA(nouveauReste)}.`,
         documentNumero: repDoc.numero,
+        montantPaye: nouveauMontantPaye,
+        resteAPayer: nouveauReste,
+        statutPaiement: newStatutPaiement,
       });
     }
 
@@ -424,19 +508,45 @@ export async function PATCH(
         });
       }
 
-      // Règle 4 : EN_REPARATION exige que la facture soit payée si une facture de réparation existe
+      // Règle 4 : EN_REPARATION exige qu'au moins un acompte ou le paiement intégral ait été encaissé
       if (newStatut === InterventionStatut.EN_REPARATION) {
         const repDoc = currentTicket.documents.find(
-          (d) => d.type === DocumentType.FACTURE && d.typeFacture === FactureType.REPARATION
+          (d) => d.type === DocumentType.FACTURE && (d.typeFacture === FactureType.REPARATION || !d.typeFacture)
         );
-        if (repDoc && repDoc.statutPaiement !== StatutPaiement.PAYE) {
+        if (
+          repDoc &&
+          repDoc.statutPaiement !== StatutPaiement.PAYE &&
+          repDoc.statutPaiement !== StatutPaiement.PARTIEL
+        ) {
           return NextResponse.json(
             {
               success: false,
-              message: `Impossible de démarrer la réparation : la facture ${repDoc.numero} (${formatFCFA(repDoc.montant)}) doit d'abord être encaissée par la réception.`,
+              message: `Impossible de démarrer la réparation : la facture ${repDoc.numero} (${formatFCFA(repDoc.montant)}) nécessite au moins le versement d'un acompte par le client.`,
             },
             { status: 400 }
           );
+        }
+      }
+
+      // Règle 4b : Clôture & Remise du matériel (LIVRE_CLOTURE / CLOTURE) exige que la facture soit intégralement soldée
+      if (
+        (newStatut === InterventionStatut.LIVRE_CLOTURE || newStatut === InterventionStatut.CLOTURE) &&
+        currentTicket.type === InterventionType.PONCTUEL
+      ) {
+        const repDoc = currentTicket.documents.find(
+          (d) => d.type === DocumentType.FACTURE && (d.typeFacture === FactureType.REPARATION || !d.typeFacture)
+        );
+        if (repDoc) {
+          const reste = Math.max(0, repDoc.montant - (repDoc.montantPaye || 0));
+          if (repDoc.statutPaiement !== StatutPaiement.PAYE || reste > 0) {
+            return NextResponse.json(
+              {
+                success: false,
+                message: `Remise et clôture impossibles : la facture de réparation ${repDoc.numero} présente un reste à payer de ${formatFCFA(reste)}. Veuillez encaisser le solde au comptoir avant restitution.`,
+              },
+              { status: 400 }
+            );
+          }
         }
       }
 

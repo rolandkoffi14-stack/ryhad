@@ -71,8 +71,16 @@ export const PAYMENT_METHODS: PaymentMethodOption[] = [
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (method: string, reference?: string) => Promise<void> | void;
+  onConfirm: (
+    method: string,
+    reference?: string,
+    montantVerse?: number,
+    note?: string
+  ) => Promise<void> | void;
   montant: number;
+  montantTotal?: number;
+  dejaPaye?: number;
+  allowPartial?: boolean;
   titre?: string;
   description?: string;
   loading?: boolean;
@@ -83,18 +91,32 @@ export function PaymentConfirmationModal({
   onClose,
   onConfirm,
   montant,
+  montantTotal,
+  dejaPaye = 0,
+  allowPartial = false,
   titre = "Confirmation de l'Encaissement",
   description = "Veuillez sélectionner le moyen par lequel le client a effectué le règlement.",
   loading = false,
 }: Props) {
   const [selectedMethod, setSelectedMethod] = useState("ESPECES");
   const [reference, setReference] = useState("");
+  const [montantSaisi, setMontantSaisi] = useState<number | string>(montant);
+  const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      setMontantSaisi(montant);
+      setReference("");
+      setNote("");
+      setError(null);
+    }
+  }, [isOpen, montant]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -110,12 +132,32 @@ export function PaymentConfirmationModal({
 
   if (!isOpen || !mounted) return null;
 
+  const totalFacture = montantTotal || montant;
+  const numMontantSaisi = parseInt(String(montantSaisi), 10) || 0;
+  const resteApresVersement = Math.max(0, montant - numMontantSaisi);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (allowPartial) {
+      if (isNaN(numMontantSaisi) || numMontantSaisi <= 0) {
+        setError("Veuillez saisir un montant supérieur à 0 FCFA.");
+        return;
+      }
+      if (numMontantSaisi > montant) {
+        setError(`Le montant saisi (${formatFCFA(numMontantSaisi)}) dépasse le solde restant dû (${formatFCFA(montant)}).`);
+        return;
+      }
+    }
+
     try {
-      await onConfirm(selectedMethod, reference.trim() || undefined);
-      setReference("");
+      await onConfirm(
+        selectedMethod,
+        reference.trim() || undefined,
+        allowPartial ? numMontantSaisi : montant,
+        note.trim() || undefined
+      );
       onClose();
     } catch (err: any) {
       setError(err.message || "Une erreur est survenue lors de l'encaissement.");
@@ -144,6 +186,7 @@ export function PaymentConfirmationModal({
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
             disabled={loading}
             className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
@@ -153,16 +196,95 @@ export function PaymentConfirmationModal({
         </div>
 
         {/* Formulaire */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 overflow-y-auto flex-1">
-          {/* Montant mis en avant */}
-          <div className="p-4 rounded-2xl bg-brand-blue/5 border border-brand-blue/20 text-center space-y-1">
-            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
-              Montant à Encaisser
-            </span>
-            <div className="text-2xl sm:text-3xl font-extrabold text-brand-blue tracking-tight">
-              {formatFCFA(montant)}
+        <form onSubmit={handleSubmit} className="p-6 space-y-4 overflow-y-auto flex-1">
+          {/* Bloc Montant ou Récapitulatif Acompte / Solde */}
+          {allowPartial ? (
+            <div className="space-y-3">
+              {/* Synthèse globale */}
+              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5 text-xs">
+                <div className="flex justify-between items-center text-slate-600">
+                  <span>Montant total de la facture :</span>
+                  <span className="font-bold text-slate-900">{formatFCFA(totalFacture)}</span>
+                </div>
+                {dejaPaye > 0 && (
+                  <div className="flex justify-between items-center text-emerald-700 font-semibold">
+                    <span>Acompte(s) déjà encaissé(s) :</span>
+                    <span>- {formatFCFA(dejaPaye)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center pt-1.5 border-t border-slate-200 font-extrabold">
+                  <span className="text-brand-dark">Reste à payer actuel :</span>
+                  <span className="text-sm text-brand-blue">{formatFCFA(montant)}</span>
+                </div>
+              </div>
+
+              {/* Saisie du montant du versement */}
+              <div className="p-4 rounded-2xl bg-brand-blue/5 border border-brand-blue/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-extrabold text-brand-dark uppercase tracking-wider block">
+                    Montant de ce versement (FCFA) <span className="text-red-500">*</span>
+                  </label>
+                  <span className="text-[10px] font-bold text-slate-500">
+                    {numMontantSaisi >= montant ? "Paiement du solde intégral" : "Acompte partiel"}
+                  </span>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type="number"
+                    min="1"
+                    max={montant}
+                    value={montantSaisi}
+                    onChange={(e) => setMontantSaisi(e.target.value)}
+                    required
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-brand-blue/30 bg-white text-lg font-black text-brand-blue focus:ring-2 focus:ring-brand-blue outline-none"
+                  />
+                </div>
+
+                {/* Raccourcis rapides */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  {dejaPaye === 0 && totalFacture > 0 && Math.round(totalFacture / 2) < montant && (
+                    <button
+                      type="button"
+                      onClick={() => setMontantSaisi(Math.round(totalFacture / 2))}
+                      className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 text-[10px] font-extrabold border border-slate-200 transition-colors"
+                    >
+                      Acompte 50% ({formatFCFA(Math.round(totalFacture / 2))})
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setMontantSaisi(montant)}
+                    className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[10px] font-extrabold border border-emerald-200 transition-colors"
+                  >
+                    Tout solder ({formatFCFA(montant)})
+                  </button>
+                </div>
+
+                {/* Aperçu du solde restant après ce versement */}
+                <div className="text-[11px] pt-1">
+                  {resteApresVersement > 0 ? (
+                    <span className="text-amber-800 font-bold">
+                      ℹ️ Acompte : un solde de {formatFCFA(resteApresVersement)} restera dû au retrait.
+                    </span>
+                  ) : (
+                    <span className="text-emerald-700 font-extrabold">
+                      ✅ La facture sera entièrement soldée (Solde : 0 FCFA).
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="p-4 rounded-2xl bg-brand-blue/5 border border-brand-blue/20 text-center space-y-1">
+              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider block">
+                Montant à Encaisser
+              </span>
+              <div className="text-2xl sm:text-3xl font-extrabold text-brand-blue tracking-tight">
+                {formatFCFA(montant)}
+              </div>
+            </div>
+          )}
 
           {error && (
             <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center gap-2">
@@ -215,18 +337,33 @@ export function PaymentConfirmationModal({
           </div>
 
           {/* Référence ou transaction facultative */}
-          <div className="space-y-1.5 pt-1">
-            <label className="text-xs font-bold text-gray-700 block">
-              Référence / ID de transaction / N° Chèque{" "}
-              <span className="text-gray-400 font-normal">(Facultatif)</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Référence de paiement"
-              value={reference}
-              onChange={(e) => setReference(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-700 block">
+                Référence / N° Transaction{" "}
+                <span className="text-gray-400 font-normal">(Facultatif)</span>
+              </label>
+              <input
+                type="text"
+                placeholder="Réf MoMo, N° Chèque..."
+                value={reference}
+                onChange={(e) => setReference(e.target.value)}
+                className="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-700 block">
+                Note de règlement <span className="text-gray-400 font-normal">(Facultatif)</span>
+              </label>
+              <input
+                type="text"
+                placeholder={allowPartial && numMontantSaisi < montant ? "Ex: Acompte 50%" : "Ex: Solde au comptoir"}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className="w-full px-3.5 py-2 rounded-xl border border-gray-200 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none"
+              />
+            </div>
           </div>
 
           {/* Boutons d'action */}
@@ -245,7 +382,13 @@ export function PaymentConfirmationModal({
               className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-xs transition-all disabled:opacity-50"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>{loading ? "Validation en cours..." : "Valider l'Encaissement"}</span>
+              <span>
+                {loading
+                  ? "Validation en cours..."
+                  : allowPartial
+                  ? `Valider l'Encaissement (${formatFCFA(numMontantSaisi)})`
+                  : "Valider l'Encaissement"}
+              </span>
             </button>
           </div>
         </form>

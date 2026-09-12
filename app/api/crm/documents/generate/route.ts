@@ -94,10 +94,55 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const validated = documentUpdateSchema.parse(body);
 
-    const updateData: any = { statutPaiement: validated.statutPaiement };
-    if (validated.statutPaiement === StatutPaiement.PAYE) {
-      updateData.modePaiement = validated.modePaiement || "ESPECES";
-      updateData.referencePaiement = validated.referencePaiement || null;
+    const currentDoc = await db.financialDocument.findUnique({
+      where: { id: validated.documentId },
+    });
+
+    if (!currentDoc) {
+      return NextResponse.json({ success: false, message: "Document introuvable." }, { status: 404 });
+    }
+
+    const userId = (session.user as any).id as string;
+    const modePaiement = validated.modePaiement || "ESPECES";
+    const referencePaiement = validated.referencePaiement || null;
+
+    let nouveauMontantPaye = currentDoc.montantPaye || 0;
+    let finalStatut = validated.statutPaiement;
+
+    if (validated.statutPaiement === StatutPaiement.PAYE || validated.statutPaiement === StatutPaiement.PARTIEL) {
+      const reste = Math.max(0, currentDoc.montant - nouveauMontantPaye);
+      const montantVerse = validated.montantVerse ? Number(validated.montantVerse) : reste;
+
+      if (montantVerse > 0) {
+        nouveauMontantPaye += montantVerse;
+        if (nouveauMontantPaye >= currentDoc.montant) {
+          finalStatut = StatutPaiement.PAYE;
+        } else {
+          finalStatut = StatutPaiement.PARTIEL;
+        }
+
+        // Créer la transaction de règlement
+        await db.paymentTransaction.create({
+          data: {
+            documentId: currentDoc.id,
+            montant: montantVerse,
+            modePaiement,
+            referencePaiement,
+            encaisseParId: userId,
+            note: validated.note || (finalStatut === StatutPaiement.PAYE ? "Règlement solde" : "Acompte partiel"),
+          },
+        });
+      }
+    }
+
+    const updateData: any = {
+      statutPaiement: finalStatut,
+      montantPaye: nouveauMontantPaye,
+    };
+
+    if (finalStatut === StatutPaiement.PAYE || finalStatut === StatutPaiement.PARTIEL) {
+      updateData.modePaiement = modePaiement;
+      updateData.referencePaiement = referencePaiement;
       updateData.datePaiement = new Date();
     }
 

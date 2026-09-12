@@ -209,6 +209,8 @@ export const ticketEncaisserRepSchema = z.object({
   actionType: z.literal("encaisser_reparation"),
   modePaiement: z.string().optional(),
   referencePaiement: z.string().nullable().optional(),
+  montantVerse: z.union([z.number().positive(), z.string().regex(/^\d+$/)]).optional(),
+  note: z.string().optional().nullable(),
 });
 
 // ============================================================================
@@ -249,5 +251,7 @@ export const documentUpdateSchema = z.object({
   statutPaiement: z.nativeEnum(StatutPaiement),
   modePaiement: z.string().optional().nullable(),
   referencePaiement: z.string().optional().nullable(),
+  montantVerse: z.union([z.number().positive(), z.string().regex(/^\d+$/)]).optional().nullable(),
+  note: z.string().optional().nullable(),
 });
 

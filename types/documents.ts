@@ -6,6 +6,15 @@ export interface DocumentPrintItem {
   prixUnitaire: number;
 }
 
+export interface DocumentPaymentTransaction {
+  id?: string;
+  montant: number;
+  modePaiement: string;
+  referencePaiement?: string | null;
+  datePaiement: string;
+  note?: string | null;
+}
+
 export interface DocumentPrintData {
   id?: string;
   numero: string;
@@ -17,6 +26,9 @@ export interface DocumentPrintData {
   modePaiement?: string | null;
   referencePaiement?: string | null;
   montant: number;
+  montantPaye?: number;
+  resteAPayer?: number;
+  transactions?: DocumentPaymentTransaction[];
   client: {
     nom: string;
     telephone: string;

@@ -35,6 +35,7 @@ interface DocItem {
   type: DocumentType;
   typeFacture?: FactureType | null;
   montant: number;
+  montantPaye?: number;
   statutPaiement: StatutPaiement;
   modePaiement?: string | null;
   referencePaiement?: string | null;
@@ -79,6 +80,9 @@ export function DocumentsTable({ documents }: Props) {
     docId: string | null;
     numero: string;
     montant: number;
+    montantTotal?: number;
+    dejaPaye?: number;
+    allowPartial?: boolean;
   }>({
     isOpen: false,
     docId: null,
@@ -239,18 +243,26 @@ export function DocumentsTable({ documents }: Props) {
     message: "",
   });
 
-  const handleConfirmPayment = async (modePaiement: string, referencePaiement?: string) => {
+  const handleConfirmPayment = async (
+    modePaiement: string,
+    referencePaiement?: string,
+    montantVerse?: number,
+    note?: string
+  ) => {
     if (!paymentModalState.docId) return;
     setLoading(true);
     try {
+      const isFullSettle = !montantVerse || montantVerse >= paymentModalState.montant;
       const res = await fetch("/api/crm/documents/generate", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           documentId: paymentModalState.docId,
-          statutPaiement: "PAYE",
+          statutPaiement: isFullSettle ? "PAYE" : "PARTIEL",
           modePaiement,
           referencePaiement,
+          montantVerse,
+          note,
         }),
       });
       const data = await res.json();
@@ -454,6 +466,12 @@ export function DocumentsTable({ documents }: Props) {
                   {/* 4. Montant */}
                   <td className="px-5 py-3.5 font-extrabold text-brand-blue text-xs">
                     {formatFCFA(doc.montant)}
+                    {doc.statutPaiement === StatutPaiement.PARTIEL && (
+                      <div className="text-[10px] space-y-0.5 mt-0.5 font-bold">
+                        <span className="text-emerald-700 block">Payé: {formatFCFA(doc.montantPaye || 0)}</span>
+                        <span className="text-amber-800 block">Reste: {formatFCFA(Math.max(0, doc.montant - (doc.montantPaye || 0)))}</span>
+                      </div>
+                    )}
                   </td>
 
                   {/* 5. Statut */}
@@ -496,19 +514,25 @@ export function DocumentsTable({ documents }: Props) {
                       {/* Bouton Encaisser direct si facture impayée */}
                       {doc.type !== DocumentType.DEVIS && doc.statutPaiement !== StatutPaiement.PAYE && (
                         <button
-                          onClick={() =>
+                          type="button"
+                          onClick={() => {
+                            const dejaPaye = doc.montantPaye || 0;
+                            const reste = Math.max(0, doc.montant - dejaPaye);
                             setPaymentModalState({
                               isOpen: true,
                               docId: doc.id,
                               numero: doc.numero,
-                              montant: doc.montant,
-                            })
-                          }
+                              montant: reste,
+                              montantTotal: doc.montant,
+                              dejaPaye: dejaPaye,
+                              allowPartial: true,
+                            });
+                          }}
                           title="Encaisser cette facture"
                           className="inline-flex items-center gap-1 bg-brand-green hover:bg-brand-green-dark text-white px-2 py-1 rounded-xl font-extrabold text-[11px] shadow-2xs transition-all"
                         >
                           <CreditCard className="w-3 h-3" />
-                          <span>Encaisser</span>
+                          <span>{doc.statutPaiement === StatutPaiement.PARTIEL ? "Solder" : "Encaisser"}</span>
                         </button>
                       )}
                     </div>
@@ -550,6 +574,9 @@ export function DocumentsTable({ documents }: Props) {
         onClose={() => setPaymentModalState({ isOpen: false, docId: null, numero: "", montant: 0 })}
         onConfirm={handleConfirmPayment}
         montant={paymentModalState.montant}
+        montantTotal={paymentModalState.montantTotal}
+        dejaPaye={paymentModalState.dejaPaye}
+        allowPartial={paymentModalState.allowPartial}
         titre={`Encaissement Facture ${paymentModalState.numero}`}
         description="Veuillez renseigner le mode de paiement utilisé pour régler cette facture."
         loading={loading}

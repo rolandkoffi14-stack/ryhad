@@ -23,6 +23,7 @@ model User {
   createdAt             DateTime @default(now())
   interventionsAssignees Intervention[] @relation("TechnicienAssigne")
   historique            HistoriqueTicket[]
+  paiementsEncaisses    PaymentTransaction[]
   notifications         Notification[]
   pushSubscriptions     PushSubscription[]
 
@@ -289,6 +290,7 @@ model FinancialDocument {
   contractId            String?             // renseigné pour FACTURE de contrat
   demandeCommercialeId  String?             // renseigné pour devis ou facture commerciale
   montant               Int                 // FCFA
+  montantPaye           Int                 @default(0) // FCFA cumulés perçus
   statutPaiement        StatutPaiement      @default(EN_ATTENTE)
   modePaiement          String?             // ESPECES | MTN_MOMO | MOOV_MONEY | CARTE_BANCAIRE | VIREMENT | CHEQUE
   referencePaiement     String?             // Réf transaction, n° chèque, etc.
@@ -298,6 +300,7 @@ model FinancialDocument {
   intervention          Intervention?       @relation(fields: [interventionId], references: [id])
   contract              Contract?           @relation(fields: [contractId], references: [id])
   demandeCommerciale    DemandeCommerciale? @relation(fields: [demandeCommercialeId], references: [id])
+  transactions          PaymentTransaction[]
 
   @@index([statutPaiement])
   @@index([type, typeFacture])
@@ -305,6 +308,24 @@ model FinancialDocument {
   @@index([contractId])
   @@index([demandeCommercialeId])
   @@index([dateEmission])
+}
+
+model PaymentTransaction {
+  id                String            @id @default(cuid())
+  documentId        String
+  montant           Int               // Montant de ce versement en FCFA
+  modePaiement      String            // ESPECES | MTN_MOMO | MOOV_MONEY | CARTE_BANCAIRE | VIREMENT | CHEQUE
+  referencePaiement String?           // ID transaction, Réf MoMo, N° Chèque
+  datePaiement      DateTime          @default(now())
+  encaisseParId     String?
+  note              String?           // Ex: "Acompte initial", "Solde au retrait"
+  createdAt         DateTime          @default(now())
+  
+  document          FinancialDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  encaissePar       User?             @relation(fields: [encaisseParId], references: [id])
+
+  @@index([documentId])
+  @@index([datePaiement])
 }
 
 enum DocumentType {

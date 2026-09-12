@@ -38,6 +38,10 @@ export function DocumentPrintTemplate({ data, format: printFormat }: Props) {
   };
 
   const isPaid = data.statutPaiement === StatutPaiement.PAYE;
+  const isPartial = data.statutPaiement === StatutPaiement.PARTIEL;
+  const montantPaye = data.montantPaye || 0;
+  const resteAPayer = data.resteAPayer !== undefined ? data.resteAPayer : Math.max(0, data.montant - montantPaye);
+  const hasPartialPayment = isPartial || (montantPaye > 0 && resteAPayer > 0);
 
   const items = data.intervention?.piecesUtilisees || [];
   const montantMO = data.intervention?.montantMainOeuvre || 0;
@@ -216,23 +220,47 @@ export function DocumentPrintTemplate({ data, format: printFormat }: Props) {
 
           {/* Totaux & Règlement */}
           <div className="py-2.5 border-b border-dashed border-slate-300 space-y-1.5">
-            <div className="flex justify-between items-center text-sm font-black">
-              <span className="uppercase">NET À PAYER :</span>
-              <span className="text-base text-slate-950">{formatFCFA(data.montant)}</span>
+            <div className="flex justify-between items-center text-xs font-black">
+              <span className="uppercase text-slate-700">TOTAL FACTURE :</span>
+              <span className="text-sm text-slate-950">{formatFCFA(data.montant)}</span>
             </div>
 
-            <div className="pt-1 flex justify-between items-center text-[10px]">
+            {hasPartialPayment && (
+              <>
+                <div className="flex justify-between items-center text-[10px] text-emerald-800 font-bold">
+                  <span>Acompte(s) perçu(s) :</span>
+                  <span>- {formatFCFA(montantPaye)}</span>
+                </div>
+                <div className="flex justify-between items-center pt-1 border-t border-dashed border-slate-300 text-xs font-black">
+                  <span className="text-rose-700 uppercase">RESTE DÛ AU RETRAIT :</span>
+                  <span className="text-sm text-rose-700">{formatFCFA(resteAPayer)}</span>
+                </div>
+              </>
+            )}
+
+            {!hasPartialPayment && isPaid && (
+              <div className="flex justify-between items-center pt-1 border-t border-dashed border-slate-300 text-xs font-black text-emerald-800">
+                <span className="uppercase">SOLDE RESTANT :</span>
+                <span className="text-xs">0 FCFA (SOLDÉ)</span>
+              </div>
+            )}
+
+            <div className="pt-1.5 flex justify-between items-center text-[10px]">
               <span className="font-bold text-slate-600">Statut :</span>
               <span className={`px-1.5 py-0.5 rounded font-black ${
-                isPaid ? "bg-emerald-100 text-emerald-900 border border-emerald-300" : "bg-amber-100 text-amber-900 border border-amber-300"
+                isPaid
+                  ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
+                  : isPartial
+                  ? "bg-amber-100 text-amber-900 border border-amber-300"
+                  : "bg-slate-100 text-slate-800 border border-slate-300"
               }`}>
-                {isPaid ? "PAYÉ / ENCAISSÉ" : "EN ATTENTE"}
+                {isPaid ? "PAYÉ / SOLDÉ" : isPartial ? "ACOMPTE VERSÉ (PARTIEL)" : "EN ATTENTE"}
               </span>
             </div>
 
             {data.modePaiement && (
               <div className="flex justify-between items-center text-[10px] text-slate-600">
-                <span>Règlement :</span>
+                <span>Dernier règlement :</span>
                 <span className="font-bold text-slate-800">{data.modePaiement.replace(/_/g, " ")}</span>
               </div>
             )}
@@ -524,28 +552,67 @@ export function DocumentPrintTemplate({ data, format: printFormat }: Props) {
         {/* Totaux & Signature */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 items-start avoid-break">
           {/* Informations de paiement & mentions */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-[11px] space-y-1.5">
-            <span className="font-extrabold text-slate-800 block text-xs">Détails du Règlement</span>
-            <div className="flex justify-between">
-              <span className="text-slate-500">Statut :</span>
-              <span className="font-extrabold text-slate-900">{data.statutPaiement}</span>
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-[11px] space-y-2">
+            <div className="flex justify-between items-center border-b border-slate-200 pb-1.5">
+              <span className="font-extrabold text-slate-800 text-xs">Règlement & Transactions</span>
+              <span
+                className={`px-2 py-0.5 rounded text-[10px] font-black ${
+                  isPaid
+                    ? "bg-emerald-100 text-emerald-900 border border-emerald-300"
+                    : isPartial
+                    ? "bg-amber-100 text-amber-900 border border-amber-300"
+                    : "bg-slate-100 text-slate-800 border border-slate-300"
+                }`}
+              >
+                {isPaid ? "FACTURE SOLDÉE" : isPartial ? "ACOMPTE PERÇU (PARTIEL)" : "EN ATTENTE"}
+              </span>
             </div>
-            {data.modePaiement && (
-              <div className="flex justify-between">
-                <span className="text-slate-500">Mode :</span>
-                <span className="font-bold text-slate-800">{data.modePaiement.replace(/_/g, " ")}</span>
+
+            {/* Liste détaillée des transactions s'il y en a */}
+            {data.transactions && data.transactions.length > 0 ? (
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">
+                  Historique des versements ({data.transactions.length})
+                </span>
+                {data.transactions.map((tx, idx) => (
+                  <div
+                    key={tx.id || idx}
+                    className="p-2 rounded-lg bg-white border border-slate-200 flex justify-between items-center text-[10px]"
+                  >
+                    <div>
+                      <span className="font-extrabold text-slate-900 block">
+                        {formatFCFA(tx.montant)} • {tx.modePaiement.replace(/_/g, " ")}
+                      </span>
+                      <span className="text-slate-500 text-[9px]">
+                        {tx.datePaiement} {tx.referencePaiement ? `(Réf: ${tx.referencePaiement})` : ""} {tx.note ? `• ${tx.note}` : ""}
+                      </span>
+                    </div>
+                    <span className="font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded text-[9px]">
+                      Encaissé
+                    </span>
+                  </div>
+                ))}
               </div>
-            )}
-            {data.referencePaiement && (
-              <div className="flex justify-between">
-                <span className="text-slate-500">Référence :</span>
-                <span className="font-mono text-slate-800">{data.referencePaiement}</span>
-              </div>
-            )}
-            {data.datePaiement && (
-              <div className="flex justify-between text-[10px] text-emerald-700 font-semibold pt-1 border-t border-slate-200">
-                <span>Encaissé le :</span>
-                <span>{data.datePaiement}</span>
+            ) : (
+              <div className="space-y-1 text-slate-600">
+                {data.modePaiement && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Mode :</span>
+                    <span className="font-bold text-slate-800">{data.modePaiement.replace(/_/g, " ")}</span>
+                  </div>
+                )}
+                {data.referencePaiement && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500">Référence :</span>
+                    <span className="font-mono text-slate-800">{data.referencePaiement}</span>
+                  </div>
+                )}
+                {data.datePaiement && (
+                  <div className="flex justify-between text-[10px] text-emerald-700 font-semibold pt-1 border-t border-slate-200">
+                    <span>Encaissé le :</span>
+                    <span>{data.datePaiement}</span>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -553,17 +620,51 @@ export function DocumentPrintTemplate({ data, format: printFormat }: Props) {
           {/* Totaux financiers */}
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
             <div className="flex justify-between text-xs text-slate-600">
-              <span>Total Brut Hors Taxes :</span>
-              <span className="font-bold">{formatFCFA(data.montant)}</span>
+              <span>Total Brut des Prestations :</span>
+              <span className="font-bold text-slate-900">{formatFCFA(data.montant)}</span>
             </div>
             <div className="flex justify-between text-xs text-slate-500">
               <span>TVA (0% - Régime TPS Bénin) :</span>
               <span>0 FCFA</span>
             </div>
-            <div className="pt-2 border-t-2 border-[#1E4D8B] flex justify-between items-center">
-              <span className="font-black text-sm text-[#1E4D8B]">NET À PAYER :</span>
-              <span className="font-black text-base text-[#1E4D8B]">{formatFCFA(data.montant)}</span>
+            <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-xs font-extrabold text-slate-800">
+              <span>TOTAL NET DE LA FACTURE :</span>
+              <span className="text-sm font-black">{formatFCFA(data.montant)}</span>
             </div>
+
+            {hasPartialPayment && (
+              <>
+                <div className="flex justify-between items-center text-xs font-bold text-emerald-700 pt-1 border-t border-slate-200">
+                  <span>Acompte(s) déjà réglé(s) :</span>
+                  <span>- {formatFCFA(montantPaye)}</span>
+                </div>
+                <div className="pt-2 border-t-2 border-rose-600 flex justify-between items-center">
+                  <div>
+                    <span className="font-black text-xs text-rose-700 block uppercase">
+                      NET RESTANT À PAYER AU RETRAIT :
+                    </span>
+                    <span className="text-[10px] text-slate-500">Dû lors de la restitution du matériel</span>
+                  </div>
+                  <span className="font-black text-base text-rose-700">{formatFCFA(resteAPayer)}</span>
+                </div>
+              </>
+            )}
+
+            {!hasPartialPayment && isPaid && (
+              <div className="pt-2 border-t-2 border-emerald-600 flex justify-between items-center">
+                <span className="font-black text-xs text-emerald-800 uppercase">SOLDE RESTANT DÛ :</span>
+                <span className="font-black text-sm text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">
+                  0 FCFA (FACTURE SOLDÉE)
+                </span>
+              </div>
+            )}
+
+            {!hasPartialPayment && !isPaid && (
+              <div className="pt-2 border-t-2 border-[#1E4D8B] flex justify-between items-center">
+                <span className="font-black text-sm text-[#1E4D8B]">NET À PAYER :</span>
+                <span className="font-black text-base text-[#1E4D8B]">{formatFCFA(data.montant)}</span>
+              </div>
+            )}
           </div>
         </div>
 
