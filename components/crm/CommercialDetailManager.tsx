@@ -25,6 +25,7 @@ import {
   Ban,
   Archive,
   Lock,
+  Printer,
 } from "lucide-react";
 import {
   DemandeStatut,
@@ -34,6 +35,7 @@ import {
   StaffRole,
 } from "@prisma/client";
 import { PaymentConfirmationModal } from "@/components/crm/PaymentConfirmationModal";
+import { PrintDocumentModal } from "@/components/crm/PrintDocumentModal";
 import { formatFCFA, formatNumber } from "@/lib/format";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -84,6 +86,18 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
+  // Print Document Modal
+  const [printModalState, setPrintModalState] = useState<{
+    isOpen: boolean;
+    numero: string | null;
+    defaultFormat: "a4" | "ticket";
+    titre?: string;
+  }>({
+    isOpen: false,
+    numero: null,
+    defaultFormat: "a4",
+  });
 
   // Initialisation des lignes d'articles
   const [articles, setArticles] = useState<ArticleLine[]>(() => {
@@ -151,6 +165,16 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
       }
 
       setSuccessMsg(data.message || "Opération effectuée avec succès.");
+
+      if (actionType === "encaisser_facture" && factDoc?.numero) {
+        setPrintModalState({
+          isOpen: true,
+          numero: factDoc.numero,
+          defaultFormat: "a4",
+          titre: `Facture Commerciale (${factDoc.numero})`,
+        });
+      }
+
       router.refresh();
     } catch (err: any) {
       setError(err.message);
@@ -595,15 +619,30 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                       </span>
                     </div>
 
-                    <div className="pt-2 border-t border-gray-200/60 flex items-center justify-end">
+                    <div className="pt-2 border-t border-gray-200/60 flex items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPrintModalState({
+                            isOpen: true,
+                            numero: doc.numero,
+                            defaultFormat: "a4",
+                            titre: `${isDocDevis ? "Devis Commercial" : "Facture Commerciale"} (${doc.numero})`,
+                          })
+                        }
+                        className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-2xs transition-all cursor-pointer"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        <span>🖨️ Imprimer</span>
+                      </button>
                       <a
-                        href={`/api/documents/${doc.numero}/pdf`}
+                        href={`/api/documents/${doc.numero}/pdf?download=true`}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-2xs transition-all"
                       >
                         <Download className="w-3.5 h-3.5 text-brand-green" />
-                        <span>Télécharger PDF</span>
+                        <span>Télécharger</span>
                       </a>
                     </div>
                   </div>
@@ -656,6 +695,21 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
         titre={`Encaissement Facture Commerciale ${factDoc?.numero || ""}`}
         description="Confirmez le mode de règlement de la prestation/vente commerciale."
         loading={loading}
+      />
+
+      {/* Modale d'impression universelle (A4 / Ticket 80mm) */}
+      <PrintDocumentModal
+        isOpen={printModalState.isOpen}
+        onClose={() =>
+          setPrintModalState({
+            isOpen: false,
+            numero: null,
+            defaultFormat: "a4",
+          })
+        }
+        documentNumero={printModalState.numero}
+        defaultFormat={printModalState.defaultFormat}
+        titre={printModalState.titre}
       />
     </div>
   );

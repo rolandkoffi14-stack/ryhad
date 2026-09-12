@@ -94,6 +94,8 @@ export async function PATCH(
       const modePaiement = validated.modePaiement || "ESPECES";
       const referencePaiement = validated.referencePaiement || null;
 
+      let finalDiagNumero = diagDoc?.numero;
+
       if (diagDoc) {
         await db.financialDocument.update({
           where: { id: diagDoc.id },
@@ -107,6 +109,7 @@ export async function PATCH(
         });
       } else {
         const docNum = await generateDocumentNumber(DocumentType.FACTURE);
+        finalDiagNumero = docNum;
         await db.financialDocument.create({
           data: {
             numero: docNum,
@@ -159,6 +162,7 @@ export async function PATCH(
       return NextResponse.json({
         success: true,
         message: `Frais de diagnostic (${formatFCFA(montantDiag)}) encaissés avec succès.`,
+        documentNumero: finalDiagNumero,
       });
     }
 
@@ -229,7 +233,11 @@ export async function PATCH(
 
       broadcastCrmEvent("ticket:updated", id);
 
-      return NextResponse.json({ success: true, message: `Facture ${repDoc.numero} encaissée avec succès.` });
+      return NextResponse.json({
+        success: true,
+        message: `Facture ${repDoc.numero} encaissée avec succès.`,
+        documentNumero: repDoc.numero,
+      });
     }
 
     // --------------------------------------------------------------------------

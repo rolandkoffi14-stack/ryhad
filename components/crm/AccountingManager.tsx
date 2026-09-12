@@ -24,12 +24,14 @@ import {
   FileText,
   Wrench,
   Cpu,
+  Printer,
 } from "lucide-react";
 import { formatFCFA } from "@/lib/format";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PaginationControls } from "@/components/crm/PaginationControls";
 import { PaymentConfirmationModal } from "@/components/crm/PaymentConfirmationModal";
+import { PrintDocumentModal } from "@/components/crm/PrintDocumentModal";
 import { useRouter } from "next/navigation";
 
 interface FinancialDoc {
@@ -90,6 +92,18 @@ export function AccountingManager({ documents }: Props) {
     docId: null,
     numero: "",
     montant: 0,
+  });
+
+  // Print Document Modal
+  const [printModalState, setPrintModalState] = useState<{
+    isOpen: boolean;
+    numero: string | null;
+    defaultFormat: "a4" | "ticket";
+    titre?: string;
+  }>({
+    isOpen: false,
+    numero: null,
+    defaultFormat: "a4",
   });
 
   // Filtrage selon la période
@@ -861,8 +875,23 @@ export function AccountingManager({ documents }: Props) {
                                   Encaisser
                                 </button>
                               )}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPrintModalState({
+                                    isOpen: true,
+                                    numero: doc.numero,
+                                    defaultFormat: "a4",
+                                    titre: `Facture : ${doc.numero}`,
+                                  })
+                                }
+                                className="text-slate-400 hover:text-emerald-700 p-1.5 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer"
+                                title="Imprimer ce document"
+                              >
+                                <Printer className="w-4 h-4" />
+                              </button>
                               <a
-                                href={`/api/documents/${doc.numero}/pdf`}
+                                href={`/api/documents/${doc.numero}/pdf?download=true`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="text-slate-400 hover:text-brand-blue p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
@@ -957,15 +986,32 @@ export function AccountingManager({ documents }: Props) {
                             </span>
                           </td>
                           <td className="py-4 px-6 text-right">
-                            <a
-                              href={`/api/documents/${doc.numero}/pdf`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-slate-400 hover:text-brand-blue p-1.5 rounded-lg hover:bg-slate-100 transition-colors inline-flex"
-                              title="Télécharger Devis PDF"
-                            >
-                              <Download className="w-4 h-4" />
-                            </a>
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPrintModalState({
+                                    isOpen: true,
+                                    numero: doc.numero,
+                                    defaultFormat: "a4",
+                                    titre: `Devis : ${doc.numero}`,
+                                  })
+                                }
+                                className="text-slate-400 hover:text-emerald-700 p-1.5 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer inline-flex"
+                                title="Imprimer le Devis"
+                              >
+                                <Printer className="w-4 h-4" />
+                              </button>
+                              <a
+                                href={`/api/documents/${doc.numero}/pdf?download=true`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-slate-400 hover:text-brand-blue p-1.5 rounded-lg hover:bg-slate-100 transition-colors inline-flex"
+                                title="Télécharger Devis PDF"
+                              >
+                                <Download className="w-4 h-4" />
+                              </a>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -1093,12 +1139,30 @@ export function AccountingManager({ documents }: Props) {
                                 Encaisser
                               </button>
 
+                              {/* Imprimer direct */}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPrintModalState({
+                                    isOpen: true,
+                                    numero: doc.numero,
+                                    defaultFormat: "a4",
+                                    titre: `Document : ${doc.numero}`,
+                                  })
+                                }
+                                className="p-1.5 text-slate-400 hover:text-emerald-700 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer"
+                                title="Imprimer ce document"
+                              >
+                                <Printer className="w-4 h-4" />
+                              </button>
+
                               {/* Télécharger PDF */}
                               <a
-                                href={`/api/documents/${doc.numero}/pdf`}
+                                href={`/api/documents/${doc.numero}/pdf?download=true`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+                                title="Télécharger PDF"
                               >
                                 <Download className="w-4 h-4" />
                               </a>
@@ -1147,7 +1211,20 @@ export function AccountingManager({ documents }: Props) {
             });
             const data = await res.json();
             if (!res.ok || !data.success) throw new Error(data.message || "Erreur validation paiement.");
+            
+            const encNum = paymentModal.numero;
             setPaymentModal({ isOpen: false, docId: null, numero: "", montant: 0 });
+            
+            // Déclencher la modale d'impression pour délivrer immédiatement la facture soldée
+            if (encNum) {
+              setPrintModalState({
+                isOpen: true,
+                numero: encNum,
+                defaultFormat: "a4",
+                titre: `Facture Encaissée : ${encNum}`,
+              });
+            }
+
             router.refresh();
           } catch (err) {
             console.error("Erreur enregistrement paiement:", err);
@@ -1156,6 +1233,21 @@ export function AccountingManager({ documents }: Props) {
         montant={paymentModal.montant}
         titre={`Encaissement Facture ${paymentModal.numero}`}
         description="Confirmez le mode de règlement reçu pour solder cette facture."
+      />
+
+      {/* Modale d'impression universelle (A4 / Ticket 80mm) */}
+      <PrintDocumentModal
+        isOpen={printModalState.isOpen}
+        onClose={() =>
+          setPrintModalState({
+            isOpen: false,
+            numero: null,
+            defaultFormat: "a4",
+          })
+        }
+        documentNumero={printModalState.numero}
+        defaultFormat={printModalState.defaultFormat}
+        titre={printModalState.titre}
       />
     </div>
   );

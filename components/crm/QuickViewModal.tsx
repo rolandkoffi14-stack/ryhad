@@ -21,9 +21,11 @@ import {
   Layers,
   CreditCard,
   ShoppingBag,
+  Printer,
 } from "lucide-react";
 import { formatFCFA } from "@/lib/format";
 import { TicketStatusBadge } from "@/components/crm/TicketStatusBadge";
+import { PrintDocumentModal } from "@/components/crm/PrintDocumentModal";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -50,6 +52,7 @@ interface Props {
 
 export function QuickViewModal({ isOpen, onClose, data }: Props) {
   const [mounted, setMounted] = useState(false);
+  const [isPrintOpen, setIsPrintOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -165,20 +168,39 @@ export function QuickViewModal({ isOpen, onClose, data }: Props) {
             ))}
           </div>
 
-          {/* Téléchargement PDF si applicable */}
-          {data.pdfUrl && (
-            <div className="pt-2">
-              <a
-                href={data.pdfUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full inline-flex items-center justify-center gap-2 p-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-xs shadow-2xs transition-all"
-              >
-                <Download className="w-3.5 h-3.5 text-brand-green" />
-                <span>Télécharger Document PDF</span>
-              </a>
-            </div>
-          )}
+          {/* Action Imprimer & Télécharger si applicable */}
+          {data.pdfUrl && (() => {
+            const extractedDocNum = data.pdfUrl.split("/api/documents/")[1]?.split("/pdf")[0] || null;
+            return (
+              <div className="pt-2 flex flex-col sm:flex-row items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsPrintOpen(true)}
+                  className="w-full sm:flex-1 inline-flex items-center justify-center gap-2 p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-xs transition-all cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>🖨️ Imprimer Immédiatement</span>
+                </button>
+                <a
+                  href={`${data.pdfUrl}?download=true`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition-all"
+                >
+                  <Download className="w-3.5 h-3.5 text-slate-500" />
+                  <span>Télécharger PDF</span>
+                </a>
+
+                <PrintDocumentModal
+                  isOpen={isPrintOpen}
+                  onClose={() => setIsPrintOpen(false)}
+                  documentNumero={extractedDocNum}
+                  defaultFormat="a4"
+                  titre={data.title}
+                />
+              </div>
+            );
+          })()}
         </div>
 
         {/* Footer avec lien vers la fiche complète */}

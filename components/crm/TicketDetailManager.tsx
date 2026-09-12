@@ -37,6 +37,7 @@ import {
 import { InterventionStatut, InterventionType, DocumentType, FactureType, StaffRole } from "@prisma/client";
 import { PaymentConfirmationModal } from "@/components/crm/PaymentConfirmationModal";
 import { ConfirmationModal } from "@/components/crm/ConfirmationModal";
+import { PrintDocumentModal } from "@/components/crm/PrintDocumentModal";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -434,13 +435,25 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
     description: "",
   });
 
+  // État de la modale d'impression de document (Facture, Devis, Reçu de dépôt)
+  const [printModalState, setPrintModalState] = useState<{
+    isOpen: boolean;
+    numero: string | null;
+    defaultFormat: "a4" | "ticket";
+    titre?: string;
+  }>({
+    isOpen: false,
+    numero: null,
+    defaultFormat: "ticket",
+  });
+
   const handleConfirmPayment = async (modePaiement: string, referencePaiement?: string) => {
     setLoading(true);
     setError(null);
     setSuccessMsg(null);
     try {
-      const actionType =
-        paymentModalState.type === "DIAGNOSTIC" ? "encaisser_diagnostic" : "encaisser_reparation";
+      const isDiag = paymentModalState.type === "DIAGNOSTIC";
+      const actionType = isDiag ? "encaisser_diagnostic" : "encaisser_reparation";
 
       const res = await fetch(`/api/crm/tickets/${ticket.id}`, {
         method: "PATCH",
@@ -455,11 +468,23 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
       if (!res.ok || !data.success) throw new Error(data.message || "Erreur lors de l'encaissement.");
 
       setSuccessMsg(
-        paymentModalState.type === "DIAGNOSTIC"
+        isDiag
           ? `Frais de diagnostic (${diagAmountFormatted}) encaissés via ${modePaiement.replace(/_/g, " ")}. Le technicien peut démarrer.`
           : `Facture encaissée avec succès via ${modePaiement.replace(/_/g, " ")}. Le technicien peut démarrer la réparation.`
       );
       setTimeout(() => setSuccessMsg(null), 4000);
+
+      // Ouvrir immédiatement la modale d'impression du reçu ou de la facture pour la délivrer au client
+      const paidDocNumero = data.documentNumero || (isDiag ? diagDoc?.numero : repDoc?.numero);
+      if (paidDocNumero) {
+        setPrintModalState({
+          isOpen: true,
+          numero: paidDocNumero,
+          defaultFormat: isDiag ? "ticket" : "a4",
+          titre: isDiag ? `Reçu de Dépôt Diagnostic (${paidDocNumero})` : `Facture de Réparation (${paidDocNumero})`,
+        });
+      }
+
       router.refresh();
     } catch (err: any) {
       setError(err.message);
@@ -644,15 +669,30 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                   : "Frais encaissés. En attente du démarrage de l'expertise technique par le technicien."}
               </p>
               {diagDoc && (
-                <div className="mt-2.5">
-                  <a
-                    href={`/api/documents/${diagDoc.numero}/pdf`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all"
+                <div className="mt-2.5 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPrintModalState({
+                        isOpen: true,
+                        numero: diagDoc.numero,
+                        defaultFormat: "ticket",
+                        titre: `Reçu de Dépôt (${diagDoc.numero})`,
+                      })
+                    }
+                    className="inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
                   >
                     <Printer className="w-3.5 h-3.5 text-emerald-200" />
-                    <span>Imprimer Reçu de Dépôt PDF ({diagDoc.numero})</span>
+                    <span>🖨️ Imprimer Reçu de Dépôt ({diagDoc.numero})</span>
+                  </button>
+                  <a
+                    href={`/api/documents/${diagDoc.numero}/pdf?download=true`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 hover:underline px-2 py-1"
+                  >
+                    <Download className="w-3 h-3" />
+                    <span>Télécharger PDF</span>
                   </a>
                 </div>
               )}
@@ -666,7 +706,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
           <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-0.5">
             <FileText className="w-5 h-5" />
           </div>
-          <div>
+          <div className="flex-1">
             <h3 className="text-xs font-extrabold text-blue-950 uppercase tracking-wide">
               Étape 3 : Devis {devisDoc.numero} ({formatFCFA(devisDoc.montant)}) prêt pour envoi
             </h3>
@@ -675,6 +715,32 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                 ? "Rapport technique et devis scellés. La réception va le transmettre au client pour validation."
                 : "Transmettez le devis au client (WhatsApp, email, appel) puis cliquez sur 'Envoyer Devis'."}
             </p>
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setPrintModalState({
+                    isOpen: true,
+                    numero: devisDoc.numero,
+                    defaultFormat: "a4",
+                    titre: `Devis Estimatif (${devisDoc.numero})`,
+                  })
+                }
+                className="inline-flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5 text-blue-200" />
+                <span>🖨️ Imprimer Devis ({devisDoc.numero})</span>
+              </button>
+              <a
+                href={`/api/documents/${devisDoc.numero}/pdf?download=true`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-[10px] font-bold text-brand-blue hover:underline px-2 py-1"
+              >
+                <Download className="w-3 h-3" />
+                <span>Télécharger PDF</span>
+              </a>
+            </div>
           </div>
         </div>
       )}
@@ -702,7 +768,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
           <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
             <Receipt className="w-5 h-5" />
           </div>
-          <div>
+          <div className="flex-1">
             <h3 className="text-xs font-extrabold text-emerald-950 uppercase tracking-wide">
               Étape 5 : Devis accepté — Facture {repDoc.numero} ({formatFCFA(repDoc.montant)}) à encaisser
             </h3>
@@ -711,6 +777,32 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                 ? "La réparation pourra débuter dès confirmation de l'encaissement de la facture par la réception."
                 : "Encaissez le règlement pour débloquer le démarrage des travaux par le technicien."}
             </p>
+            <div className="mt-2.5 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  setPrintModalState({
+                    isOpen: true,
+                    numero: repDoc.numero,
+                    defaultFormat: "a4",
+                    titre: `Facture de Réparation (${repDoc.numero})`,
+                  })
+                }
+                className="inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5 text-emerald-200" />
+                <span>🖨️ Imprimer Facture ({repDoc.numero})</span>
+              </button>
+              <a
+                href={`/api/documents/${repDoc.numero}/pdf?download=true`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 hover:underline px-2 py-1"
+              >
+                <Download className="w-3 h-3" />
+                <span>Télécharger PDF</span>
+              </a>
+            </div>
           </div>
         </div>
       )}
@@ -1336,6 +1428,21 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                             <MessageCircle className="w-3 h-3" />
                           </a>
                         )}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setPrintModalState({
+                              isOpen: true,
+                              numero: doc.numero,
+                              defaultFormat: isDevis ? "a4" : "ticket",
+                              titre: `${label} (${doc.numero})`,
+                            })
+                          }
+                          title="Imprimer ce document"
+                          className="p-1 rounded bg-white hover:bg-emerald-600 hover:text-white text-emerald-700 border border-gray-200 transition-all inline-flex items-center shadow-xs cursor-pointer"
+                        >
+                          <Printer className="w-3 h-3" />
+                        </button>
                         <a
                           href={`/api/documents/${doc.numero}/pdf`}
                           target="_blank"
@@ -1437,6 +1544,21 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
         confirmLabel="Confirmer et émettre le devis"
         variant="warning"
         loading={loading}
+      />
+
+      {/* Modale d'impression immédiate universelle (A4 / Ticket 80mm) */}
+      <PrintDocumentModal
+        isOpen={printModalState.isOpen}
+        onClose={() =>
+          setPrintModalState({
+            isOpen: false,
+            numero: null,
+            defaultFormat: "ticket",
+          })
+        }
+        documentNumero={printModalState.numero}
+        defaultFormat={printModalState.defaultFormat}
+        titre={printModalState.titre}
       />
     </div>
   );

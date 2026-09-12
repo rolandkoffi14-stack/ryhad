@@ -32,14 +32,16 @@ import {
   Eye,
   MessageCircle,
   Laptop,
+  Printer,
 } from "lucide-react";
 import { formatFCFA } from "@/lib/format";
-import { format, isToday, isBefore, isAfter, startOfDay } from "date-fns";
+import { format, isToday, isBefore, isAfter, startOfDay, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PaymentConfirmationModal } from "@/components/crm/PaymentConfirmationModal";
 import { QuickViewModal, QuickViewData } from "@/components/crm/QuickViewModal";
+import { PrintDocumentModal } from "@/components/crm/PrintDocumentModal";
 import { TicketStatusBadge } from "@/components/crm/TicketStatusBadge";
-import { StaffRole, InterventionStatut } from "@prisma/client";
+import { StaffRole, InterventionStatut, Periodicite } from "@prisma/client";
 
 interface ContractEnterprise {
   id: string;
@@ -174,6 +176,18 @@ export function ContractEnterpriseView({
     docId: null,
     numero: "",
     montant: 0,
+  });
+
+  // Print Document Modal
+  const [printModalState, setPrintModalState] = useState<{
+    isOpen: boolean;
+    numero: string | null;
+    defaultFormat: "a4" | "ticket";
+    titre?: string;
+  }>({
+    isOpen: false,
+    numero: null,
+    defaultFormat: "a4",
   });
 
   const [mounted, setMounted] = useState(false);
@@ -1134,8 +1148,25 @@ export function ContractEnterpriseView({
                                   Encaisser
                                 </button>
                               )}
+                              {/* Imprimer direct */}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPrintModalState({
+                                    isOpen: true,
+                                    numero: fac.numero,
+                                    defaultFormat: "a4",
+                                    titre: `Facture Contrat : ${fac.numero}`,
+                                  })
+                                }
+                                className="p-1.5 text-slate-400 hover:text-emerald-700 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer"
+                                title="Imprimer ce document"
+                              >
+                                <Printer className="w-4 h-4" />
+                              </button>
+
                               <a
-                                href={`/api/documents/${fac.numero}/pdf`}
+                                href={`/api/documents/${fac.numero}/pdf?download=true`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="p-1.5 text-slate-400 hover:text-brand-blue rounded-lg hover:bg-slate-100 transition-colors"
@@ -1401,7 +1432,20 @@ export function ContractEnterpriseView({
               });
               const data = await res.json();
               if (!res.ok || !data.success) throw new Error(data.message || "Erreur validation paiement.");
+              
+              const encNumero = paymentModal.numero;
               setPaymentModal({ isOpen: false, docId: null, numero: "", montant: 0 });
+
+              // Déclencher immédiatement l'impression du reçu de paiement contrat
+              if (encNumero) {
+                setPrintModalState({
+                  isOpen: true,
+                  numero: encNumero,
+                  defaultFormat: "a4",
+                  titre: `Facture Contrat Encaissée : ${encNumero}`,
+                });
+              }
+
               router.refresh();
             } catch (err) {
               console.error("Erreur enregistrement paiement:", err);
@@ -1419,6 +1463,21 @@ export function ContractEnterpriseView({
         isOpen={isQuickViewOpen}
         onClose={() => setIsQuickViewOpen(false)}
         data={quickViewData}
+      />
+
+      {/* Modale d'impression universelle (A4 / Ticket 80mm) */}
+      <PrintDocumentModal
+        isOpen={printModalState.isOpen}
+        onClose={() =>
+          setPrintModalState({
+            isOpen: false,
+            numero: null,
+            defaultFormat: "a4",
+          })
+        }
+        documentNumero={printModalState.numero}
+        defaultFormat={printModalState.defaultFormat}
+        titre={printModalState.titre}
       />
     </div>
   );

@@ -17,6 +17,7 @@ import {
   Search,
   Eye,
   CreditCard,
+  Printer,
 } from "lucide-react";
 import { DocumentType, FactureType, StatutPaiement, InterventionStatut } from "@prisma/client";
 import { formatFCFA } from "@/lib/format";
@@ -24,6 +25,7 @@ import { PaginationControls } from "@/components/crm/PaginationControls";
 import { QuickViewModal, QuickViewData } from "@/components/crm/QuickViewModal";
 import { PaymentConfirmationModal } from "@/components/crm/PaymentConfirmationModal";
 import { ConfirmationModal } from "@/components/crm/ConfirmationModal";
+import { PrintDocumentModal } from "@/components/crm/PrintDocumentModal";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -82,6 +84,18 @@ export function DocumentsTable({ documents }: Props) {
     docId: null,
     numero: "",
     montant: 0,
+  });
+
+  // Print Document Modal
+  const [printModalState, setPrintModalState] = useState<{
+    isOpen: boolean;
+    numero: string | null;
+    defaultFormat: "a4" | "ticket";
+    titre?: string;
+  }>({
+    isOpen: false,
+    numero: null,
+    defaultFormat: "a4",
   });
 
   const filteredDocs = useMemo(() => {
@@ -241,6 +255,14 @@ export function DocumentsTable({ documents }: Props) {
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || "Erreur encaissement.");
+
+      // Ouvrir immédiatement la modale d'impression du reçu/facture encaissé(e)
+      setPrintModalState({
+        isOpen: true,
+        numero: paymentModalState.numero,
+        defaultFormat: "a4",
+        titre: `Facture Encaissée : ${paymentModalState.numero}`,
+      });
 
       router.refresh();
     } catch (err: any) {
@@ -454,9 +476,26 @@ export function DocumentsTable({ documents }: Props) {
                         <Eye className="w-3.5 h-3.5" />
                       </button>
 
+                      {/* Bouton Imprimer direct A4 / Ticket */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setPrintModalState({
+                            isOpen: true,
+                            numero: doc.numero,
+                            defaultFormat: doc.typeFacture === FactureType.DIAGNOSTIC ? "ticket" : "a4",
+                            titre: `${displayInfo.label} : ${doc.numero}`,
+                          })
+                        }
+                        title="Imprimer ce document"
+                        className="p-1.5 rounded-xl border border-gray-200 bg-white text-emerald-700 hover:bg-emerald-600 hover:text-white transition-all shadow-2xs cursor-pointer"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                      </button>
+
                       {/* Télécharger PDF */}
                       <a
-                        href={`/api/documents/${doc.numero}/pdf`}
+                        href={`/api/documents/${doc.numero}/pdf?download=true`}
                         target="_blank"
                         rel="noreferrer"
                         title="Télécharger PDF"
@@ -535,6 +574,21 @@ export function DocumentsTable({ documents }: Props) {
         message={errorModal.message}
         confirmLabel="Compris"
         variant="danger"
+      />
+
+      {/* Modale d'impression universelle (A4 / Ticket 80mm) */}
+      <PrintDocumentModal
+        isOpen={printModalState.isOpen}
+        onClose={() =>
+          setPrintModalState({
+            isOpen: false,
+            numero: null,
+            defaultFormat: "a4",
+          })
+        }
+        documentNumero={printModalState.numero}
+        defaultFormat={printModalState.defaultFormat}
+        titre={printModalState.titre}
       />
     </div>
   );

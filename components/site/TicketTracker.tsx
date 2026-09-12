@@ -20,8 +20,10 @@ import {
   Receipt,
   Sparkles,
   Lock,
+  Printer,
 } from "lucide-react";
 import { formatFCFA } from "@/lib/format";
+import { PrintDocumentModal } from "@/components/crm/PrintDocumentModal";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -73,6 +75,7 @@ export function TicketTracker({ initialNumero }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [ticket, setTicket] = useState<TicketData | null>(null);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
 
   const fetchTicket = async (numToSearch: string, phoneCode: string = phoneSuffix) => {
     if (!numToSearch.trim()) return;
@@ -406,15 +409,27 @@ export function TicketTracker({ initialNumero }: Props) {
 
               {/* Boutons d'action client */}
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-                <a
-                  href={`/api/documents/${ticket.devis.numero}/pdf?phoneSuffix=${encodeURIComponent(phoneSuffix.trim())}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border border-gray-300 text-brand-dark px-4 py-3 rounded-xl text-xs font-bold shadow-xs transition-all"
-                >
-                  <Download className="w-4 h-4 text-brand-blue" />
-                  <span>Télécharger le Devis Officiel (PDF)</span>
-                </a>
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => setIsPrintModalOpen(true)}
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl text-xs font-black shadow-xs transition-all cursor-pointer"
+                  >
+                    <Printer className="w-4 h-4" />
+                    <span>🖨️ Imprimer / Sauvegarder</span>
+                  </button>
+
+                  <a
+                    href={`/api/documents/${ticket.devis.numero}/pdf?download=true&phoneSuffix=${encodeURIComponent(phoneSuffix.trim())}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border border-gray-300 text-brand-dark px-3 py-3 rounded-xl text-xs font-bold shadow-xs transition-all"
+                    title="Télécharger le fichier PDF officiel"
+                  >
+                    <Download className="w-4 h-4 text-slate-500" />
+                    <span className="hidden md:inline">PDF</span>
+                  </a>
+                </div>
 
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                   <button
@@ -464,6 +479,17 @@ export function TicketTracker({ initialNumero }: Props) {
             </a>
           </div>
         </div>
+      )}
+
+      {/* Modale d'impression immédiate client */}
+      {ticket?.devis && (
+        <PrintDocumentModal
+          isOpen={isPrintModalOpen}
+          onClose={() => setIsPrintModalOpen(false)}
+          documentNumero={ticket.devis.numero}
+          defaultFormat="a4"
+          titre={`Devis Estimatif : ${ticket.devis.numero}`}
+        />
       )}
     </div>
   );
