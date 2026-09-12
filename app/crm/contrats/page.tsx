@@ -39,7 +39,7 @@ export default async function CrmContratsPage() {
         orderBy: { dateDebut: "desc" },
       }),
       db.client.findMany({
-        select: { id: true, nom: true, type: true, entreprise: true },
+        select: { id: true, nom: true, type: true, contactNom: true },
         orderBy: [{ type: "desc" }, { nom: "asc" }],
       }),
     ]);

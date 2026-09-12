@@ -56,7 +56,7 @@ interface ContractItem {
 
 interface Props {
   contracts: ContractItem[];
-  clients: { id: string; nom: string; entreprise?: string | null; type?: string }[];
+  clients: { id: string; nom: string; contactNom?: string | null; type?: string }[];
 }
 
 export function ContractManager({ contracts, clients }: Props) {
@@ -696,7 +696,7 @@ export function ContractManager({ contracts, clients }: Props) {
                         disabled={hasActive}
                         className={hasActive ? "text-gray-400 bg-gray-50" : "text-gray-900 font-medium"}
                       >
-                        {cl.nom} {cl.entreprise ? `(${cl.entreprise})` : ""} {hasActive ? "— ⛔ Contrat actif en cours" : ""}
+                        {cl.nom} {cl.contactNom ? `(Contact: ${cl.contactNom})` : ""} {hasActive ? "— ⛔ Contrat actif en cours" : ""}
                       </option>
                     );
                   })}

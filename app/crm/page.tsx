@@ -157,8 +157,7 @@ export default async function CrmDashboardPage() {
   const isTicketPending = (t: any) => {
     if (
       t.statut === InterventionStatut.LIVRE_CLOTURE ||
-      t.statut === InterventionStatut.CLOTURE ||
-      t.statut === InterventionStatut.ANNULE
+      t.statut === InterventionStatut.CLOTURE
     ) {
       return false;
     }
@@ -215,8 +214,7 @@ export default async function CrmDashboardPage() {
   const isTicketInProgress = (t: any) => {
     if (
       t.statut === InterventionStatut.LIVRE_CLOTURE ||
-      t.statut === InterventionStatut.CLOTURE ||
-      t.statut === InterventionStatut.ANNULE
+      t.statut === InterventionStatut.CLOTURE
     ) {
       return false;
     }
@@ -227,10 +225,7 @@ export default async function CrmDashboardPage() {
     }
 
     // S'il est à l'état NOUVEAU sans encaissement préalable
-    if (
-      t.statut === InterventionStatut.NOUVEAU ||
-      t.statut === InterventionStatut.FRAIS_DIAGNOSTIC_EN_ATTENTE
-    ) {
+    if (t.statut === InterventionStatut.NOUVEAU) {
       return false;
     }
 
@@ -240,10 +235,9 @@ export default async function CrmDashboardPage() {
       InterventionStatut.DIAGNOSTIC_TERMINE,
       InterventionStatut.DEVIS_ENVOYE,
       InterventionStatut.DEVIS_ACCEPTE,
+      InterventionStatut.DEVIS_REFUSE,
       InterventionStatut.EN_REPARATION,
       InterventionStatut.EN_INTERVENTION,
-      InterventionStatut.EN_ATTENTE_PIECE,
-      InterventionStatut.EN_ATTENTE_VALIDATION_CLIENT,
       InterventionStatut.TERMINE,
     ].includes(t.statut);
   };
