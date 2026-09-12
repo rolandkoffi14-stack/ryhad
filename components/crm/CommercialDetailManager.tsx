@@ -635,15 +635,6 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                         <Printer className="w-3.5 h-3.5" />
                         <span>🖨️ Imprimer</span>
                       </button>
-                      <a
-                        href={`/api/documents/${doc.numero}/pdf?download=true`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-2xs transition-all"
-                      >
-                        <Download className="w-3.5 h-3.5 text-brand-green" />
-                        <span>Télécharger</span>
-                      </a>
                     </div>
                   </div>
                 );

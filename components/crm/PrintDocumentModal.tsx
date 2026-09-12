@@ -5,13 +5,12 @@ import { createPortal } from "react-dom";
 import {
   Printer,
   X,
-  Download,
   MessageCircle,
   FileText,
   Receipt,
   Loader2,
   AlertCircle,
-  CheckCircle2,
+  ExternalLink,
 } from "lucide-react";
 import { DocumentPrintData } from "@/types/documents";
 import { DocumentPrintTemplate } from "@/components/documents/DocumentPrintTemplate";
@@ -95,20 +94,29 @@ export function PrintDocumentModal({
 
   if (!isOpen || !mounted) return null;
 
+  const docNum = data?.numero || documentNumero || "";
+
+  // Déclenchement de l'impression dans un nouvel onglet dédié propre
+  // Laisse l'onglet CRM intact et garantit 0 conflit de styles
   const handleTriggerPrint = () => {
-    // Déclenchement de l'impression native du navigateur
-    window.print();
+    if (!docNum) return;
+    const printUrl = `/documents/${encodeURIComponent(docNum)}?format=${format}&auto=true`;
+    window.open(printUrl, "_blank");
   };
 
   const appOrigin = typeof window !== "undefined" ? window.location.origin : "https://ryhad.bj";
-  const docNum = data?.numero || documentNumero || "";
 
   // Préparation du message WhatsApp officiel RyHaD
   let waText = "";
   if (data) {
     const clientNom = data.client.nom;
-    const typeLibelle = data.typeFacture === "DIAGNOSTIC" ? "Reçu de diagnostic" : data.type === "DEVIS" ? "Devis" : "Facture";
-    waText = `Bonjour ${clientNom},\n\nVoici votre ${typeLibelle} officiel RyHaD Tic-Medic :\n📄 N° : ${data.numero}\n💰 Montant : ${formatFCFA(data.montant)}\n\n👉 Télécharger votre document officiel :\n${appOrigin}/api/documents/${data.numero}/pdf`;
+    const typeLibelle =
+      data.typeFacture === "DIAGNOSTIC"
+        ? "Reçu de diagnostic"
+        : data.type === "DEVIS"
+        ? "Devis"
+        : "Facture";
+    waText = `Bonjour ${clientNom},\n\nVoici votre ${typeLibelle} officiel RyHaD Tic-Medic :\n📄 N° : ${data.numero}\n💰 Montant : ${formatFCFA(data.montant)}\n\n👉 Consulter et télécharger votre document officiel :\n${appOrigin}/documents/${data.numero}`;
     if (data.intervention?.numero) {
       waText += `\n\n🔍 Suivi de votre matériel en direct :\n${appOrigin}/suivi/${data.intervention.numero}`;
     }
@@ -116,36 +124,13 @@ export function PrintDocumentModal({
   }
 
   return createPortal(
-    <div className="print-modal-overlay fixed inset-0 z-[99999] flex flex-col items-center justify-center p-0 sm:p-4 bg-slate-900/80 backdrop-blur-xs animate-in fade-in duration-150">
-      {/* Styles d'impression globaux pour isoler le document lors de window.print() */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @media print {
-          /* Masquer tout le corps du site CRM et de la page */
-          body * {
-            visibility: hidden !important;
-          }
-          /* Afficher uniquement la zone imprimable */
-          .printable-document-area, .printable-document-area * {
-            visibility: visible !important;
-          }
-          .printable-document-area {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #fff !important;
-          }
-          .no-print, .print-modal-overlay > :not(.print-content-wrapper), .modal-header-actions {
-            display: none !important;
-          }
-        }
-      `}} />
+    <div className="fixed inset-0 z-[99999] flex flex-col items-center justify-center p-2 sm:p-4 bg-slate-900/80 backdrop-blur-xs animate-in fade-in duration-150">
+      {/* Fond cliquable pour fermer la modale */}
+      <div className="absolute inset-0 -z-10" onClick={onClose} aria-hidden="true" />
 
-      <div className="print-content-wrapper bg-slate-100 sm:rounded-3xl shadow-2xl border border-slate-300 w-full max-w-4xl h-full sm:h-[94vh] flex flex-col overflow-hidden">
-        {/* Barre Supérieure d'Actions (Masquée à l'impression) */}
-        <div className="no-print modal-header-actions bg-white border-b border-slate-200 px-4 py-3 sm:px-6 sm:py-3.5 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-xs z-10">
+      <div className="bg-slate-100 sm:rounded-3xl shadow-2xl border border-slate-300 w-full max-w-4xl h-full sm:h-[94vh] flex flex-col overflow-hidden relative">
+        {/* Barre Supérieure d'Actions */}
+        <div className="bg-white border-b border-slate-200 px-4 py-3 sm:px-6 sm:py-3.5 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-xs z-10">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200">
               <Printer className="w-5 h-5" />
@@ -188,14 +173,15 @@ export function PrintDocumentModal({
             </button>
           </div>
 
-          {/* Boutons d'Action Clés */}
+          {/* Boutons d'Action Clés + Fermeture Isolée */}
           <div className="flex items-center gap-2">
-            {/* GROS BOUTON VERT D'IMPRESSION IMMÉDIATE */}
+            {/* GROS BOUTON VERT D'IMPRESSION (OUVRE NOUVEL ONGLET PROPRE) */}
             <button
               type="button"
               onClick={handleTriggerPrint}
               disabled={loading || !data}
               className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-black shadow-sm hover:shadow transition-all disabled:opacity-50 cursor-pointer"
+              title="Ouvre le document dans un nouvel onglet et lance l'impression"
             >
               <Printer className="w-4 h-4" />
               <span>🖨️ Imprimer Immédiatement</span>
@@ -215,31 +201,23 @@ export function PrintDocumentModal({
               </a>
             )}
 
-            {/* Télécharger PDF binaire officiel */}
-            {docNum && (
-              <a
-                href={`/api/documents/${encodeURIComponent(docNum)}/pdf?download=true`}
-                target="_blank"
-                rel="noreferrer"
-                title="Télécharger fichier PDF officiel"
-                className="p-2 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors"
-              >
-                <Download className="w-4 h-4 text-slate-600" />
-              </a>
-            )}
+            {/* Séparateur visuel */}
+            <div className="h-6 w-px bg-slate-200 mx-1 hidden sm:block" />
 
-            {/* Bouton Fermer */}
+            {/* BOUTON FERMER DISTINCT ET HAUTEMENT VISIBLE */}
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              aria-label="Fermer la fenêtre d'impression"
+              title="Fermer (Échap)"
+              className="p-2 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-500 hover:text-red-600 border border-slate-200 hover:border-red-200 transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        {/* Corps avec Aperçu Live & Zone Imprimable */}
+        {/* Corps avec Aperçu Live */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 flex justify-center bg-slate-200/80">
           {loading && (
             <div className="flex flex-col items-center justify-center p-12 text-slate-500 space-y-3 m-auto">
@@ -258,7 +236,7 @@ export function PrintDocumentModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 cursor-pointer"
               >
                 Fermer
               </button>
@@ -266,10 +244,38 @@ export function PrintDocumentModal({
           )}
 
           {!loading && !error && data && (
-            <div className="printable-document-area w-full flex justify-center">
+            <div className="w-full flex justify-center">
               <DocumentPrintTemplate data={data} format={format} />
             </div>
           )}
+        </div>
+
+        {/* Pied de page de la modale avec bouton Fermer explicite */}
+        <div className="bg-white border-t border-slate-200 px-4 py-3 sm:px-6 flex items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2 text-xs text-slate-500">
+            <span>Astuce : Vous pouvez aussi appuyer sur <kbd className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-300 font-mono text-[10px]">Échap</kbd></span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {docNum && (
+              <a
+                href={`/documents/${encodeURIComponent(docNum)}?format=${format}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                <span>Ouvrir dans un onglet</span>
+              </a>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-700 transition-colors cursor-pointer"
+            >
+              Fermer
+            </button>
+          </div>
         </div>
       </div>
     </div>,

@@ -1164,16 +1164,6 @@ export function ContractEnterpriseView({
                               >
                                 <Printer className="w-4 h-4" />
                               </button>
-
-                              <a
-                                href={`/api/documents/${fac.numero}/pdf?download=true`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="p-1.5 text-slate-400 hover:text-brand-blue rounded-lg hover:bg-slate-100 transition-colors"
-                                title="Télécharger le PDF"
-                              >
-                                <Download className="w-4 h-4" />
-                              </a>
                             </div>
                           </td>
                         </tr>

@@ -685,15 +685,6 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                     <Printer className="w-3.5 h-3.5 text-emerald-200" />
                     <span>🖨️ Imprimer Reçu de Dépôt ({diagDoc.numero})</span>
                   </button>
-                  <a
-                    href={`/api/documents/${diagDoc.numero}/pdf?download=true`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 hover:underline px-2 py-1"
-                  >
-                    <Download className="w-3 h-3" />
-                    <span>Télécharger PDF</span>
-                  </a>
                 </div>
               )}
             </div>
@@ -731,15 +722,6 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                 <Printer className="w-3.5 h-3.5 text-blue-200" />
                 <span>🖨️ Imprimer Devis ({devisDoc.numero})</span>
               </button>
-              <a
-                href={`/api/documents/${devisDoc.numero}/pdf?download=true`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-[10px] font-bold text-brand-blue hover:underline px-2 py-1"
-              >
-                <Download className="w-3 h-3" />
-                <span>Télécharger PDF</span>
-              </a>
             </div>
           </div>
         </div>
@@ -793,15 +775,6 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                 <Printer className="w-3.5 h-3.5 text-emerald-200" />
                 <span>🖨️ Imprimer Facture ({repDoc.numero})</span>
               </button>
-              <a
-                href={`/api/documents/${repDoc.numero}/pdf?download=true`}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 hover:underline px-2 py-1"
-              >
-                <Download className="w-3 h-3" />
-                <span>Télécharger PDF</span>
-              </a>
             </div>
           </div>
         </div>
@@ -944,9 +917,9 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
               let waText = `Bonjour ${ticket.client.nom},\n\n`;
 
               if (devisDoc && (ticket.statut === InterventionStatut.DIAGNOSTIC_TERMINE || ticket.statut === InterventionStatut.DEVIS_ENVOYE)) {
-                waText += `Votre devis de réparation RyHaD Tic-Medic est disponible :\n📄 Devis N° : ${devisDoc.numero}\n💰 Montant estimé : ${formatFCFA(devisDoc.montant)}\n⚙️ Matériel : ${ticket.typeMateriel.replace(/_/g, " ")}\n\n👉 Télécharger votre devis PDF officiel :\n${appBaseUrl}/api/documents/${devisDoc.numero}/pdf\n\n🔍 Ou suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou`;
+                waText += `Votre devis de réparation RyHaD Tic-Medic est disponible :\n📄 Devis N° : ${devisDoc.numero}\n💰 Montant estimé : ${formatFCFA(devisDoc.montant)}\n⚙️ Matériel : ${ticket.typeMateriel.replace(/_/g, " ")}\n\n👉 Consulter votre devis officiel :\n${appBaseUrl}/documents/${devisDoc.numero}\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou`;
               } else if (repDoc && ticket.statut === InterventionStatut.DEVIS_ACCEPTE) {
-                waText += `Votre facture de réparation N° ${repDoc.numero} (${formatFCFA(repDoc.montant)}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} chez RyHaD Tic-Medic est disponible.\n\n👉 Télécharger votre facture PDF :\n${appBaseUrl}/api/documents/${repDoc.numero}/pdf\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}`;
+                waText += `Votre facture de réparation N° ${repDoc.numero} (${formatFCFA(repDoc.montant)}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} chez RyHaD Tic-Medic est disponible.\n\n👉 Consulter votre facture officielle :\n${appBaseUrl}/documents/${repDoc.numero}\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}`;
               } else if (ticket.statut === InterventionStatut.TERMINE) {
                 waText += `Bonne nouvelle ! Votre ${ticket.typeMateriel.replace(/_/g, " ")} (Dossier ${ticket.numero}) est réparé et disponible à notre atelier de Gbégamey pour retrait.\n\n🔍 Suivre votre dossier :\n${appBaseUrl}/suivi/${ticket.numero}`;
               } else {
@@ -1418,7 +1391,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                         {ticket.client.telephone && (
                           <a
                             href={`https://wa.me/${ticket.client.telephone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                              `Bonjour ${ticket.client.nom},\n\nVoici votre ${label} RyHaD Tic-Medic :\n📄 Réf : ${doc.numero}\n💰 Montant : ${formatFCFA(doc.montant)}\n\n👉 Télécharger votre document PDF :\n${typeof window !== "undefined" ? window.location.origin : "https://ryhad.bj"}/api/documents/${doc.numero}/pdf\n\n🔍 Suivi de votre dossier : ${typeof window !== "undefined" ? window.location.origin : "https://ryhad.bj"}/suivi/${ticket.numero}`
+                              `Bonjour ${ticket.client.nom},\n\nVoici votre ${label} RyHaD Tic-Medic :\n📄 Réf : ${doc.numero}\n💰 Montant : ${formatFCFA(doc.montant)}\n\n👉 Consulter votre document officiel :\n${typeof window !== "undefined" ? window.location.origin : "https://ryhad.bj"}/documents/${doc.numero}\n\n🔍 Suivi de votre dossier : ${typeof window !== "undefined" ? window.location.origin : "https://ryhad.bj"}/suivi/${ticket.numero}`
                             )}`}
                             target="_blank"
                             rel="noreferrer"
@@ -1443,15 +1416,6 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                         >
                           <Printer className="w-3 h-3" />
                         </button>
-                        <a
-                          href={`/api/documents/${doc.numero}/pdf`}
-                          target="_blank"
-                          rel="noreferrer"
-                          title="Télécharger le PDF officiel"
-                          className="p-1 rounded bg-white hover:bg-brand-blue hover:text-white text-brand-blue border border-gray-200 transition-all inline-flex items-center shadow-xs"
-                        >
-                          <Download className="w-3 h-3 text-brand-green" />
-                        </a>
                       </div>
                     </div>
                   </div>

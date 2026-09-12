@@ -293,7 +293,7 @@ export function DocumentsTable({ documents }: Props) {
       title: `${displayInfo.label} : ${doc.numero}`,
       subtitle: `Émis le ${format(new Date(doc.dateEmission), "dd/MM/yyyy", { locale: fr })}`,
       badge: statusBadge,
-      pdfUrl: `/api/documents/${doc.numero}/pdf`,
+      pdfUrl: `/documents/${doc.numero}`,
       clientName: clientNom,
       clientPhone: clientTel,
       linkHref: doc.intervention
@@ -492,17 +492,6 @@ export function DocumentsTable({ documents }: Props) {
                       >
                         <Printer className="w-3.5 h-3.5" />
                       </button>
-
-                      {/* Télécharger PDF */}
-                      <a
-                        href={`/api/documents/${doc.numero}/pdf?download=true`}
-                        target="_blank"
-                        rel="noreferrer"
-                        title="Télécharger PDF"
-                        className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-brand-blue hover:text-white transition-all shadow-2xs"
-                      >
-                        <Download className="w-3.5 h-3.5 text-brand-green" />
-                      </a>
 
                       {/* Bouton Encaisser direct si facture impayée */}
                       {doc.type !== DocumentType.DEVIS && doc.statutPaiement !== StatutPaiement.PAYE && (

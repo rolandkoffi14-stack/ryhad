@@ -890,15 +890,6 @@ export function AccountingManager({ documents }: Props) {
                               >
                                 <Printer className="w-4 h-4" />
                               </button>
-                              <a
-                                href={`/api/documents/${doc.numero}/pdf?download=true`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-slate-400 hover:text-brand-blue p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
-                                title="Télécharger le PDF"
-                              >
-                                <Download className="w-4 h-4" />
-                              </a>
                             </div>
                           </td>
                         </tr>
@@ -1002,15 +993,6 @@ export function AccountingManager({ documents }: Props) {
                               >
                                 <Printer className="w-4 h-4" />
                               </button>
-                              <a
-                                href={`/api/documents/${doc.numero}/pdf?download=true`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-slate-400 hover:text-brand-blue p-1.5 rounded-lg hover:bg-slate-100 transition-colors inline-flex"
-                                title="Télécharger Devis PDF"
-                              >
-                                <Download className="w-4 h-4" />
-                              </a>
                             </div>
                           </td>
                         </tr>
@@ -1155,17 +1137,6 @@ export function AccountingManager({ documents }: Props) {
                               >
                                 <Printer className="w-4 h-4" />
                               </button>
-
-                              {/* Télécharger PDF */}
-                              <a
-                                href={`/api/documents/${doc.numero}/pdf?download=true`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
-                                title="Télécharger PDF"
-                              >
-                                <Download className="w-4 h-4" />
-                              </a>
                             </div>
                           </td>
                         </tr>

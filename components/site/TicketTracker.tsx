@@ -418,17 +418,6 @@ export function TicketTracker({ initialNumero }: Props) {
                     <Printer className="w-4 h-4" />
                     <span>🖨️ Imprimer / Sauvegarder</span>
                   </button>
-
-                  <a
-                    href={`/api/documents/${ticket.devis.numero}/pdf?download=true&phoneSuffix=${encodeURIComponent(phoneSuffix.trim())}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border border-gray-300 text-brand-dark px-3 py-3 rounded-xl text-xs font-bold shadow-xs transition-all"
-                    title="Télécharger le fichier PDF officiel"
-                  >
-                    <Download className="w-4 h-4 text-slate-500" />
-                    <span className="hidden md:inline">PDF</span>
-                  </a>
                 </div>
 
                 <div className="flex items-center gap-3 w-full sm:w-auto">

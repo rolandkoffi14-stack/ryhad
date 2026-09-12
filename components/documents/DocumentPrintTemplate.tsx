@@ -293,6 +293,16 @@ export function DocumentPrintTemplate({ data, format: printFormat }: Props) {
             padding: 0 5mm !important;
             box-shadow: none !important;
             border: none !important;
+            height: auto !important;
+            min-height: auto !important;
+          }
+          table {
+            break-inside: auto !important;
+            page-break-inside: auto !important;
+          }
+          tr {
+            break-inside: avoid !important;
+            page-break-inside: avoid !important;
           }
           .avoid-break {
             break-inside: avoid !important;

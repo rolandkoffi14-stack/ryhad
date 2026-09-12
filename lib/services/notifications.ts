@@ -526,7 +526,7 @@ export async function sendClientQuoteEmail({
 
   try {
     const trackingLink = `${appUrl}/suivi/${numeroTicket}`;
-    const pdfLink = `${appUrl}/api/documents/${numeroDevis}/pdf`;
+    const pdfLink = `${appUrl}/documents/${numeroDevis}`;
 
     await resend.emails.send({
       from: emailFrom,

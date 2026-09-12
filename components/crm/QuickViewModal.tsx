@@ -168,28 +168,22 @@ export function QuickViewModal({ isOpen, onClose, data }: Props) {
             ))}
           </div>
 
-          {/* Action Imprimer & Télécharger si applicable */}
+          {/* Action Imprimer si applicable */}
           {data.pdfUrl && (() => {
-            const extractedDocNum = data.pdfUrl.split("/api/documents/")[1]?.split("/pdf")[0] || null;
+            const extractedDocNum =
+              data.pdfUrl.split("/documents/")[1]?.split(/[/?]/)[0] ||
+              data.pdfUrl.split("/api/documents/")[1]?.split(/[/?]/)[0] ||
+              null;
             return (
-              <div className="pt-2 flex flex-col sm:flex-row items-center gap-2">
+              <div className="pt-2 flex flex-col items-stretch gap-2">
                 <button
                   type="button"
                   onClick={() => setIsPrintOpen(true)}
-                  className="w-full sm:flex-1 inline-flex items-center justify-center gap-2 p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-xs transition-all cursor-pointer"
+                  className="w-full inline-flex items-center justify-center gap-2 p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-xs transition-all cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5" />
-                  <span>🖨️ Imprimer Immédiatement</span>
+                  <span>🖨️ Imprimer / Aperçu</span>
                 </button>
-                <a
-                  href={`${data.pdfUrl}?download=true`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs shadow-2xs transition-all"
-                >
-                  <Download className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Télécharger PDF</span>
-                </a>
 
                 <PrintDocumentModal
                   isOpen={isPrintOpen}
