@@ -129,15 +129,15 @@ export function PrintDocumentModal({
       <div className="absolute inset-0 -z-10" onClick={onClose} aria-hidden="true" />
 
       <div className="bg-slate-100 sm:rounded-3xl shadow-2xl border border-slate-300 w-full max-w-4xl h-full sm:h-[94vh] flex flex-col overflow-hidden relative">
-        {/* BOUTON FERMER ANCRÉ TOUT EN HAUT À DROITE — HAUT CONTRASTE & TOTALEMENT SÉPARÉ */}
+        {/* BOUTON FERMER ANCRÉ TOUT EN HAUT À DROITE — DESIGN STANDARD & TOTALEMENT SÉPARÉ */}
         <button
           type="button"
           onClick={onClose}
           aria-label="Fermer la fenêtre d'impression"
           title="Fermer (Échap)"
-          className="absolute top-3 right-3 sm:top-3.5 sm:right-4 z-50 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900 hover:bg-red-600 text-white flex items-center justify-center shadow-lg hover:scale-105 transition-all cursor-pointer border-2 border-white focus:outline-hidden"
+          className="absolute top-3 right-3 sm:top-3.5 sm:right-4 z-50 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
         >
-          <X className="w-5 h-5" strokeWidth={2.5} />
+          <X className="w-5 h-5" />
         </button>
 
         {/* Barre Supérieure d'Actions (avec marge droite réservée au bouton fermer) */}
