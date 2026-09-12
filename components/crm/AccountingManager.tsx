@@ -1237,9 +1237,6 @@ export function AccountingManager({ documents }: Props) {
             console.error("Erreur enregistrement paiement:", err);
           }
         }}
-        montant={paymentModal.montant}
-        titre={`Encaissement Facture ${paymentModal.numero}`}
-        description="Confirmez le mode de règlement reçu pour solder cette facture."
       />
 
       {/* Modale d'impression universelle (A4 / Ticket 80mm) */}
