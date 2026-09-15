@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck, Lock, Eye, FileText, CheckCircle2, UserCheck } from "lucide-react";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 
 export const metadata = {
   title: "Politique de Confidentialité",
@@ -37,10 +38,10 @@ export default function ConfidentialitePage() {
             Le traitement de vos données à caractère personnel est placé sous la responsabilité de :
           </p>
           <ul className="list-disc pl-5 space-y-1 text-xs text-gray-600">
-            <li><strong>Entreprise :</strong> RyHaD Tic-Medic</li>
-            <li><strong>Adresse :</strong> Gbégamey, rue avant le collège Clé de la réussite, Cotonou, Bénin</li>
-            <li><strong>Téléphone :</strong> +229 01 90 88 13 14</li>
-            <li><strong>Email de contact :</strong> ryhadticmedic@gmail.com</li>
+            <li><strong>Entreprise :</strong> {COMPANY_CONFIG.name}</li>
+            <li><strong>Adresse :</strong> {COMPANY_CONFIG.address}</li>
+            <li><strong>Téléphone :</strong> {COMPANY_CONFIG.phone}</li>
+            <li><strong>Email de contact :</strong> {COMPANY_CONFIG.email}</li>
           </ul>
         </section>
 
@@ -119,7 +120,7 @@ export default function ConfidentialitePage() {
             Conformément à la réglementation applicable en République du Bénin, vous disposez d&apos;un droit d&apos;accès, de rectification, d&apos;opposition et de suppression de vos données personnelles.
           </p>
           <p className="text-xs text-gray-600">
-            Pour exercer vos droits ou pour toute question relative à la protection de vos données, vous pouvez contacter notre direction par email à <a href="mailto:ryhadticmedic@gmail.com" className="text-brand-blue font-bold hover:underline">ryhadticmedic@gmail.com</a> ou par courrier à l&apos;adresse de notre atelier à Gbégamey, Cotonou.
+            Pour exercer vos droits ou pour toute question relative à la protection de vos données, vous pouvez contacter notre direction par email à <a href={`mailto:${COMPANY_CONFIG.email}`} className="text-brand-blue font-bold hover:underline">{COMPANY_CONFIG.email}</a> ou par courrier à l&apos;adresse de notre atelier ({COMPANY_CONFIG.shortAddress}).
           </p>
         </section>
       </div>

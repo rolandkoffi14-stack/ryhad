@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
 import { ArrowLeft, KeyRound } from "lucide-react";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 
 export const metadata = {
   title: "Nouveau mot de passe",
@@ -52,7 +53,7 @@ export default function ResetPasswordPage() {
 
       {/* Footer */}
       <div className="max-w-md mx-auto w-full text-center text-[11px] text-gray-400">
-        RyHaD Tic-Medic • Gbégamey, Cotonou, Bénin • +229 01 90 88 13 14
+        {COMPANY_CONFIG.name} • {COMPANY_CONFIG.shortAddress} • {COMPANY_CONFIG.phone}
       </div>
     </div>
   );

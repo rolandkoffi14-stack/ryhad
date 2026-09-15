@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { TicketStatusBadge } from "./TicketStatusBadge";
 import { getStatutsAutorises, getCrmStatusLabel, getCrmActionLabel } from "@/lib/interventions/statut-transitions";
 import { formatFCFA, formatNumber } from "@/lib/format";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 import {
   Wrench,
   CheckCircle2,
@@ -1082,17 +1083,17 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
             {ticket.client.adresse && <div className="text-gray-500">{ticket.client.adresse}</div>}
 
             {ticket.client.telephone && (() => {
-              const appBaseUrl = typeof window !== "undefined" ? window.location.origin : "https://ryhad.bj";
+              const appBaseUrl = typeof window !== "undefined" ? window.location.origin : COMPANY_CONFIG.appUrl;
               let waText = `Bonjour ${ticket.client.nom},\n\n`;
 
               if (devisDoc && (ticket.statut === InterventionStatut.DIAGNOSTIC_TERMINE || ticket.statut === InterventionStatut.DEVIS_ENVOYE)) {
-                waText += `Votre devis de réparation RyHaD Tic-Medic est disponible :\n📄 Devis N° : ${devisDoc.numero}\n💰 Montant estimé : ${formatFCFA(devisDoc.montant)}\n⚙️ Matériel : ${ticket.typeMateriel.replace(/_/g, " ")}\n\n👉 Consulter votre devis officiel :\n${appBaseUrl}/documents/${devisDoc.numero}\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou`;
+                waText += `Votre devis de réparation ${COMPANY_CONFIG.name} est disponible :\n📄 Devis N° : ${devisDoc.numero}\n💰 Montant estimé : ${formatFCFA(devisDoc.montant)}\n⚙️ Matériel : ${ticket.typeMateriel.replace(/_/g, " ")}\n\n👉 Consulter votre devis officiel :\n${appBaseUrl}/documents/${devisDoc.numero}\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}\n\n${COMPANY_CONFIG.name} • ${COMPANY_CONFIG.shortAddress}`;
               } else if (repDoc && ticket.statut === InterventionStatut.DEVIS_ACCEPTE) {
-                waText += `Votre facture de réparation N° ${repDoc.numero} (${formatFCFA(repDoc.montant)}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} chez RyHaD Tic-Medic est disponible.\n\n👉 Consulter votre facture officielle :\n${appBaseUrl}/documents/${repDoc.numero}\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}`;
+                waText += `Votre facture de réparation N° ${repDoc.numero} (${formatFCFA(repDoc.montant)}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} chez ${COMPANY_CONFIG.name} est disponible.\n\n👉 Consulter votre facture officielle :\n${appBaseUrl}/documents/${repDoc.numero}\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}`;
               } else if (ticket.statut === InterventionStatut.TERMINE) {
-                waText += `Bonne nouvelle ! Votre ${ticket.typeMateriel.replace(/_/g, " ")} (Dossier ${ticket.numero}) est réparé et disponible à notre atelier de Gbégamey pour retrait.\n\n🔍 Suivre votre dossier :\n${appBaseUrl}/suivi/${ticket.numero}`;
+                waText += `Bonne nouvelle ! Votre ${ticket.typeMateriel.replace(/_/g, " ")} (Dossier ${ticket.numero}) est réparé et disponible à notre atelier (${COMPANY_CONFIG.shortAddress}) pour retrait.\n\n🔍 Suivre votre dossier :\n${appBaseUrl}/suivi/${ticket.numero}`;
               } else {
-                waText += `Votre dossier (${ticket.numero}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} a bien été enregistré chez RyHaD Tic-Medic.\n\n🔍 Suivez l'avancement technique et vos documents en direct sur :\n${appBaseUrl}/suivi/${ticket.numero}`;
+                waText += `Votre dossier (${ticket.numero}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} a bien été enregistré chez ${COMPANY_CONFIG.name}.\n\n🔍 Suivez l'avancement technique et vos documents en direct sur :\n${appBaseUrl}/suivi/${ticket.numero}`;
               }
 
               return (
@@ -1565,7 +1566,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                         {ticket.client.telephone && (
                           <a
                             href={`https://wa.me/${ticket.client.telephone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                              `Bonjour ${ticket.client.nom},\n\nVoici votre ${label} RyHaD Tic-Medic :\n📄 Réf : ${doc.numero}\n💰 Montant : ${formatFCFA(doc.montant)}\n\n👉 Consulter votre document officiel :\n${typeof window !== "undefined" ? window.location.origin : "https://ryhad.bj"}/documents/${doc.numero}\n\n🔍 Suivi de votre dossier : ${typeof window !== "undefined" ? window.location.origin : "https://ryhad.bj"}/suivi/${ticket.numero}`
+                              `Bonjour ${ticket.client.nom},\n\nVoici votre ${label} ${COMPANY_CONFIG.name} :\n📄 Réf : ${doc.numero}\n💰 Montant : ${formatFCFA(doc.montant)}\n\n👉 Consulter votre document officiel :\n${typeof window !== "undefined" ? window.location.origin : COMPANY_CONFIG.appUrl}/documents/${doc.numero}\n\n🔍 Suivi de votre dossier : ${typeof window !== "undefined" ? window.location.origin : COMPANY_CONFIG.appUrl}/suivi/${ticket.numero}`
                             )}`}
                             target="_blank"
                             rel="noreferrer"

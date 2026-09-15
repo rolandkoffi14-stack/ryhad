@@ -75,7 +75,8 @@ export async function POST(
       },
     });
 
-    const appUrl = env.NEXT_PUBLIC_APP_URL || "https://www.ryhad.bj";
+    const { COMPANY_CONFIG } = await import("@/lib/config/company");
+    const appUrl = COMPANY_CONFIG.appUrl;
     const resetUrl = `${appUrl}/reinitialisation-mot-de-passe?token=${rawToken}`;
 
     // 2. Envoi de l'email

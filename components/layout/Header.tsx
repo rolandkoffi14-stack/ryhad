@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { Menu, X, Search, ArrowRight } from "lucide-react";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +23,7 @@ export function Header() {
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="flex items-center gap-2 font-medium">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
-            <span>Atelier Gbégamey : Lun - Ven (9h - 20h)</span>
+            <span>Atelier : {COMPANY_CONFIG.hoursShort}</span>
           </div>
 
           <div className="flex items-center gap-3 font-medium">

@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PublicDocumentClient } from "./PublicDocumentClient";
 import type { Metadata } from "next";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 
 export const dynamic = "force-dynamic";
 
@@ -18,8 +19,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { numero } = await params;
   const cleanNum = decodeURIComponent(numero).toUpperCase().trim();
   return {
-    title: `Document ${cleanNum} | RyHaD Tic-Medic`,
-    description: `Consultez votre facture ou devis officiel ${cleanNum} émis par RyHaD Tic-Medic à Cotonou.`,
+    title: `Document ${cleanNum} | ${COMPANY_CONFIG.name}`,
+    description: `Consultez votre facture ou devis officiel ${cleanNum} émis par ${COMPANY_CONFIG.name} à ${COMPANY_CONFIG.city}.`,
     robots: {
       index: false,
       follow: false,
@@ -63,10 +64,10 @@ export default async function PublicDocumentPage({ params, searchParams }: Props
   }
 
   const client = doc.intervention?.client || doc.contract?.client || doc.demandeCommerciale?.client || {
-    nom: "Client RyHaD",
-    telephone: "+229 01 90 88 13 14",
+    nom: `Client ${COMPANY_CONFIG.shortName}`,
+    telephone: COMPANY_CONFIG.phone,
     email: null,
-    adresse: "Gbégamey, Cotonou, Bénin",
+    adresse: COMPANY_CONFIG.shortAddress,
   };
 
   let docMontant = doc.montant;

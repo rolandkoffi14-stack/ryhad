@@ -4,6 +4,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 import { ShieldCheck, ArrowLeft } from "lucide-react";
 
 export const metadata = {
@@ -60,7 +61,7 @@ export default async function LoginPage() {
 
       {/* Footer */}
       <div className="max-w-md mx-auto w-full text-center text-[11px] text-gray-400">
-        RyHaD Tic-Medic • +229 01 90 88 13 14 • ryhadticmedic@gmail.com
+        {COMPANY_CONFIG.name} • {COMPANY_CONFIG.phone} • {COMPANY_CONFIG.email}
       </div>
     </div>
   );

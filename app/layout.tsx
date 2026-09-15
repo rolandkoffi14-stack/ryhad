@@ -10,26 +10,28 @@ const montserrat = Montserrat({
 });
 
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | RyHaD Tic-Medic",
-    default: "RyHaD Tic-Medic | Maintenance & Solutions Tech à Cotonou",
+    template: `%s | ${COMPANY_CONFIG.name}`,
+    default: `${COMPANY_CONFIG.name} | ${COMPANY_CONFIG.tagline}`,
   },
   description:
-    "Expert en maintenance informatique (PC, serveurs), biomédicale, audiovisuelle (TV, vidéoprojecteurs), réseaux, vidéosurveillance et vente de matériel à Cotonou, Bénin.",
-  applicationName: "RyHaD Tic-Medic",
+    `Expert en maintenance informatique (PC, serveurs), biomédicale, audiovisuelle (TV, vidéoprojecteurs), réseaux, vidéosurveillance et vente de matériel à ${COMPANY_CONFIG.city}, ${COMPANY_CONFIG.country}.`,
+  applicationName: COMPANY_CONFIG.name,
   keywords: [
-    "maintenance informatique Cotonou",
-    "réparation ordinateur Bénin",
-    "maintenance biomédicale Cotonou",
-    "réparation vidéoprojecteur Bénin",
-    "caméra de surveillance Cotonou",
-    "RyHaD Tic-Medic",
-    "dépannage informatique Gbégamey",
+    `maintenance informatique ${COMPANY_CONFIG.city}`,
+    `réparation ordinateur ${COMPANY_CONFIG.country}`,
+    `maintenance biomédicale ${COMPANY_CONFIG.city}`,
+    `réparation vidéoprojecteur ${COMPANY_CONFIG.country}`,
+    `caméra de surveillance ${COMPANY_CONFIG.city}`,
+    COMPANY_CONFIG.name,
+    COMPANY_CONFIG.shortName,
+    "dépannage informatique atelier",
   ],
-  authors: [{ name: "RyHaD Tic-Medic" }],
-  metadataBase: new URL("https://www.ryhad.bj"),
+  authors: [{ name: COMPANY_CONFIG.name }],
+  metadataBase: new URL(COMPANY_CONFIG.appUrl),
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -44,14 +46,14 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "RyHaD CRM",
+    title: `${COMPANY_CONFIG.shortName} CRM`,
   },
   openGraph: {
-    title: "RyHaD Tic-Medic — Maintenance & Solutions Tech à Cotonou",
+    title: `${COMPANY_CONFIG.name} — ${COMPANY_CONFIG.tagline}`,
     description:
-      "Maintenance informatique, biomédicale et audiovisuelle à Cotonou. Suivi en direct et interventions rapides par des experts certifiés.",
-    url: "https://www.ryhad.bj",
-    siteName: "RyHaD Tic-Medic",
+      `Maintenance informatique, biomédicale et audiovisuelle à ${COMPANY_CONFIG.city}. Suivi en direct et interventions rapides par des experts certifiés.`,
+    url: COMPANY_CONFIG.appUrl,
+    siteName: COMPANY_CONFIG.name,
     locale: "fr_FR",
     type: "website",
   },
@@ -60,21 +62,21 @@ export const metadata: Metadata = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "LocalBusiness",
-  name: "RyHaD Tic-Medic",
-  image: "https://www.ryhad.bj/icons/icon-512x512.png",
-  telephone: "+229 01 90 88 13 14",
-  email: "ryhadticmedic@gmail.com",
-  url: "https://www.ryhad.bj",
+  name: COMPANY_CONFIG.name,
+  image: `${COMPANY_CONFIG.appUrl}/icons/icon-512x512.png`,
+  telephone: COMPANY_CONFIG.phone,
+  email: COMPANY_CONFIG.email,
+  url: COMPANY_CONFIG.appUrl,
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Gbégamey, rue avant le collège Clé de la réussite",
-    addressLocality: "Cotonou",
+    streetAddress: COMPANY_CONFIG.address,
+    addressLocality: COMPANY_CONFIG.city,
     addressCountry: "BJ",
   },
   geo: {
     "@type": "GeoCoordinates",
-    latitude: 6.3683,
-    longitude: 2.4183,
+    latitude: COMPANY_CONFIG.geo.latitude,
+    longitude: COMPANY_CONFIG.geo.longitude,
   },
   openingHoursSpecification: [
     {

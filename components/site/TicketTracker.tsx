@@ -21,9 +21,11 @@ import {
   Sparkles,
   Lock,
   Printer,
+  ExternalLink,
 } from "lucide-react";
 import { formatFCFA } from "@/lib/format";
 import { PrintDocumentModal } from "@/components/crm/PrintDocumentModal";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -460,11 +462,11 @@ export function TicketTracker({ initialNumero }: Props) {
               <span>Besoin d&apos;informations complémentaires sur ce dossier ?</span>
             </div>
             <a
-              href="tel:+2290190881314"
+              href={`tel:${COMPANY_CONFIG.phoneRaw}`}
               className="inline-flex items-center gap-2 text-brand-blue font-bold hover:underline"
             >
               <Phone className="w-3.5 h-3.5 text-brand-green" />
-              <span>Contacter l&apos;atelier : +229 01 90 88 13 14</span>
+              <span>Contacter l&apos;atelier : {COMPANY_CONFIG.phone}</span>
             </a>
           </div>
         </div>

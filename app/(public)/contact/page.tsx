@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Phone, Mail, MapPin, Clock, Send, CheckCircle2, AlertCircle, ArrowRight, Loader2 } from "lucide-react";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
@@ -75,7 +76,7 @@ export default function ContactPage() {
                   <div>
                     <span className="font-bold text-white block">Adresse physique</span>
                     <span className="text-brand-blue-light/90">
-                      Gbégamey, rue avant le collège Clé de la réussite, Cotonou, Bénin
+                      {COMPANY_CONFIG.address}
                     </span>
                   </div>
                 </div>
@@ -85,10 +86,10 @@ export default function ContactPage() {
                   <div>
                     <span className="font-bold text-white block">Téléphone & WhatsApp</span>
                     <a
-                      href="tel:+2290190881314"
+                      href={`tel:${COMPANY_CONFIG.phoneRaw}`}
                       className="text-brand-green font-bold text-base hover:underline"
                     >
-                      +229 01 90 88 13 14
+                      {COMPANY_CONFIG.phone}
                     </a>
                   </div>
                 </div>
@@ -98,10 +99,10 @@ export default function ContactPage() {
                   <div>
                     <span className="font-bold text-white block">Email officiel</span>
                     <a
-                      href="mailto:ryhadticmedic@gmail.com"
+                      href={`mailto:${COMPANY_CONFIG.email}`}
                       className="text-brand-blue-light/90 hover:underline"
                     >
-                      ryhadticmedic@gmail.com
+                      {COMPANY_CONFIG.email}
                     </a>
                   </div>
                 </div>
@@ -109,13 +110,13 @@ export default function ContactPage() {
                 <div className="flex items-start gap-3 pt-2 border-t border-white/10">
                   <Clock className="w-5 h-5 text-brand-green shrink-0 mt-0.5" />
                   <div>
-                    <span className="font-bold text-white block">Horaires de réception</span>
-                    <span className="text-brand-blue-light/90">
-                      Lundi à Vendredi : 9h00 – 20h00
+                    <span className="font-bold text-white block">Heures d&apos;ouverture</span>
+                    <span className="text-brand-blue-light/90 block">
+                      {COMPANY_CONFIG.hours}
                     </span>
-                    <p className="text-[11px] text-white/60 mt-0.5">
-                      Interventions urgentes sur site pour structures sous contrat.
-                    </p>
+                    <span className="text-xs text-brand-blue-light/70">
+                      Permanence technique sur rendez-vous
+                    </span>
                   </div>
                 </div>
               </div>

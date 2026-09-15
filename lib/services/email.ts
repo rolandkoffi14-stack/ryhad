@@ -1,10 +1,11 @@
 import { Resend } from "resend";
 import { env } from "@/lib/env";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 
 const resendApiKey = env.RESEND_API_KEY;
-const emailFrom = env.EMAIL_FROM || "RyHaD Tic-Medic <notifications@ryhad.bj>";
-const workshopEmail = env.NOTIFICATION_EMAIL || "ryhadticmedic@gmail.com";
-const appUrl = env.NEXT_PUBLIC_APP_URL || "https://www.ryhad.bj";
+const emailFrom = COMPANY_CONFIG.emailFrom;
+const workshopEmail = COMPANY_CONFIG.notificationEmail;
+const appUrl = COMPANY_CONFIG.appUrl;
 
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
@@ -84,7 +85,7 @@ export async function sendInterventionNotification({
             </p>
             <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
             <p style="font-size: 12px; color: #777;">
-              RyHaD Tic-Medic • Gbégamey, Cotonou, Bénin • Tél : +229 01 90 88 13 14
+              ${COMPANY_CONFIG.name} • ${COMPANY_CONFIG.address} • Tél : ${COMPANY_CONFIG.phone}
             </p>
           </div>
         `,
@@ -180,7 +181,7 @@ export async function sendContactNotification(data: {
           </blockquote>
           <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
           <p style="font-size: 12px; color: #777;">
-            RyHaD Tic-Medic • Gbégamey, rue avant le collège Clé de la réussite, Cotonou, Bénin • Tél : +229 01 90 88 13 14
+            ${COMPANY_CONFIG.name} • ${COMPANY_CONFIG.address} • Tél : ${COMPANY_CONFIG.phone}
           </p>
         </div>
       `,
@@ -238,7 +239,7 @@ export async function sendPasswordResetEmail({
             </p>
           </div>
           <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #9CA3AF;">
-            RyHaD Tic-Medic • Gbégamey, Cotonou, Bénin • +229 01 90 88 13 14
+            ${COMPANY_CONFIG.name} • ${COMPANY_CONFIG.address} • ${COMPANY_CONFIG.phone}
           </div>
         </div>
       `,

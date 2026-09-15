@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ShieldCheck, FileText, ArrowLeft } from "lucide-react";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 
 export const metadata = {
   title: "Mentions Légales",
@@ -30,13 +31,13 @@ export default function MentionsLegalesPage() {
             <span>1. Éditeur du Site & Atelier</span>
           </h2>
           <p>
-            Le site internet <strong>www.ryhad.bj</strong> et la plateforme de gestion associée sont édités par l&apos;entreprise <strong>RyHaD Tic-Medic</strong>, spécialisée dans la maintenance des équipements informatiques, biomédicaux et audiovisuels au Bénin.
+            Le site internet <strong>{COMPANY_CONFIG.websiteDisplay}</strong> et la plateforme de gestion associée sont édités par l&apos;entreprise <strong>{COMPANY_CONFIG.name}</strong>, spécialisée dans la maintenance des équipements informatiques, biomédicaux et audiovisuels au Bénin.
           </p>
           <ul className="list-disc pl-5 space-y-1 text-xs text-gray-600">
-            <li><strong>Dénomination :</strong> RyHaD Tic-Medic</li>
-            <li><strong>Siège social & Atelier :</strong> Gbégamey, rue avant le collège Clé de la réussite, Cotonou, Bénin</li>
-            <li><strong>Téléphone :</strong> +229 01 90 88 13 14</li>
-            <li><strong>Email de contact :</strong> ryhadticmedic@gmail.com</li>
+            <li><strong>Dénomination :</strong> {COMPANY_CONFIG.name}</li>
+            <li><strong>Siège social & Atelier :</strong> {COMPANY_CONFIG.address}</li>
+            <li><strong>Téléphone :</strong> {COMPANY_CONFIG.phone}</li>
+            <li><strong>Email de contact :</strong> {COMPANY_CONFIG.email}</li>
           </ul>
         </section>
 

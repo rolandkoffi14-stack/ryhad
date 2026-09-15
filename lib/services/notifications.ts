@@ -5,10 +5,11 @@ import { env } from "@/lib/env";
 import { NotificationType, StaffRole } from "@prisma/client";
 import { formatFCFA } from "@/lib/format";
 import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 
 const resendApiKey = env.RESEND_API_KEY;
-const emailFrom = env.EMAIL_FROM || "RyHaD Tic-Medic <notifications@ryhad.bj>";
-const appUrl = env.NEXT_PUBLIC_APP_URL || "https://www.ryhad.bj";
+const emailFrom = COMPANY_CONFIG.emailFrom;
+const appUrl = COMPANY_CONFIG.appUrl;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 export interface StaffNotificationOptions {
@@ -561,7 +562,7 @@ export async function sendClientQuoteEmail({
             </p>
           </div>
           <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #9CA3AF;">
-            RyHaD Tic-Medic • Gbégamey, rue avant le collège Clé de la réussite, Cotonou, Bénin • +229 01 90 88 13 14
+            ${COMPANY_CONFIG.name} • ${COMPANY_CONFIG.address} • ${COMPANY_CONFIG.phone}
           </div>
         </div>
       `,
@@ -597,7 +598,7 @@ export async function sendClientReadyForPickupEmail({
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 25px;">
-            <h1 style="color: #1E4D8B; margin: 0; font-size: 22px;">RyHaD Tic-Medic</h1>
+            <h1 style="color: #1E4D8B; margin: 0; font-size: 22px;">${COMPANY_CONFIG.name}</h1>
             <p style="color: #666; font-size: 13px; margin-top: 5px;">Atelier de Maintenance & Réparation</p>
           </div>
           <div style="background-color: #ffffff; border: 1px solid #E5E7EB; border-radius: 12px; padding: 25px;">
@@ -607,9 +608,9 @@ export async function sendClientReadyForPickupEmail({
             </p>
             <div style="background-color: #F4F6F8; border-radius: 8px; padding: 18px; margin: 20px 0;">
               <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: bold; color: #1C222B;">📍 Adresse de retrait :</p>
-              <p style="margin: 0 0 10px 0; font-size: 13px; color: #4B5563;">Gbégamey, rue avant le collège Clé de la réussite, Cotonou, Bénin</p>
+              <p style="margin: 0 0 10px 0; font-size: 13px; color: #4B5563;">${COMPANY_CONFIG.address}</p>
               <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: bold; color: #1C222B;">🕒 Horaires d'ouverture :</p>
-              <p style="margin: 0; font-size: 13px; color: #4B5563;">Lundi à Vendredi de 9h00 à 20h00</p>
+              <p style="margin: 0; font-size: 13px; color: #4B5563;">${COMPANY_CONFIG.hours}</p>
             </div>
             <div style="text-align: center; margin: 25px 0;">
               <a href="${trackingLink}" style="background-color: #2CA58D; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">

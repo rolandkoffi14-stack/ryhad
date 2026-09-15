@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { SetupForm } from "@/components/auth/SetupForm";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 import { ShieldCheck, ArrowLeft, Wrench } from "lucide-react";
 
 export const metadata = {
@@ -63,7 +64,7 @@ export default async function SetupPage() {
 
       {/* Footer */}
       <div className="max-w-xl mx-auto w-full text-center text-[11px] text-gray-400">
-        RyHaD Tic-Medic • Gbégamey, Cotonou, Bénin • +229 01 90 88 13 14
+        {COMPANY_CONFIG.name} • {COMPANY_CONFIG.address} • {COMPANY_CONFIG.phone}
       </div>
     </div>
   );

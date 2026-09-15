@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Phone, Mail, MapPin, Clock, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { COMPANY_CONFIG } from "@/lib/config/company";
 
 export function Footer() {
   return (
@@ -25,10 +26,10 @@ export function Footer() {
               Déposer un appareil
             </Link>
             <a
-              href="tel:+2290190881314"
+              href={`tel:${COMPANY_CONFIG.phoneRaw}`}
               className="bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all"
             >
-              +229 01 90 88 13 14
+              {COMPANY_CONFIG.phone}
             </a>
           </div>
         </div>
@@ -146,24 +147,24 @@ export function Footer() {
             <div className="space-y-3 text-xs">
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-brand-green shrink-0 mt-0.5" />
-                <span>Gbégamey, rue avant le collège Clé de la réussite, Cotonou, Bénin</span>
+                <span>{COMPANY_CONFIG.address}</span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-brand-green shrink-0" />
-                <a href="tel:+2290190881314" className="hover:text-white">
-                  +229 01 90 88 13 14
+                <a href={`tel:${COMPANY_CONFIG.phoneRaw}`} className="hover:text-white">
+                  {COMPANY_CONFIG.phone}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-brand-green shrink-0" />
-                <a href="mailto:ryhadticmedic@gmail.com" className="hover:text-white">
-                  ryhadticmedic@gmail.com
+                <a href={`mailto:${COMPANY_CONFIG.email}`} className="hover:text-white">
+                  {COMPANY_CONFIG.email}
                 </a>
               </div>
               <div className="flex items-start gap-2.5 pt-1">
                 <Clock className="w-4 h-4 text-brand-green shrink-0 mt-0.5" />
                 <div>
-                  <span className="font-semibold text-white">Lundi - Vendredi : 9h00 - 20h00</span>
+                  <span className="font-semibold text-white">{COMPANY_CONFIG.hours}</span>
                   <p className="text-[11px] text-gray-400">Permanence technique sur rendez-vous</p>
                 </div>
               </div>
@@ -173,7 +174,7 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="mt-12 pt-6 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
-          <p>© {new Date().getFullYear()} RyHaD Tic-Medic. Tous droits réservés. Cotonou, Bénin.</p>
+          <p>© {new Date().getFullYear()} {COMPANY_CONFIG.name}. Tous droits réservés. {COMPANY_CONFIG.city}, {COMPANY_CONFIG.country}.</p>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <Link href="/mentions-legales" className="hover:text-gray-300 transition-colors">
               Mentions Légales
