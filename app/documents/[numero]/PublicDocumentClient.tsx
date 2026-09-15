@@ -6,7 +6,6 @@ import { DocumentPrintTemplate } from "@/components/documents/DocumentPrintTempl
 import { Printer, FileText, Receipt, ArrowLeft, MessageCircle, ExternalLink, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { formatFCFA } from "@/lib/format";
-import { COMPANY_CONFIG } from "@/lib/config/company";
 
 interface Props {
   data: DocumentPrintData;
@@ -137,9 +136,9 @@ export function PublicDocumentClient({ data, initialFormat, autoPrint }: Props) 
 
       {/* Footer public discret (Masqué à l'impression) */}
       <footer className="no-print mt-8 text-center text-xs text-slate-500 pb-6 space-y-1">
-        <p className="font-bold text-slate-700">{COMPANY_CONFIG.name} • {COMPANY_CONFIG.city}, {COMPANY_CONFIG.country}</p>
+        <p className="font-bold text-slate-700">RyHaD Tic-Medic • Cotonou, Bénin</p>
         <p className="text-[11px] text-slate-400">
-          Document électronique certifié conforme • Tél : {COMPANY_CONFIG.phone}
+          Document électronique certifié conforme • Tél : +229 01 90 88 13 14
         </p>
       </footer>
     </div>

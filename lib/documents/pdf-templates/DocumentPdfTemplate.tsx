@@ -2,7 +2,6 @@ import React from "react";
 import { Document, Page, Text, View, StyleSheet } from "@react-pdf/renderer";
 import { DocumentType, StatutPaiement } from "@prisma/client";
 import { formatFCFA, formatNumber } from "@/lib/format";
-import { COMPANY_CONFIG } from "@/lib/config/company";
 
 // Définition des styles PDF respectant la charte graphique de RyHaD Tic-Medic
 const styles = StyleSheet.create({
@@ -234,18 +233,28 @@ export function DocumentPdfTemplate({ data }: { data: PdfDocumentData }) {
   const montantMO = data.intervention?.montantMainOeuvre || 0;
   const libelleMO = data.intervention?.libelleMainOeuvre || "Main d'œuvre de réparation & tests atelier";
 
+  const webDisplay = process.env.NEXT_PUBLIC_APP_URL
+    ? (() => {
+        try {
+          return new URL(process.env.NEXT_PUBLIC_APP_URL).host;
+        } catch {
+          return "ryhad.2krdigital.online";
+        }
+      })()
+    : "ryhad.2krdigital.online";
+
   return (
     <Document>
       <Page size="A4" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.brandTitle}>{COMPANY_CONFIG.name}</Text>
-            <Text style={styles.brandSubtitle}>{COMPANY_CONFIG.tagline}</Text>
+            <Text style={styles.brandTitle}>RyHaD Tic-Medic</Text>
+            <Text style={styles.brandSubtitle}>Maintenance Informatique, Biomédicale & Audiovisuelle</Text>
             <Text style={styles.companyInfo}>
-              {COMPANY_CONFIG.address}{"\n"}
-              {COMPANY_CONFIG.city}, {COMPANY_CONFIG.country} • Tél : {COMPANY_CONFIG.phone}{"\n"}
-              Email : {COMPANY_CONFIG.email} • Web : {COMPANY_CONFIG.websiteDisplay}
+              Gbégamey, rue avant le collège Clé de la réussite{"\n"}
+              Cotonou, Bénin • Tél : +229 01 90 88 13 14{"\n"}
+              Email : ryhadticmedic@gmail.com • Web : {webDisplay}
             </Text>
           </View>
 

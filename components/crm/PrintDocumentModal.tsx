@@ -15,7 +15,6 @@ import {
 import { DocumentPrintData } from "@/types/documents";
 import { DocumentPrintTemplate } from "@/components/documents/DocumentPrintTemplate";
 import { formatFCFA } from "@/lib/format";
-import { COMPANY_CONFIG } from "@/lib/config/company";
 
 interface Props {
   isOpen: boolean;
@@ -105,9 +104,12 @@ export function PrintDocumentModal({
     window.open(printUrl, "_blank");
   };
 
-  const appOrigin = typeof window !== "undefined" ? window.location.origin : COMPANY_CONFIG.appUrl;
+  const appOrigin =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : (process.env.NEXT_PUBLIC_APP_URL || "https://ryhad.2krdigital.online");
 
-  // Préparation du message WhatsApp officiel
+  // Préparation du message WhatsApp officiel RyHaD
   let waText = "";
   if (data) {
     const clientNom = data.client.nom;
@@ -117,11 +119,11 @@ export function PrintDocumentModal({
         : data.type === "DEVIS"
         ? "Devis"
         : "Facture";
-    waText = `Bonjour ${clientNom},\n\nVoici votre ${typeLibelle} officiel ${COMPANY_CONFIG.name} :\n📄 N° : ${data.numero}\n💰 Montant : ${formatFCFA(data.montant)}\n\n👉 Consulter et télécharger votre document officiel :\n${appOrigin}/documents/${data.numero}`;
+    waText = `Bonjour ${clientNom},\n\nVoici votre ${typeLibelle} officiel RyHaD Tic-Medic :\n📄 N° : ${data.numero}\n💰 Montant : ${formatFCFA(data.montant)}\n\n👉 Consulter et télécharger votre document officiel :\n${appOrigin}/documents/${data.numero}`;
     if (data.intervention?.numero) {
       waText += `\n\n🔍 Suivi de votre matériel en direct :\n${appOrigin}/suivi/${data.intervention.numero}`;
     }
-    waText += `\n\n${COMPANY_CONFIG.name} • ${COMPANY_CONFIG.shortAddress}\nTél : ${COMPANY_CONFIG.phone}`;
+    waText += `\n\nRyHaD Tic-Medic • Gbégamey, Cotonou\nTél : +229 01 90 88 13 14`;
   }
 
   return createPortal(

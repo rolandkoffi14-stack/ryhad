@@ -72,8 +72,7 @@ export async function POST(request: Request) {
       });
 
       // Construction du lien sécurisé
-      const { COMPANY_CONFIG } = await import("@/lib/config/company");
-      const appUrl = COMPANY_CONFIG.appUrl;
+      const appUrl = env.NEXT_PUBLIC_APP_URL || "https://www.ryhad.bj";
       const resetUrl = `${appUrl}/reinitialisation-mot-de-passe?token=${rawToken}`;
 
       // Envoi de l'email transactionnel

@@ -5,7 +5,6 @@ import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { DocumentType } from "@prisma/client";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { COMPANY_CONFIG } from "@/lib/config/company";
 
 export const dynamic = "force-dynamic";
 
@@ -56,10 +55,10 @@ export async function GET(
     }
 
     const client = doc.intervention?.client || doc.contract?.client || doc.demandeCommerciale?.client || {
-      nom: `Client ${COMPANY_CONFIG.shortName}`,
-      telephone: COMPANY_CONFIG.phone,
+      nom: "Client RyHaD",
+      telephone: "+229 01 90 88 13 14",
       email: null,
-      adresse: COMPANY_CONFIG.shortAddress,
+      adresse: "Gbégamey, Cotonou, Bénin",
     };
 
     // Recalcul du montant total conforme

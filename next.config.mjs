@@ -1,6 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: "standalone",
   reactStrictMode: true,
   serverExternalPackages: ["@prisma/client", "bcryptjs", "@react-pdf/renderer"],
   images: {
@@ -9,6 +8,14 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "media.ryhad.bj",
+      },
+      {
+        protocol: "https",
+        hostname: "ryhad.2krdigital.online",
+      },
+      {
+        protocol: "https",
+        hostname: "**.2krdigital.online",
       },
       {
         protocol: "https",

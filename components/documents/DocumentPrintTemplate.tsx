@@ -4,7 +4,6 @@ import React from "react";
 import { DocumentPrintData } from "@/types/documents";
 import { DocumentType, StatutPaiement } from "@prisma/client";
 import { formatFCFA, formatNumber } from "@/lib/format";
-import { COMPANY_CONFIG } from "@/lib/config/company";
 
 interface Props {
   data: DocumentPrintData;
@@ -86,14 +85,14 @@ export function DocumentPrintTemplate({ data, format: printFormat }: Props) {
           {/* Header Ticket */}
           <div className="text-center pb-3 border-b border-dashed border-slate-400">
             <h1 className="text-base font-black tracking-tight text-slate-950 uppercase">
-              {COMPANY_CONFIG.name}
+              RyHaD Tic-Medic
             </h1>
             <p className="text-[10px] font-bold text-slate-600 uppercase tracking-wide mt-0.5">
-              {COMPANY_CONFIG.tagline}
+              Maintenance Informatique & Médicale
             </p>
             <p className="text-[10px] text-slate-600 mt-1 leading-tight">
-              {COMPANY_CONFIG.address}<br />
-              {COMPANY_CONFIG.city}, {COMPANY_CONFIG.country} • Tél : {COMPANY_CONFIG.phone}
+              Gbégamey, rue avant collège Clé de la réussite<br />
+              Cotonou, Bénin • Tél : +229 01 90 88 13 14
             </p>
           </div>
 
@@ -278,14 +277,19 @@ export function DocumentPrintTemplate({ data, format: printFormat }: Props) {
             {data.intervention?.numero && (
               <div className="p-1.5 rounded bg-slate-100 font-mono text-[10px] text-slate-800 font-bold">
                 Suivez votre matériel sur :<br />
-                <span className="text-brand-blue font-extrabold">{COMPANY_CONFIG.websiteDisplay}/suivi/{data.intervention.numero}</span>
+                <span className="text-brand-blue font-extrabold">
+                  {typeof window !== "undefined" && window.location.host
+                    ? window.location.host
+                    : (process.env.NEXT_PUBLIC_APP_URL ? new URL(process.env.NEXT_PUBLIC_APP_URL).host : "ryhad.2krdigital.online")}
+                  /suivi/{data.intervention.numero}
+                </span>
               </div>
             )}
             <p className="font-bold text-slate-700">
               Merci pour votre confiance !
             </p>
             <p className="text-[9px] text-slate-400 leading-tight">
-              {COMPANY_CONFIG.name} • {COMPANY_CONFIG.shortAddress}
+              RyHaD Tic-Medic • Gbégamey, Cotonou
             </p>
           </div>
         </div>
@@ -341,19 +345,19 @@ export function DocumentPrintTemplate({ data, format: printFormat }: Props) {
       `}} />
 
       <div className="print-a4-container mx-auto max-w-[800px] w-full p-8 sm:p-10 bg-white border border-slate-200 sm:rounded-2xl shadow-sm text-xs">
-        {/* En-tête officiel */}
+        {/* En-tête officiel RyHaD */}
         <div className="flex flex-col sm:flex-row justify-between items-start gap-6 pb-6 border-b-2 border-[#1E4D8B]">
           <div className="space-y-1">
             <h1 className="text-2xl font-black tracking-tight text-[#1E4D8B]">
-              {COMPANY_CONFIG.name}
+              RyHaD Tic-Medic
             </h1>
             <p className="text-[11px] font-bold text-[#2CA58D] uppercase tracking-wider">
-              {COMPANY_CONFIG.tagline}
+              Maintenance Informatique, Biomédicale & Audiovisuelle
             </p>
             <div className="text-[10px] text-slate-600 leading-relaxed pt-1">
-              <p>{COMPANY_CONFIG.address}</p>
-              <p>{COMPANY_CONFIG.city}, {COMPANY_CONFIG.country} • Tél : {COMPANY_CONFIG.phone}</p>
-              <p>Email : {COMPANY_CONFIG.email} • Web : {COMPANY_CONFIG.websiteDisplay}</p>
+              <p>Gbégamey, rue avant le collège Clé de la réussite</p>
+              <p>Cotonou, Bénin • Tél : +229 01 90 88 13 14</p>
+              <p>Email : ryhadticmedic@gmail.com • Web : www.ryhad.bj</p>
             </div>
           </div>
 

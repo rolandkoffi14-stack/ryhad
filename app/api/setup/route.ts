@@ -80,13 +80,13 @@ export async function POST(request: Request) {
     // 5. Envoi du mail de bienvenue avec ses accès
     try {
       const { sendWelcomeUserEmail } = await import("@/lib/services/email");
-      const { COMPANY_CONFIG } = await import("@/lib/config/company");
+      const { env } = await import("@/lib/env");
       await sendWelcomeUserEmail({
         email: adminUser.email,
         firstName: adminUser.firstName,
         role: adminUser.role,
         temporaryPassword: validatedData.password,
-        loginUrl: `${COMPANY_CONFIG.appUrl}/login`,
+        loginUrl: `${env.NEXT_PUBLIC_APP_URL || "https://www.ryhad.bj"}/login`,
       });
     } catch (mailErr) {
       console.error("Erreur lors de l'envoi du mail de bienvenue admin (non bloquant):", mailErr);
