@@ -147,7 +147,7 @@ export function TicketsPonctuelTable({ tickets, isTechnician = false }: Props) {
       status: t.statut,
       raw: { isPaid: isRepPaid },
       linkHref: `/crm/tickets/${t.id}`,
-      linkLabel: "Ouvrir le ticket",
+      linkLabel: "Ouvrir",
       clientName: t.client?.nom,
       clientPhone: t.client?.telephone,
       details: [
@@ -206,9 +206,9 @@ export function TicketsPonctuelTable({ tickets, isTechnician = false }: Props) {
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 text-xs">
           {[
             { id: "ALL", label: "Tous" },
-            { id: "ATTENTE_DIAG", label: "À Diagnostiquer" },
+            { id: "ATTENTE_DIAG", label: "À diagnostiquer" },
             { id: "DEVIS", label: "Devis" },
-            { id: "REPARATION", label: "En Réparation" },
+            { id: "REPARATION", label: "En réparation" },
             { id: "TERMINE", label: "Prêts" },
             { id: "CLOS", label: "Clôturés" },
           ].map((tab) => {
@@ -297,7 +297,7 @@ export function TicketsPonctuelTable({ tickets, isTechnician = false }: Props) {
                   <td className="px-5 py-3.5">
                     {t.technicienAssigne ? (
                       <div className="flex items-center gap-1.5">
-                        <div className="w-6 h-6 rounded-full bg-brand-green/20 text-brand-green-dark font-extrabold text-[10px] flex items-center justify-center shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-brand-blue/10 text-brand-blue font-extrabold text-[10px] flex items-center justify-center shrink-0">
                           {t.technicienAssigne.firstName.charAt(0)}
                         </div>
                         <span className="font-semibold text-brand-dark text-xs">
@@ -347,8 +347,8 @@ export function TicketsPonctuelTable({ tickets, isTechnician = false }: Props) {
               <tr>
                 <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
                   {searchTerm || statusFilter !== "ALL"
-                    ? "Aucun ticket ne correspond aux critères de recherche."
-                    : "Aucun ticket ponctuel pour le moment."}
+                    ? "Aucun ticket trouvé."
+                    : "Aucun ticket ponctuel."}
                 </td>
               </tr>
             )}

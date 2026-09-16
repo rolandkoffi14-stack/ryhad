@@ -197,8 +197,8 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
         )}
 
         {successMessage && (
-          <div className="p-3.5 rounded-xl bg-brand-green/10 border border-brand-green/30 text-brand-green-dark text-xs flex items-start gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-brand-green" />
+          <div className="p-3.5 rounded-xl bg-brand-blue/10 border border-brand-blue/30 text-brand-blue text-xs flex items-start gap-2">
+            <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-brand-blue" />
             <span>{successMessage}</span>
           </div>
         )}
@@ -273,7 +273,7 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
                 onClick={() => handleRoleChange(StaffRole.TECHNICIEN)}
                 className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                   role === StaffRole.TECHNICIEN
-                    ? "border-brand-green bg-brand-green-light/30 text-brand-green-dark ring-2 ring-brand-green/20"
+                    ? "border-brand-blue bg-brand-blue-light/50 text-brand-blue ring-2 ring-brand-blue/20"
                     : "border-gray-200 hover:border-gray-300 bg-white"
                 }`}
               >
@@ -289,7 +289,7 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
                 onClick={() => handleRoleChange(StaffRole.RECEPTIONNISTE)}
                 className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                   role === StaffRole.RECEPTIONNISTE
-                    ? "border-purple-500 bg-purple-50 text-purple-700 ring-2 ring-purple-200"
+                    ? "border-brand-blue bg-brand-blue-light/50 text-brand-blue ring-2 ring-brand-blue/20"
                     : "border-gray-200 hover:border-gray-300 bg-white"
                 }`}
               >
@@ -327,7 +327,7 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
                 className="text-[11px] font-bold text-brand-blue hover:text-brand-blue-dark inline-flex items-center gap-1 cursor-pointer"
               >
                 <RefreshCw className="w-3 h-3" />
-                <span>Générer un mot de passe fort</span>
+                <span>Générer</span>
               </button>
             </div>
 
@@ -353,19 +353,19 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
 
             <div className="bg-brand-slate p-2.5 rounded-xl border border-gray-200">
               <div className="grid grid-cols-2 gap-1 text-[10px]">
-                <div className={`flex items-center gap-1 ${passwordCriteria.length ? "text-brand-green font-bold" : "text-gray-400"}`}>
+                <div className={`flex items-center gap-1 ${passwordCriteria.length ? "text-brand-blue font-bold" : "text-gray-400"}`}>
                   {passwordCriteria.length ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
                   <span>Min. 10 caractères</span>
                 </div>
-                <div className={`flex items-center gap-1 ${passwordCriteria.hasUpper ? "text-brand-green font-bold" : "text-gray-400"}`}>
+                <div className={`flex items-center gap-1 ${passwordCriteria.hasUpper ? "text-brand-blue font-bold" : "text-gray-400"}`}>
                   {passwordCriteria.hasUpper ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
                   <span>Une majuscule</span>
                 </div>
-                <div className={`flex items-center gap-1 ${passwordCriteria.hasNumber ? "text-brand-green font-bold" : "text-gray-400"}`}>
+                <div className={`flex items-center gap-1 ${passwordCriteria.hasNumber ? "text-brand-blue font-bold" : "text-gray-400"}`}>
                   {passwordCriteria.hasNumber ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
                   <span>Un chiffre</span>
                 </div>
-                <div className={`flex items-center gap-1 ${passwordCriteria.hasSpecial ? "text-brand-green font-bold" : "text-gray-400"}`}>
+                <div className={`flex items-center gap-1 ${passwordCriteria.hasSpecial ? "text-brand-blue font-bold" : "text-gray-400"}`}>
                   {passwordCriteria.hasSpecial ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
                   <span>Un symbole (@, #...)</span>
                 </div>
@@ -399,7 +399,7 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
               disabled={loading || !isPasswordValid}
               className="px-5 py-2 rounded-xl text-xs font-bold bg-brand-blue hover:bg-brand-blue-dark text-white shadow transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
             >
-              {loading ? "Création en cours..." : "Créer le collaborateur"}
+              {loading ? "Création..." : "Enregistrer"}
             </button>
           </div>
         </form>

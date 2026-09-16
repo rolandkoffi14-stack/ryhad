@@ -120,12 +120,12 @@ export function PushSubscriptionManager() {
     <div className="px-3 py-2 bg-brand-slate/80 rounded-xl border border-gray-100 flex items-center justify-between gap-3 text-xs">
       <div className="flex items-center gap-2">
         {isSubscribed ? (
-          <Check className="w-4 h-4 text-brand-green" />
+          <Check className="w-4 h-4 text-brand-blue" />
         ) : (
           <Bell className="w-4 h-4 text-brand-blue" />
         )}
         <span className="text-gray-700 font-medium">
-          {isSubscribed ? "Notifications activées sur cet appareil" : "Activer les notifications sur cet appareil"}
+          {isSubscribed ? "Notifications activées" : "Activer les notifications"}
         </span>
       </div>
 

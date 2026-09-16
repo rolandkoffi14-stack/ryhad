@@ -146,7 +146,7 @@ export function TicketsContractuelTable({ tickets, isTechnician = false }: Props
       )}`,
       status: t.statut,
       linkHref: `/crm/tickets/${t.id}`,
-      linkLabel: "Ouvrir le ticket",
+      linkLabel: "Ouvrir",
       clientName: t.client?.nom,
       clientPhone: t.client?.telephone,
       details: [
@@ -208,7 +208,7 @@ export function TicketsContractuelTable({ tickets, isTechnician = false }: Props
           {[
             { id: "ALL", label: "Tous" },
             { id: "NOUVEAU", label: "Nouveaux" },
-            { id: "EN_COURS", label: "En Intervention" },
+            { id: "EN_COURS", label: "En cours" },
             { id: "TERMINE", label: "Terminés" },
             { id: "CLOTURE", label: "Clôturés" },
           ].map((tab) => {
@@ -255,7 +255,7 @@ export function TicketsContractuelTable({ tickets, isTechnician = false }: Props
                   {/* 1. Réf. & Matériel */}
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-xl bg-brand-green/10 text-brand-green-dark flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0">
                         <Building2 className="w-4 h-4" />
                       </div>
                       <div>
@@ -297,7 +297,7 @@ export function TicketsContractuelTable({ tickets, isTechnician = false }: Props
                   <td className="px-5 py-3.5">
                     {t.technicienAssigne ? (
                       <div className="flex items-center gap-1.5">
-                        <div className="w-6 h-6 rounded-full bg-brand-green/20 text-brand-green-dark font-extrabold text-[10px] flex items-center justify-center shrink-0">
+                        <div className="w-6 h-6 rounded-full bg-brand-blue/10 text-brand-blue font-extrabold text-[10px] flex items-center justify-center shrink-0">
                           {t.technicienAssigne.firstName.charAt(0)}
                         </div>
                         <span className="font-semibold text-brand-dark text-xs">
@@ -345,8 +345,8 @@ export function TicketsContractuelTable({ tickets, isTechnician = false }: Props
               <tr>
                 <td colSpan={5} className="px-6 py-12 text-center text-gray-400">
                   {searchTerm || statusFilter !== "ALL"
-                    ? "Aucune intervention contractuelle ne correspond aux critères."
-                    : "Aucune intervention contractuelle pour le moment."}
+                    ? "Aucune intervention trouvée."
+                    : "Aucune intervention contractuelle."}
                 </td>
               </tr>
             )}

@@ -56,11 +56,11 @@ export function InstallPwaHeaderButton() {
     <button
       type="button"
       onClick={handleInstall}
-      title="Installer l'application sur votre appareil"
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-green/10 hover:bg-brand-green text-brand-green-dark hover:text-white text-xs font-bold transition-all border border-brand-green/30 shadow-2xs cursor-pointer"
+      title="Installer l'application"
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-blue/10 hover:bg-brand-blue text-brand-blue hover:text-white text-xs font-bold transition-all border border-brand-blue/20 shadow-2xs cursor-pointer"
     >
-      <Download className="w-3.5 h-3.5 text-brand-green group-hover:text-white" />
-      <span className="hidden sm:inline">Installer l&apos;App</span>
+      <Download className="w-3.5 h-3.5" />
+      <span className="hidden sm:inline">Installer l&apos;application</span>
     </button>
   );
 }

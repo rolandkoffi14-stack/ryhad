@@ -59,11 +59,11 @@ export function CommercialRequestsTable({ demandes }: Props) {
       case TypeDemandeCommerciale.VENTE_MATERIEL:
         return <ShoppingBag className="w-4 h-4 text-brand-blue" />;
       case TypeDemandeCommerciale.LOCATION_VIDEOPROJECTEUR:
-        return <Tv className="w-4 h-4 text-purple-600" />;
+        return <Tv className="w-4 h-4 text-brand-blue" />;
       case TypeDemandeCommerciale.FORMATION:
-        return <GraduationCap className="w-4 h-4 text-emerald-600" />;
+        return <GraduationCap className="w-4 h-4 text-brand-blue" />;
       default:
-        return <Wrench className="w-4 h-4 text-gray-600" />;
+        return <Wrench className="w-4 h-4 text-brand-blue" />;
     }
   };
 
@@ -82,7 +82,7 @@ export function CommercialRequestsTable({ demandes }: Props) {
       case DemandeStatut.DEVIS_ENVOYE:
         return {
           label: "Devis émis",
-          className: "bg-purple-100 text-purple-800 border-purple-300 font-extrabold",
+          className: "bg-blue-50 text-brand-blue border-blue-300 font-extrabold",
         };
       case DemandeStatut.DEVIS_ACCEPTE:
         return {
@@ -169,7 +169,7 @@ export function CommercialRequestsTable({ demandes }: Props) {
       )}`,
       badge,
       linkHref: `/crm/demandes-commerciales/${d.id}`,
-      linkLabel: "Traiter la demande",
+      linkLabel: "Ouvrir",
       clientName: d.client?.nom,
       clientPhone: d.client?.telephone,
       details: [
@@ -221,9 +221,9 @@ export function CommercialRequestsTable({ demandes }: Props) {
           {[
             { id: "ALL", label: "Tous" },
             { id: DemandeStatut.NOUVEAU, label: "Nouveaux" },
-            { id: DemandeStatut.EN_COURS, label: "En Cours" },
-            { id: DemandeStatut.DEVIS_ENVOYE, label: "Devis Émis" },
-            { id: DemandeStatut.DEVIS_ACCEPTE, label: "Devis Validés" },
+            { id: DemandeStatut.EN_COURS, label: "En cours" },
+            { id: DemandeStatut.DEVIS_ENVOYE, label: "Devis émis" },
+            { id: DemandeStatut.DEVIS_ACCEPTE, label: "Devis validés" },
             { id: DemandeStatut.FACTURE_PAYEE, label: "Payés" },
             { id: DemandeStatut.CLOS, label: "Clôturés" },
           ].map((tab) => {

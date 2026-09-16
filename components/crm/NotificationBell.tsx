@@ -267,7 +267,7 @@ export function NotificationBell() {
             ) : notifications.length === 0 ? (
               <div className="p-8 text-center text-xs text-gray-400 space-y-2">
                 <Bell className="w-7 h-7 mx-auto text-gray-300 stroke-[1.5]" />
-                <p className="font-medium">Aucune notification pour le moment.</p>
+                <p className="font-medium">Aucune notification.</p>
               </div>
             ) : (
               <>
@@ -311,7 +311,7 @@ export function NotificationBell() {
                 {isLoadingMore && (
                   <div className="p-3 text-center text-xs text-gray-500 flex items-center justify-center gap-2 bg-gray-50">
                     <Loader2 className="w-3.5 h-3.5 animate-spin text-brand-blue" />
-                    <span>Chargement des anciennes notifications...</span>
+                    <span>Chargement...</span>
                   </div>
                 )}
               </>

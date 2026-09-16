@@ -41,11 +41,11 @@ export function CrmHeader({ user, onMenuToggle }: Props) {
   const getRoleBadge = (role: StaffRole) => {
     switch (role) {
       case StaffRole.ADMIN:
-        return "bg-blue-50 text-blue-700 border-blue-200";
+        return "bg-brand-blue-light text-brand-blue border-brand-blue/30 font-extrabold";
       case StaffRole.RECEPTIONNISTE:
-        return "bg-amber-50 text-amber-800 border-amber-300";
+        return "bg-blue-50 text-brand-blue border-blue-200 font-semibold";
       case StaffRole.TECHNICIEN:
-        return "bg-emerald-50 text-emerald-800 border-emerald-300";
+        return "bg-slate-100 text-slate-700 border-slate-200 font-semibold";
       default:
         return "bg-slate-100 text-slate-700 border-slate-200";
     }
@@ -132,7 +132,7 @@ export function CrmHeader({ user, onMenuToggle }: Props) {
                   className="w-full text-left px-3 py-2 rounded-xl text-xs text-brand-red hover:bg-brand-red-light flex items-center gap-2 font-bold transition-all"
                 >
                   <LogOut className="w-4 h-4" />
-                  <span>Se Déconnecter</span>
+                  <span>Déconnexion</span>
                 </button>
               </div>
             </div>

@@ -207,7 +207,7 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
       case TypeDemandeCommerciale.FORMATION:
         return <GraduationCap className="w-5 h-5 text-brand-blue" />;
       default:
-        return <Wrench className="w-5 h-5 text-gray-600" />;
+        return <Wrench className="w-5 h-5 text-brand-blue" />;
     }
   };
 
@@ -215,22 +215,22 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
     switch (demande.statut) {
       case DemandeStatut.NOUVEAU:
         return {
-          label: "Demande reçue (Nouveau)",
+          label: "Nouveau",
           className: "bg-amber-100 text-amber-800 border-amber-300 font-extrabold",
         };
       case DemandeStatut.EN_COURS:
         return {
-          label: "En cours d'étude & cotation",
+          label: "En cours",
           className: "bg-blue-100 text-brand-blue border-blue-300 font-extrabold",
         };
       case DemandeStatut.DEVIS_ENVOYE:
         return {
-          label: "Devis émis & transmis",
-          className: "bg-purple-100 text-purple-800 border-purple-300 font-extrabold",
+          label: "Devis émis",
+          className: "bg-blue-50 text-brand-blue border-blue-200 font-extrabold",
         };
       case DemandeStatut.DEVIS_ACCEPTE:
         return {
-          label: "Devis validé (Facture en attente)",
+          label: "Devis validé",
           className: "bg-amber-50 text-amber-900 border-amber-400 font-extrabold",
         };
       case DemandeStatut.DEVIS_REFUSE:
@@ -240,12 +240,12 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
         };
       case DemandeStatut.FACTURE_PAYEE:
         return {
-          label: "Facture réglée (Payée)",
+          label: "Facture réglée",
           className: "bg-emerald-100 text-emerald-800 border-emerald-300 font-extrabold",
         };
       case DemandeStatut.CLOS:
         return {
-          label: "Dossier commercial clôturé",
+          label: "Clôturé",
           className: "bg-gray-100 text-gray-700 border-gray-300 font-bold",
         };
       default:
@@ -269,14 +269,14 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
           className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-brand-blue transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Retour aux demandes commerciales</span>
+          <span>Retour à la liste</span>
         </Link>
       </div>
 
       {/* Messages d'alerte & Toasts */}
       {successMsg && (
-        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-center gap-2.5 font-bold shadow-xs">
-          <CheckCircle2 className="w-4 h-4 text-brand-green shrink-0" />
+        <div className="p-4 rounded-2xl bg-brand-blue/10 border border-brand-blue/30 text-brand-blue-dark text-xs flex items-center gap-2.5 font-bold shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-brand-blue shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
@@ -346,7 +346,7 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-xs transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
                 >
                   <FileText className="w-3.5 h-3.5 text-white" />
-                  <span>Émettre le devis ({formatFCFA(totalCalculated)})</span>
+                  <span>Émettre devis ({formatFCFA(totalCalculated)})</span>
                 </button>
               </div>
             )}
@@ -381,7 +381,7 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-xs transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
               >
                 <CreditCard className="w-3.5 h-3.5 text-white" />
-                <span>Encaisser la facture ({formatFCFA(factDoc?.montant || demande.montantTotal || 0)})</span>
+                <span>Encaisser ({formatFCFA(factDoc?.montant || demande.montantTotal || 0)})</span>
               </button>
             )}
 
@@ -405,15 +405,15 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-bold py-2 px-4 rounded-xl border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
               >
                 <Archive className="w-3.5 h-3.5" />
-                <span>Archiver Dossier</span>
+                <span>Archiver</span>
               </button>
             )}
 
             {/* 7. Statut CLOS */}
             {demande.statut === DemandeStatut.CLOS && (
               <span className="text-xs font-bold text-gray-600 bg-white px-3.5 py-2 rounded-lg border border-gray-200 flex items-center gap-2 shadow-2xs">
-                <CheckCircle2 className="w-3.5 h-3.5 text-brand-green" />
-                <span>Dossier commercial finalisé et archivé</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-brand-blue" />
+                <span>Dossier commercial archivé</span>
               </span>
             )}
           </div>
@@ -446,7 +446,7 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                   className="inline-flex items-center gap-1 bg-[#25D366]/10 hover:bg-[#25D366] text-[#128C7E] hover:text-white font-extrabold px-3 py-1.5 rounded-lg text-[11px] transition-all border border-[#25D366]/30 shadow-2xs"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
-                  <span>WhatsApp Commercial</span>
+                  <span>WhatsApp</span>
                 </a>
                 <a
                   href={`tel:${clientPhone}`}
@@ -579,8 +579,8 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-white rounded-3xl p-6 border border-gray-200 subtle-shadow space-y-4">
             <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
-              <Receipt className="w-5 h-5 text-brand-green" />
-              <h2 className="text-base font-extrabold text-brand-dark">Documents Officiels</h2>
+              <Receipt className="w-5 h-5 text-brand-blue" />
+              <h2 className="text-base font-extrabold text-brand-dark">Documents officiels</h2>
             </div>
 
             <div className="space-y-3">
@@ -630,10 +630,10 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                             titre: `${isDocDevis ? "Devis Commercial" : "Facture Commerciale"} (${doc.numero})`,
                           })
                         }
-                        className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow-2xs transition-all cursor-pointer"
+                        className="inline-flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold px-3 py-1.5 rounded-xl text-xs shadow-2xs transition-all cursor-pointer"
                       >
                         <Printer className="w-3.5 h-3.5" />
-                        <span>🖨️ Imprimer</span>
+                        <span>Imprimer</span>
                       </button>
                     </div>
                   </div>
@@ -668,7 +668,7 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                 className="w-full inline-flex items-center justify-center gap-1 text-xs font-bold py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all"
               >
                 <Save className="w-3.5 h-3.5 text-gray-500" />
-                <span>Enregistrer Notes</span>
+                <span>Enregistrer</span>
               </button>
             )}
           </div>
@@ -683,7 +683,7 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
           handleAction("encaisser_facture", { modePaiement, referencePaiement })
         }
         montant={factDoc?.montant || demande.montantTotal || 0}
-        titre={`Encaissement Facture Commerciale ${factDoc?.numero || ""}`}
+        titre={`Encaissement ${factDoc?.numero || ""}`}
         description="Confirmez le mode de règlement de la prestation/vente commerciale."
         loading={loading}
       />

@@ -278,10 +278,10 @@ export function ClientManager({ clients, userRole }: Props) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-            Répertoire Clients & Entreprises
+            Clients
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Gestion des coordonnées, contacts et parcs informatiques des clients.
+            Gestion des coordonnées, contacts et parcs informatiques.
           </p>
         </div>
 
@@ -292,7 +292,7 @@ export function ClientManager({ clients, userRole }: Props) {
             className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-2xs hover:border-slate-300 transition-all"
           >
             <FileSpreadsheet className="w-4 h-4 text-brand-blue" />
-            <span>Exporter en CSV</span>
+            <span>Télécharger le CSV</span>
           </button>
 
           <button
@@ -300,15 +300,15 @@ export function ClientManager({ clients, userRole }: Props) {
             className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all"
           >
             <UserPlus className="w-4 h-4 text-white" />
-            <span>Nouveau Client</span>
+            <span>Nouveau client</span>
           </button>
         </div>
       </div>
 
       {/* Alertes & Toasts */}
       {successMsg && (
-        <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-center gap-2 font-bold shadow-xs">
-          <CheckCircle2 className="w-4 h-4 text-brand-green shrink-0" />
+        <div className="p-3.5 rounded-2xl bg-brand-blue/10 border border-brand-blue/30 text-brand-blue-dark text-xs flex items-center gap-2 font-bold shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-brand-blue shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
@@ -385,8 +385,8 @@ export function ClientManager({ clients, userRole }: Props) {
                         <div
                           className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
                             cl.type === ClientType.ENTREPRISE
-                              ? "bg-purple-100 text-purple-700"
-                              : "bg-blue-100 text-brand-blue"
+                              ? "bg-brand-blue/10 text-brand-blue"
+                              : "bg-blue-50 text-brand-blue"
                           }`}
                         >
                           {cl.type === ClientType.ENTREPRISE ? (
@@ -544,11 +544,11 @@ export function ClientManager({ clients, userRole }: Props) {
           <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 max-w-lg w-full overflow-hidden flex flex-col max-h-[90vh]">
             <div className="p-5 border-b border-gray-100 bg-brand-slate/60 flex items-center justify-between">
               <h2 className="text-sm font-extrabold text-brand-dark">
-                {editingClient ? `Modifier : ${editingClient.nom}` : "Enregistrer un Nouveau Client"}
+                {editingClient ? `Modifier ${editingClient.nom}` : "Nouveau client"}
               </h2>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
               >
                 ✕
               </button>
@@ -559,7 +559,7 @@ export function ClientManager({ clients, userRole }: Props) {
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, type: ClientType.PARTICULIER })}
-                  className={`py-2 rounded-lg font-extrabold transition-all ${
+                  className={`py-2 rounded-lg font-extrabold transition-all cursor-pointer ${
                     formData.type === ClientType.PARTICULIER
                       ? "bg-white text-brand-blue shadow-2xs"
                       : "text-gray-500 hover:text-gray-800"
@@ -570,7 +570,7 @@ export function ClientManager({ clients, userRole }: Props) {
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, type: ClientType.ENTREPRISE })}
-                  className={`py-2 rounded-lg font-extrabold transition-all ${
+                  className={`py-2 rounded-lg font-extrabold transition-all cursor-pointer ${
                     formData.type === ClientType.ENTREPRISE
                       ? "bg-white text-brand-blue shadow-2xs"
                       : "text-gray-500 hover:text-gray-800"
@@ -650,16 +650,16 @@ export function ClientManager({ clients, userRole }: Props) {
                   type="button"
                   onClick={() => setShowCreateModal(false)}
                   disabled={loading}
-                  className="px-4 py-2.5 rounded-xl border border-gray-200 font-bold text-gray-600 hover:bg-gray-50"
+                  className="px-4 py-2.5 rounded-xl border border-gray-200 font-bold text-gray-600 hover:bg-gray-50 cursor-pointer"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold shadow-sm disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold shadow-sm disabled:opacity-50 cursor-pointer"
                 >
-                  {loading ? "Enregistrement..." : editingClient ? "Mettre à jour" : "Créer le Client"}
+                  {loading ? "Enregistrement..." : editingClient ? "Enregistrer" : "Créer"}
                 </button>
               </div>
             </form>
@@ -673,13 +673,13 @@ export function ClientManager({ clients, userRole }: Props) {
         isOpen={deleteConfirmModal.isOpen}
         onClose={() => setDeleteConfirmModal({ isOpen: false, client: null })}
         onConfirm={confirmDeleteClient}
-        title="Supprimer la fiche client"
+        title="Supprimer le client"
         message={
           deleteConfirmModal.client
-            ? `Êtes-vous sûr de vouloir supprimer définitivement le client "${deleteConfirmModal.client.nom}" ? Cette action est irréversible.`
+            ? `Êtes-vous sûr de vouloir supprimer le client "${deleteConfirmModal.client.nom}" ? Cette action est irréversible.`
             : ""
         }
-        confirmLabel="Supprimer définitivement"
+        confirmLabel="Supprimer"
         variant="danger"
         loading={loading}
       />

@@ -98,17 +98,17 @@ export default async function TicketsPonctuelPage({
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
             {isNew
-              ? "Nouveau Dépôt Atelier (Ponctuel)"
+              ? "Nouveau Dépôt Ponctuel"
               : isTechnician
               ? "Mes Tickets Ponctuels"
-              : "Tickets Ponctuels & Diagnostic"}
+              : "Tickets Ponctuels"}
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
             {isNew
-              ? "Enregistrement d'un matériel client pour diagnostic et devis."
+              ? "Enregistrement d'un matériel pour diagnostic et devis."
               : isTechnician
-              ? "Dossiers de réparation en cours assignés à votre profil."
-              : "Suivi des dépôts comptoir, diagnostics, devis et réparations."}
+              ? "Dossiers de réparation qui vous sont assignés."
+              : "Suivi des dépôts, diagnostics, devis et réparations."}
           </p>
         </div>
 
@@ -119,15 +119,15 @@ export default async function TicketsPonctuelPage({
                 href="/crm/tickets/ponctuel"
                 className="inline-flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-gray-200"
               >
-                <span>Voir la liste des tickets</span>
+                <span>Retour à la liste</span>
               </Link>
             ) : (
               <Link
                 href="/crm/tickets/ponctuel?new=true"
                 className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all"
               >
-                <Plus className="w-4 h-4 text-brand-green" />
-                <span>Nouveau Dépôt</span>
+                <Plus className="w-4 h-4 text-white" />
+                <span>Nouveau dépôt</span>
               </Link>
             )}
           </div>

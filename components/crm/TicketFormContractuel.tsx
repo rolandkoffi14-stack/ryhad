@@ -126,8 +126,8 @@ export function TicketFormContractuel({ contracts, technicians, initialContractI
         )}
 
         {currentContract && (
-          <div className="p-3 bg-brand-green-light/60 border border-brand-green/30 rounded-xl text-xs text-brand-dark flex items-start gap-2.5">
-            <ShieldCheck className="w-4 h-4 text-brand-green shrink-0 mt-0.5" />
+          <div className="p-3 bg-brand-blue-light/50 border border-brand-blue/20 rounded-xl text-xs text-brand-dark flex items-start gap-2.5">
+            <ShieldCheck className="w-4 h-4 text-brand-blue shrink-0 mt-0.5" />
             <div>
               <span className="font-bold block">Équipements couverts par ce contrat :</span>
               <p className="text-gray-600 mt-0.5">{currentContract.equipementsCouverts}</p>
@@ -225,7 +225,7 @@ export function TicketFormContractuel({ contracts, technicians, initialContractI
           className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold px-6 py-2.5 rounded-xl text-xs shadow transition-all disabled:opacity-50"
         >
           <Save className="w-4 h-4" />
-          <span>{loading ? "Création..." : "Créer le ticket"}</span>
+          <span>{loading ? "Création..." : "Créer"}</span>
         </button>
       </div>
     </form>

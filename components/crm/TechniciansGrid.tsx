@@ -70,7 +70,7 @@ export function TechniciansGrid({ technicians }: Props) {
                     <span>
                       <strong className="text-brand-blue">{t.numero}</strong> : {t.client.nom} ({t.typeMateriel.replace(/_/g, " ")})
                     </span>
-                    <Link href={`/crm/tickets/${t.id}`} className="text-brand-green font-bold hover:underline text-[11px] ml-2">
+                    <Link href={`/crm/tickets/${t.id}`} className="text-brand-blue font-bold hover:underline text-[11px] ml-2">
                       Voir →
                     </Link>
                   </div>
@@ -117,8 +117,8 @@ export function TechniciansGrid({ technicians }: Props) {
                     {tech.firstName} {tech.lastName}
                   </h2>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-300">
-                      {tech.role === "ADMIN" ? "Admin Référent" : "Technicien Spécialisé"}
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-lg bg-brand-blue-light text-brand-blue border border-brand-blue/30">
+                      {tech.role === "ADMIN" ? "Admin" : "Technicien"}
                     </span>
                   </div>
                 </div>
@@ -129,11 +129,11 @@ export function TechniciansGrid({ technicians }: Props) {
                   type="button"
                   onClick={() => handleOpenQuickView(tech)}
                   title="Aperçu rapide"
-                  className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-brand-blue hover:border-brand-blue hover:bg-blue-50 transition-all shadow-2xs"
+                  className="p-1.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-brand-blue hover:border-brand-blue hover:bg-blue-50 transition-all shadow-2xs cursor-pointer"
                 >
                   <Eye className="w-3.5 h-3.5" />
                 </button>
-                <span className="text-xs font-extrabold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-xl">
+                <span className="text-xs font-extrabold text-brand-blue bg-brand-blue-light/50 border border-brand-blue/20 px-2.5 py-1 rounded-xl">
                   {tech.interventionsAssignees.length} en cours
                 </span>
               </div>
@@ -143,7 +143,7 @@ export function TechniciansGrid({ technicians }: Props) {
             <div className="flex flex-wrap items-center gap-4 text-xs text-gray-600">
               {tech.phone && (
                 <div className="flex items-center gap-1.5 font-semibold text-brand-dark">
-                  <Phone className="w-3.5 h-3.5 text-brand-green" />
+                  <Phone className="w-3.5 h-3.5 text-brand-blue" />
                   <span>{tech.phone}</span>
                 </div>
               )}
@@ -198,7 +198,7 @@ export function TechniciansGrid({ technicians }: Props) {
                     className="w-full py-2 px-3 text-center text-[11px] font-bold text-brand-blue bg-brand-blue-light/50 hover:bg-brand-blue-light border border-brand-blue/20 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs"
                   >
                     <span>
-                      Voir les {tech.interventionsAssignees.length - 3} autre{tech.interventionsAssignees.length - 3 > 1 ? "s" : ""} dossier{tech.interventionsAssignees.length - 3 > 1 ? "s" : ""}
+                      Voir les {tech.interventionsAssignees.length - 3} autre{tech.interventionsAssignees.length - 3 > 1 ? "s" : ""}
                     </span>
                     <ArrowRight className="w-3 h-3 text-brand-blue" />
                   </button>

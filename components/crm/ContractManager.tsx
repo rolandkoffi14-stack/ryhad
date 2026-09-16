@@ -363,26 +363,26 @@ export function ContractManager({ contracts, clients }: Props) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-            Contrats de Maintenance PME & Entreprises
+            Contrats de Maintenance
           </h1>
           <p className="text-xs text-gray-500 mt-0.5">
-            Gestion des parcs sous contrat, planification des visites périodiques et émission des factures récurrentes.
+            Gestion des parcs sous contrat, planification des visites et factures récurrentes.
           </p>
         </div>
 
         <button
-          onClick={handleOpenCreateModal}
+          onClick={() => setShowModal(true)}
           className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all self-start sm:self-auto cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>Nouveau Contrat</span>
+          <span>Nouveau contrat</span>
         </button>
       </div>
 
       {/* Alertes & Toasts */}
       {successMsg && (
-        <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-center gap-2 font-bold shadow-xs">
-          <CheckCircle2 className="w-4 h-4 text-brand-green shrink-0" />
+        <div className="p-3.5 rounded-2xl bg-brand-blue/10 border border-brand-blue/30 text-brand-blue-dark text-xs flex items-center gap-2 font-bold shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-brand-blue shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
@@ -455,7 +455,7 @@ export function ContractManager({ contracts, clients }: Props) {
                     {/* 1. Entreprise & Équipements */}
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-brand-green/10 text-brand-green-dark flex items-center justify-center shrink-0">
+                        <div className="w-8 h-8 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0">
                           <Building2 className="w-4 h-4" />
                         </div>
                         <div>
@@ -502,7 +502,7 @@ export function ContractManager({ contracts, clients }: Props) {
                                 })
                               }
                               title="Encaisser cette facture périodique"
-                              className="p-1 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-300"
+                              className="p-1 rounded-lg bg-brand-blue/10 text-brand-blue hover:bg-brand-blue/20 border border-brand-blue/30"
                             >
                               <CreditCard className="w-3.5 h-3.5" />
                             </button>
@@ -534,7 +534,7 @@ export function ContractManager({ contracts, clients }: Props) {
                           type="button"
                           onClick={() => handleOpenQuickView(c)}
                           title="Aperçu rapide"
-                          className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-green hover:border-brand-green hover:bg-brand-green/5 transition-all shadow-2xs"
+                          className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-blue hover:border-brand-blue hover:bg-brand-blue/5 transition-all shadow-2xs"
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </button>
@@ -626,8 +626,8 @@ export function ContractManager({ contracts, clients }: Props) {
         onClose={() => setPaymentModalState({ isOpen: false, docId: null, numero: "", montant: 0 })}
         onConfirm={handleConfirmPayment}
         montant={paymentModalState.montant}
-        titre={`Encaissement Facture ${paymentModalState.numero}`}
-        description="Confirmez le mode de règlement de la facture périodique du contrat."
+        titre={`Encaissement ${paymentModalState.numero}`}
+        description="Sélectionnez le mode de règlement pour valider l'encaissement."
         loading={loading}
       />
 
@@ -636,16 +636,16 @@ export function ContractManager({ contracts, clients }: Props) {
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
           <div className="bg-white rounded-3xl shadow-2xl border border-gray-200 max-w-xl w-full overflow-hidden flex flex-col max-h-[92vh] animate-in zoom-in-95 duration-200">
             {/* Header */}
-            <div className="p-5 border-b border-gray-100 bg-linear-to-r from-slate-50 via-white to-brand-green/5 flex items-start justify-between gap-3">
+            <div className="p-5 border-b border-gray-100 bg-linear-to-r from-slate-50 via-white to-brand-blue/5 flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-brand-green/10 text-brand-green flex items-center justify-center shrink-0 border border-brand-green/20 shadow-xs">
+                <div className="w-10 h-10 rounded-2xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0 border border-brand-blue/20 shadow-xs">
                   <ShieldCheck className="w-5 h-5" />
                 </div>
                 <div>
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-brand-green bg-brand-green/10 px-2 py-0.5 rounded-full inline-block mb-1">
+                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-brand-blue bg-brand-blue/10 px-2 py-0.5 rounded-full inline-block mb-1">
                     Parc Matériel & Entreprises
                   </span>
-                  <h2 className="text-base font-extrabold text-brand-dark">Nouveau Contrat de Maintenance</h2>
+                  <h2 className="text-base font-extrabold text-brand-dark">Nouveau contrat</h2>
                 </div>
               </div>
               <button
@@ -683,7 +683,7 @@ export function ContractManager({ contracts, clients }: Props) {
                   required
                   value={formData.clientId}
                   onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none font-semibold text-gray-800 bg-white"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-blue outline-none font-semibold text-gray-800 bg-white"
                 >
                   {availableClients.length === 0 && (
                     <option value="" disabled>
@@ -699,7 +699,7 @@ export function ContractManager({ contracts, clients }: Props) {
                         disabled={hasActive}
                         className={hasActive ? "text-gray-400 bg-gray-50" : "text-gray-900 font-medium"}
                       >
-                        {cl.nom} {cl.contactNom ? `(Contact: ${cl.contactNom})` : ""} {hasActive ? "— ⛔ Contrat actif en cours" : ""}
+                        {cl.nom} {cl.contactNom ? `(Contact: ${cl.contactNom})` : ""} {hasActive ? "— Contrat actif en cours" : ""}
                       </option>
                     );
                   })}
@@ -707,7 +707,7 @@ export function ContractManager({ contracts, clients }: Props) {
 
                 {availableClients.length === 0 ? (
                   <p className="text-[11px] text-amber-700 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
-                    ⚠️ Tous vos clients enregistrés possèdent déjà un contrat actif. Vous devez créer un nouveau client ou résilier/renouveler un contrat expiré.
+                    Tous vos clients enregistrés possèdent déjà un contrat actif. Vous devez créer un nouveau client ou résilier/renouveler un contrat expiré.
                   </p>
                 ) : (
                   <p className="text-[10px] text-gray-500">
@@ -728,7 +728,7 @@ export function ContractManager({ contracts, clients }: Props) {
                       onChange={(e) =>
                         setFormData({ ...formData, periodicite: e.target.value as Periodicite })
                       }
-                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-green outline-none font-bold text-gray-800"
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-blue outline-none font-bold text-gray-800"
                     >
                       <option value={Periodicite.MENSUEL}>MENSUEL</option>
                       <option value={Periodicite.TRIMESTRIEL}>TRIMESTRIEL</option>
@@ -745,7 +745,7 @@ export function ContractManager({ contracts, clients }: Props) {
                       onChange={(e) =>
                         setFormData({ ...formData, frequenceVisites: Number(e.target.value) })
                       }
-                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-green outline-none font-bold text-gray-800"
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-blue outline-none font-bold text-gray-800"
                     >
                       <option value={1}>1 visite / mois (12/an)</option>
                       <option value={2}>2 visites / mois (24/an)</option>
@@ -769,7 +769,7 @@ export function ContractManager({ contracts, clients }: Props) {
                           montantMainOeuvre: parseInt(e.target.value, 10) || 0,
                         })
                       }
-                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-green outline-none font-extrabold text-brand-dark"
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-white focus:ring-2 focus:ring-brand-blue outline-none font-extrabold text-brand-dark"
                     />
                   </div>
                 </div>
@@ -780,7 +780,7 @@ export function ContractManager({ contracts, clients }: Props) {
                     <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
                       Montants usuels :
                     </span>
-                    <span className="text-[11px] font-extrabold text-brand-green">
+                    <span className="text-[11px] font-extrabold text-brand-blue">
                       Soit {formatFCFA(formData.montantMainOeuvre)} / {formData.periodicite === Periodicite.MENSUEL ? "mois" : formData.periodicite === Periodicite.TRIMESTRIEL ? "trimestre" : "an"} • {formData.frequenceVisites} visite(s)/mois
                     </span>
                   </div>
@@ -792,7 +792,7 @@ export function ContractManager({ contracts, clients }: Props) {
                         onClick={() => setFormData({ ...formData, montantMainOeuvre: preset })}
                         className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
                           formData.montantMainOeuvre === preset
-                            ? "bg-brand-green text-white shadow-2xs"
+                            ? "bg-brand-blue text-white shadow-2xs"
                             : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-100"
                         }`}
                       >
@@ -814,7 +814,7 @@ export function ContractManager({ contracts, clients }: Props) {
                     required
                     value={formData.dateDebut}
                     onChange={(e) => setFormData({ ...formData, dateDebut: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none font-medium text-gray-800"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-blue outline-none font-medium text-gray-800"
                   />
                 </div>
 
@@ -824,8 +824,8 @@ export function ContractManager({ contracts, clients }: Props) {
                     <span
                       className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded-full ${
                         !formData.dateFin
-                          ? "bg-emerald-100 text-emerald-800"
-                          : "bg-blue-100 text-blue-800"
+                          ? "bg-brand-blue/10 text-brand-blue"
+                          : "bg-slate-100 text-slate-800"
                       }`}
                     >
                       {!formData.dateFin ? "CDI (Tacite reconduction)" : `CDD (${calculatedDurationMonths || 1} mois)`}
@@ -836,7 +836,7 @@ export function ContractManager({ contracts, clients }: Props) {
                     min={getMinEndDate()}
                     value={formData.dateFin}
                     onChange={(e) => setFormData({ ...formData, dateFin: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none text-xs text-gray-800"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-blue outline-none text-xs text-gray-800"
                   />
                   <p className="text-[10px] text-gray-500 mt-1">
                     Laissez vide pour un CDI. Si spécifiée : min. {getMinDurationLabel()}.
@@ -848,7 +848,7 @@ export function ContractManager({ contracts, clients }: Props) {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="font-bold text-gray-700 flex items-center gap-1.5">
-                    <ShieldCheck className="w-3.5 h-3.5 text-brand-green" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-brand-blue" />
                     <span>Équipements & Périmètre Couvert</span>
                     <span className="text-brand-red">*</span>
                   </label>
@@ -861,7 +861,7 @@ export function ContractManager({ contracts, clients }: Props) {
                   onChange={(e) =>
                     setFormData({ ...formData, equipementsCouverts: e.target.value })
                   }
-                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-green outline-none text-xs leading-relaxed text-gray-800"
+                  className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-blue outline-none text-xs leading-relaxed text-gray-800"
                 />
 
                 {/* Suggestions rapides */}
@@ -881,7 +881,7 @@ export function ContractManager({ contracts, clients }: Props) {
                       key={chip}
                       type="button"
                       onClick={() => addEquipmentTag(chip)}
-                      className="px-2 py-0.5 rounded-lg bg-gray-100 hover:bg-brand-green/10 hover:text-brand-green text-gray-600 text-[10px] font-bold transition-colors cursor-pointer"
+                      className="px-2 py-0.5 rounded-lg bg-gray-100 hover:bg-brand-blue/10 hover:text-brand-blue text-gray-600 text-[10px] font-bold transition-colors cursor-pointer"
                     >
                       + {chip}
                     </button>
@@ -903,7 +903,7 @@ export function ContractManager({ contracts, clients }: Props) {
                     {!formData.dateFin ? "CDI sans échéance" : `CDD jusqu'au ${formData.dateFin}`}
                   </div>
                 </div>
-                <div className="w-9 h-9 rounded-xl bg-brand-green/10 text-brand-green flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0">
                   <CheckCircle2 className="w-5 h-5" />
                 </div>
               </div>
@@ -921,14 +921,14 @@ export function ContractManager({ contracts, clients }: Props) {
                 <button
                   type="submit"
                   disabled={loading || availableClients.length === 0 || !formData.clientId}
-                  className="px-5 py-2.5 rounded-xl bg-brand-green hover:bg-brand-green-dark text-white font-extrabold shadow-sm transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold shadow-sm transition-all disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                 >
                   {loading ? (
-                    <span>Création en cours...</span>
+                    <span>Enregistrement...</span>
                   ) : (
                     <>
                       <CheckCircle2 className="w-4 h-4" />
-                      <span>Valider le Contrat</span>
+                      <span>Enregistrer</span>
                     </>
                   )}
                 </button>

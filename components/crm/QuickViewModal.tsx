@@ -179,10 +179,10 @@ export function QuickViewModal({ isOpen, onClose, data }: Props) {
                 <button
                   type="button"
                   onClick={() => setIsPrintOpen(true)}
-                  className="w-full inline-flex items-center justify-center gap-2 p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-xs transition-all cursor-pointer"
+                  className="w-full inline-flex items-center justify-center gap-2 p-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold text-xs shadow-xs transition-all cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5" />
-                  <span>🖨️ Imprimer / Aperçu</span>
+                  <span>Imprimer</span>
                 </button>
 
                 <PrintDocumentModal
@@ -201,7 +201,7 @@ export function QuickViewModal({ isOpen, onClose, data }: Props) {
         <div className="p-4 border-t border-gray-100 bg-brand-slate/40 flex items-center justify-between gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-white transition-colors"
+            className="px-4 py-2 rounded-xl border border-gray-200 text-xs font-bold text-gray-600 hover:bg-white transition-colors cursor-pointer"
           >
             Fermer
           </button>
@@ -210,9 +210,9 @@ export function QuickViewModal({ isOpen, onClose, data }: Props) {
             <Link
               href={data.linkHref}
               onClick={onClose}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-extrabold shadow-2xs transition-all"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-extrabold shadow-2xs transition-all cursor-pointer"
             >
-              <span>{data.linkLabel || "Ouvrir le ticket"}</span>
+              <span>{data.linkLabel || "Ouvrir"}</span>
               <ArrowRight className="w-3.5 h-3.5 text-white" />
             </Link>
           )}

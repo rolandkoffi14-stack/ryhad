@@ -405,12 +405,12 @@ export default async function CrmDashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-base font-extrabold text-brand-dark">
-              {user.role === StaffRole.TECHNICIEN ? "Mes Interventions en Cours" : "Dossiers d'Intervention Récents"}
+              {user.role === StaffRole.TECHNICIEN ? "Mes interventions" : "Interventions récentes"}
             </h2>
             <p className="text-xs text-gray-500">
               {user.role === StaffRole.TECHNICIEN
-                ? "Accédez directement à vos dossiers pour consigner vos rapports techniques."
-                : "Aperçu en direct des dossiers atelier et contrat."}
+                ? "Rapports techniques et diagnostics assignés."
+                : "Aperçu des dossiers atelier et contrat."}
             </p>
           </div>
           <div className="flex items-center gap-2">

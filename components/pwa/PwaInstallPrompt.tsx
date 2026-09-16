@@ -91,7 +91,7 @@ export function PwaInstallPrompt() {
     <>
       {/* Toast de succès après installation */}
       {installedSuccess && (
-        <div className="fixed top-4 right-4 z-50 p-4 bg-brand-green text-white rounded-2xl shadow-xl flex items-center gap-3 animate-fade-in text-xs font-bold">
+        <div className="fixed top-4 right-4 z-50 p-4 bg-brand-blue text-white rounded-2xl shadow-xl flex items-center gap-3 animate-fade-in text-xs font-bold">
           <CheckCircle2 className="w-5 h-5" />
           <span>Application RyHaD installée avec succès sur votre appareil !</span>
         </div>
@@ -120,8 +120,8 @@ export function PwaInstallPrompt() {
                   onClick={handleInstallClick}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white text-[11px] font-extrabold shadow-sm transition-all cursor-pointer"
                 >
-                  <Download className="w-3.5 h-3.5 text-brand-green" />
-                  <span>Installer maintenant</span>
+                  <Download className="w-3.5 h-3.5 text-white" />
+                  <span>Installer</span>
                 </button>
                 <button
                   type="button"

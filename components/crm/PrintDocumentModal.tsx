@@ -146,7 +146,7 @@ export function PrintDocumentModal({
         {/* Barre Supérieure d'Actions (avec marge droite réservée au bouton fermer) */}
         <div className="bg-white border-b border-slate-200 pl-4 pr-16 py-3 sm:pl-6 sm:pr-20 sm:py-3.5 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-xs z-10">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200">
+            <div className="w-9 h-9 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0 border border-brand-blue/20">
               <Printer className="w-5 h-5" />
             </div>
             <div className="min-w-0">
@@ -198,7 +198,7 @@ export function PrintDocumentModal({
               title="Ouvre le document dans un nouvel onglet et lance l'impression"
             >
               <Printer className="w-4 h-4" />
-              <span>Imprimer le document</span>
+              <span>Imprimer</span>
             </button>
 
             {/* Partager WhatsApp */}
@@ -265,7 +265,7 @@ export function PrintDocumentModal({
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition-colors"
               >
                 <ExternalLink className="w-3.5 h-3.5" />
-                <span>Ouvrir dans un onglet</span>
+                <span>Ouvrir</span>
               </a>
             )}
             <button

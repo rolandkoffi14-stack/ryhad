@@ -340,13 +340,11 @@ export function ClientCsvExportModal({ isOpen, onClose, clients }: Props) {
             type="button"
             onClick={handleDownloadCsv}
             disabled={selectedColumns.length === 0 || isExporting}
-            className="inline-flex items-center gap-2 bg-brand-green hover:bg-emerald-600 disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all"
+            className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark disabled:opacity-50 text-white px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all"
           >
             <Download className="w-4 h-4" />
             <span>
-              {isExporting
-                ? "Génération en cours..."
-                : `Télécharger le CSV (${selectedColumns.length} colonnes)`}
+              {isExporting ? "Génération..." : "Télécharger le CSV"}
             </span>
           </button>
         </div>

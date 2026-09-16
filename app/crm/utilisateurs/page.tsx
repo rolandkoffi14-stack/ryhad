@@ -43,10 +43,10 @@ export default async function CrmUtilisateursPage() {
       {/* En-tête aéré */}
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-          Gestion des Collaborateurs Staff
+          Collaborateurs
         </h1>
         <p className="text-xs text-gray-500 mt-0.5">
-          Configuration des comptes et des permissions opérationnelles (Admin, Réceptionniste, Technicien).
+          Configuration des comptes et des rôles d&apos;accès.
         </p>
       </div>
 

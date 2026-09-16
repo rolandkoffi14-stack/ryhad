@@ -65,9 +65,9 @@ export function ConfirmationModal({
         };
       case "success":
         return {
-          icon: <CheckCircle2 className="w-6 h-6 text-brand-green" />,
-          iconBg: "bg-brand-green/10 text-brand-green",
-          btnClass: "bg-brand-green hover:bg-emerald-700 text-white shadow-brand-green/20",
+          icon: <CheckCircle2 className="w-6 h-6 text-brand-blue" />,
+          iconBg: "bg-brand-blue/10 text-brand-blue",
+          btnClass: "bg-brand-blue hover:bg-brand-blue-dark text-white shadow-brand-blue/20",
         };
       case "info":
       default:

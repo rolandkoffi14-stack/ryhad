@@ -447,8 +447,8 @@ export function AccountingManager({ documents }: Props) {
             onClick={handleExportJournalCsv}
             className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-2xs hover:border-slate-300 transition-all"
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
-            <span>Exporter Journal CSV</span>
+            <FileSpreadsheet className="w-4 h-4 text-brand-blue" />
+            <span>Télécharger le CSV</span>
           </button>
 
           {/* Filtres de période */}
@@ -635,14 +635,14 @@ export function AccountingManager({ documents }: Props) {
             <div className="space-y-1">
               <div className="flex justify-between text-xs font-bold">
                 <span className="text-slate-700 flex items-center gap-1.5">
-                  <Cpu className="w-3.5 h-3.5 text-purple-600" />
+                  <Cpu className="w-3.5 h-3.5 text-slate-600" />
                   <span>Pièces détachées & Matériel ({metrics.pctPieces}%)</span>
                 </span>
-                <span className="text-purple-700 font-extrabold">{formatFCFA(metrics.caPieces)}</span>
+                <span className="text-slate-800 font-extrabold">{formatFCFA(metrics.caPieces)}</span>
               </div>
               <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-purple-600 rounded-full transition-all"
+                  className="h-full bg-slate-600 rounded-full transition-all"
                   style={{ width: `${metrics.pctPieces}%` }}
                 />
               </div>
@@ -658,7 +658,7 @@ export function AccountingManager({ documents }: Props) {
         {/* Moyens de Paiement (MoMo, Moov, Espèces, Virement) */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
           <h3 className="text-sm font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            <Smartphone className="w-4 h-4 text-emerald-600" />
+            <Smartphone className="w-4 h-4 text-brand-blue" />
             <span>Moyens de Règlement (Flux de Trésorerie)</span>
           </h3>
 
@@ -1125,7 +1125,7 @@ export function AccountingManager({ documents }: Props) {
                                   className="inline-flex items-center gap-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 px-3 py-1.5 rounded-xl text-xs font-extrabold transition-colors shadow-2xs"
                                 >
                                   <MessageCircle className="w-3.5 h-3.5 text-emerald-600" />
-                                  <span>Relancer WhatsApp</span>
+                                  <span>WhatsApp</span>
                                 </a>
                               )}
 
@@ -1195,8 +1195,8 @@ export function AccountingManager({ documents }: Props) {
         montantTotal={paymentModal.montantTotal}
         dejaPaye={paymentModal.dejaPaye}
         allowPartial={paymentModal.allowPartial}
-        titre={`Encaissement Document ${paymentModal.numero}`}
-        description="Enregistrez le mode de paiement et le montant du versement."
+        titre={`Encaissement ${paymentModal.numero}`}
+        description="Sélectionnez le mode de paiement utilisé."
         onConfirm={async (mode, ref, montantVerse, note) => {
           if (!paymentModal.docId) return;
           try {

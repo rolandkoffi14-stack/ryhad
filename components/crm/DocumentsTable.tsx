@@ -165,7 +165,7 @@ export function DocumentsTable({ documents }: Props) {
     if (doc.type === DocumentType.DEVIS) {
       return {
         label: doc.demandeCommerciale ? "Devis Commercial" : "Devis Estimatif",
-        badgeColor: "bg-blue-100 text-brand-blue border-blue-200",
+        badgeColor: "bg-blue-50 text-brand-blue border-blue-200",
       };
     }
 
@@ -173,24 +173,24 @@ export function DocumentsTable({ documents }: Props) {
     if (subType === FactureType.DIAGNOSTIC || doc.type === DocumentType.RECU_DIAGNOSTIC) {
       return {
         label: "Facture Diag.",
-        badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
+        badgeColor: "bg-slate-100 text-slate-700 border-slate-200",
       };
     }
     if (subType === FactureType.CONTRAT || doc.type === DocumentType.FACTURE_PERIODIQUE) {
       return {
         label: "Facture Contrat",
-        badgeColor: "bg-purple-100 text-purple-800 border-purple-200",
+        badgeColor: "bg-brand-blue/10 text-brand-blue border-brand-blue/20",
       };
     }
     if (subType === FactureType.COMMERCIALE || doc.demandeCommerciale) {
       return {
         label: "Facture Commerciale",
-        badgeColor: "bg-cyan-100 text-cyan-800 border-cyan-200",
+        badgeColor: "bg-brand-blue/10 text-brand-blue border-brand-blue/20",
       };
     }
     return {
       label: "Facture Réparation",
-      badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
+      badgeColor: "bg-brand-blue/10 text-brand-blue border-brand-blue/20",
     };
   };
 
@@ -450,7 +450,7 @@ export function DocumentsTable({ documents }: Props) {
                     {doc.demandeCommerciale && (
                       <Link
                         href={`/crm/demandes-commerciales/${doc.demandeCommerciale.id}`}
-                        className="text-[11px] text-purple-700 hover:underline font-semibold flex items-center gap-0.5 mt-0.5"
+                        className="text-[11px] text-brand-blue hover:underline font-semibold flex items-center gap-0.5 mt-0.5"
                       >
                         <span>{doc.demandeCommerciale.typeDemande.replace(/_/g, " ")}</span>
                         <ArrowRight className="w-2.5 h-2.5 text-current" />
@@ -506,7 +506,7 @@ export function DocumentsTable({ documents }: Props) {
                           })
                         }
                         title="Imprimer ce document"
-                        className="p-1.5 rounded-xl border border-gray-200 bg-white text-emerald-700 hover:bg-emerald-600 hover:text-white transition-all shadow-2xs cursor-pointer"
+                        className="p-1.5 rounded-xl border border-gray-200 bg-white text-gray-600 hover:text-brand-blue hover:border-brand-blue hover:bg-brand-blue/5 transition-all shadow-2xs cursor-pointer"
                       >
                         <Printer className="w-3.5 h-3.5" />
                       </button>
@@ -529,7 +529,7 @@ export function DocumentsTable({ documents }: Props) {
                             });
                           }}
                           title="Encaisser cette facture"
-                          className="inline-flex items-center gap-1 bg-brand-green hover:bg-brand-green-dark text-white px-2 py-1 rounded-xl font-extrabold text-[11px] shadow-2xs transition-all"
+                          className="inline-flex items-center gap-1 bg-brand-blue hover:bg-brand-blue-dark text-white px-2 py-1 rounded-xl font-extrabold text-[11px] shadow-2xs transition-all"
                         >
                           <CreditCard className="w-3 h-3" />
                           <span>{doc.statutPaiement === StatutPaiement.PARTIEL ? "Solder" : "Encaisser"}</span>
@@ -577,7 +577,7 @@ export function DocumentsTable({ documents }: Props) {
         montantTotal={paymentModalState.montantTotal}
         dejaPaye={paymentModalState.dejaPaye}
         allowPartial={paymentModalState.allowPartial}
-        titre={`Encaissement Facture ${paymentModalState.numero}`}
+        titre={`Encaissement ${paymentModalState.numero}`}
         description="Veuillez renseigner le mode de paiement utilisé pour régler cette facture."
         loading={loading}
       />

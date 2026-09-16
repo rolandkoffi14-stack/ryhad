@@ -36,10 +36,10 @@ export default async function CrmDemandesCommercialesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-          Demandes Commerciales & Cotations
+          Demandes Commerciales
         </h1>
         <p className="text-xs text-gray-500 mt-0.5">
-          Suivi des demandes d&apos;achat de matériel, locations de vidéoprojecteurs et formations.
+          Suivi des achats de matériel, locations et formations.
         </p>
       </div>
 

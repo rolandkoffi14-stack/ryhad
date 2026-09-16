@@ -70,10 +70,10 @@ export default async function CrmDocumentsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-          Documents Financiers & Facturation
+          Devis & Factures
         </h1>
         <p className="text-xs text-gray-500 mt-0.5">
-          Génération PDF conforme et suivi des règlements (Devis DEV et Factures FAC).
+          Génération PDF et suivi des règlements.
         </p>
       </div>
 

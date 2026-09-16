@@ -34,7 +34,7 @@ export function StandalonePrintClient({ data, initialFormat, autoPrint }: Props)
           className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors inline-flex items-center gap-1.5 text-xs font-bold"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span className="hidden sm:inline">Retour aux documents</span>
+          <span className="hidden sm:inline">Retour</span>
         </Link>
 
         <div className="h-4 w-px bg-slate-200 mx-1" />
@@ -44,7 +44,7 @@ export function StandalonePrintClient({ data, initialFormat, autoPrint }: Props)
           <button
             type="button"
             onClick={() => setFormat("a4")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
               format === "a4"
                 ? "bg-white text-brand-blue shadow-2xs"
                 : "text-slate-600 hover:text-slate-900"
@@ -56,7 +56,7 @@ export function StandalonePrintClient({ data, initialFormat, autoPrint }: Props)
           <button
             type="button"
             onClick={() => setFormat("ticket")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer ${
               format === "ticket"
                 ? "bg-white text-brand-blue shadow-2xs"
                 : "text-slate-600 hover:text-slate-900"
@@ -67,14 +67,14 @@ export function StandalonePrintClient({ data, initialFormat, autoPrint }: Props)
           </button>
         </div>
 
-        {/* Gros bouton vert d'impression */}
+        {/* Bouton d'impression Bleu Confiance */}
         <button
           type="button"
           onClick={() => window.print()}
-          className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-black shadow-sm transition-all cursor-pointer"
+          className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2 rounded-xl text-xs font-extrabold shadow-sm transition-all cursor-pointer"
         >
           <Printer className="w-4 h-4" />
-          <span>🖨️ Imprimer</span>
+          <span>Imprimer</span>
         </button>
       </div>
 

@@ -45,32 +45,32 @@ export function CrmSidebar({
   const allNavItems: NavItem[] = [
     {
       href: "/crm",
-      label: userRole === StaffRole.TECHNICIEN ? "Mon Espace Travail" : "Tableau de Bord",
+      label: userRole === StaffRole.TECHNICIEN ? "Mon Espace" : "Tableau de bord",
       icon: LayoutDashboard,
       exact: true,
       roles: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE, StaffRole.TECHNICIEN],
     },
     {
       href: "/crm/clients",
-      label: "Gestion Clients",
+      label: "Clients",
       icon: Users,
       roles: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE],
     },
     {
       href: "/crm/tickets/ponctuel",
-      label: userRole === StaffRole.TECHNICIEN ? "Tickets Ponctuels" : "Tickets Ponctuels",
+      label: "Tickets Ponctuels",
       icon: Ticket,
       roles: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE, StaffRole.TECHNICIEN],
     },
     {
       href: "/crm/tickets/contractuel",
-      label: userRole === StaffRole.TECHNICIEN ? "Interventions Contrats" : "Tickets Contractuels",
+      label: "Tickets Contrats",
       icon: ClipboardList,
       roles: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE, StaffRole.TECHNICIEN],
     },
     {
       href: "/crm/contrats",
-      label: "Contrats & Visites",
+      label: "Contrats",
       icon: FileCheck2,
       roles: [StaffRole.ADMIN],
     },
@@ -89,19 +89,19 @@ export function CrmSidebar({
     },
     {
       href: "/crm/techniciens",
-      label: "Équipe Technique",
+      label: "Techniciens",
       icon: Wrench,
       roles: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE],
     },
     {
       href: "/crm/demandes-commerciales",
-      label: "Demandes Commerciales",
+      label: "Demandes",
       icon: ShoppingBag,
       roles: [StaffRole.ADMIN, StaffRole.RECEPTIONNISTE],
     },
     {
       href: "/crm/utilisateurs",
-      label: "Utilisateurs & Rôles",
+      label: "Utilisateurs",
       icon: UserCog,
       badge: "Admin",
       roles: [StaffRole.ADMIN],
@@ -139,7 +139,7 @@ export function CrmSidebar({
           <div>
             <div className="flex items-center gap-1">
               <span className="font-extrabold text-white text-base tracking-tight">RyHaD</span>
-              <span className="text-[10px] font-bold bg-brand-green/20 text-brand-green px-1.5 py-0.5 rounded">
+              <span className="text-[10px] font-bold bg-brand-blue/30 text-blue-300 px-1.5 py-0.5 rounded border border-brand-blue/30">
                 CRM
               </span>
             </div>
@@ -216,7 +216,7 @@ export function CrmSidebar({
           className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Voir le site public</span>
+          <span>Site public</span>
         </Link>
       </div>
     </div>

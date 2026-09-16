@@ -72,10 +72,10 @@ export default async function CrmTechniciensPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-          Équipe Technique & Charge d&apos;Atelier
+          Techniciens
         </h1>
         <p className="text-xs text-gray-500 mt-0.5">
-          Suivi de la disponibilité et répartition des dossiers en cours par technicien.
+          Suivi des disponibilités et des dossiers assignés.
         </p>
       </div>
 

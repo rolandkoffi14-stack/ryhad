@@ -94,8 +94,8 @@ export function PaymentConfirmationModal({
   montantTotal,
   dejaPaye = 0,
   allowPartial = false,
-  titre = "Confirmation de l'Encaissement",
-  description = "Veuillez sélectionner le moyen par lequel le client a effectué le règlement.",
+  titre = "Encaissement",
+  description = "Sélectionnez le moyen de paiement.",
   loading = false,
 }: Props) {
   const [selectedMethod, setSelectedMethod] = useState("ESPECES");
@@ -255,7 +255,7 @@ export function PaymentConfirmationModal({
                   <button
                     type="button"
                     onClick={() => setMontantSaisi(montant)}
-                    className="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[10px] font-extrabold border border-emerald-200 transition-colors"
+                    className="px-2.5 py-1 rounded-lg bg-brand-blue/10 hover:bg-brand-blue/20 text-brand-blue text-[10px] font-extrabold border border-brand-blue/30 transition-colors"
                   >
                     Tout solder ({formatFCFA(montant)})
                   </button>
@@ -265,11 +265,11 @@ export function PaymentConfirmationModal({
                 <div className="text-[11px] pt-1">
                   {resteApresVersement > 0 ? (
                     <span className="text-amber-800 font-bold">
-                      ℹ️ Acompte : un solde de {formatFCFA(resteApresVersement)} restera dû au retrait.
+                      Acompte : un solde de {formatFCFA(resteApresVersement)} restera dû au retrait.
                     </span>
                   ) : (
                     <span className="text-emerald-700 font-extrabold">
-                      ✅ La facture sera entièrement soldée (Solde : 0 FCFA).
+                      La facture sera entièrement soldée (Solde : 0 FCFA).
                     </span>
                   )}
                 </div>
@@ -379,15 +379,15 @@ export function PaymentConfirmationModal({
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-extrabold shadow-xs transition-all disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-extrabold shadow-xs transition-all disabled:opacity-50 cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>
                 {loading
                   ? "Validation..."
                   : allowPartial
-                  ? `Valider l'encaissement (${formatFCFA(numMontantSaisi)})`
-                  : "Valider l'encaissement"}
+                  ? `Valider (${formatFCFA(numMontantSaisi)})`
+                  : "Valider"}
               </span>
             </button>
           </div>

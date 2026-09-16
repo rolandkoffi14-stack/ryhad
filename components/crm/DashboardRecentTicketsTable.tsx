@@ -109,19 +109,19 @@ export function DashboardRecentTicketsTable({ tickets, userRole }: Props) {
       status: t.statut,
       raw: { isPaid: isRepPaid },
       linkHref: `/crm/tickets/${t.id}`,
-      linkLabel: "Ouvrir le ticket",
+      linkLabel: "Ouvrir",
       clientName: t.client.nom,
       clientPhone: t.client.telephone,
       details: [
         { label: "Numéro de référence", value: t.numero },
-        { label: "Parcours", value: isContract ? "Intervention Contrat Entreprise" : "Réparation Atelier Ponctuel" },
+        { label: "Parcours", value: isContract ? "Contrat" : "Ponctuel" },
         { label: "Client / Bénéficiaire", value: `${t.client.nom} (${t.client.telephone})` },
         { label: "Type d'appareil", value: t.typeMateriel.replace(/_/g, " ") },
         { label: "Mode d'intervention", value: t.modeIntervention },
         { label: "Panne déclarée au dépôt", value: t.panneDeclaree },
         {
           label: "Technicien assigné",
-          value: t.technicienAssigne ? `${t.technicienAssigne.firstName} ${t.technicienAssigne.lastName}` : "Non assigné pour le moment",
+          value: t.technicienAssigne ? `${t.technicienAssigne.firstName} ${t.technicienAssigne.lastName}` : "Non assigné",
         },
         {
           label: "Règlement réparation",
@@ -204,7 +204,7 @@ export function DashboardRecentTicketsTable({ tickets, userRole }: Props) {
                   <td className="px-5 py-3.5">
                     <div className="font-extrabold text-brand-dark text-xs">{t.numero}</div>
                     <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded border inline-block mt-0.5 bg-brand-blue-light text-brand-blue border-brand-blue/30">
-                      {isContract ? "Contrat Entreprise" : "Atelier Ponctuel"}
+                      {isContract ? "Contrat" : "Ponctuel"}
                     </span>
                   </td>
 
@@ -266,8 +266,8 @@ export function DashboardRecentTicketsTable({ tickets, userRole }: Props) {
               <tr>
                 <td colSpan={userRole !== StaffRole.TECHNICIEN ? 5 : 4} className="px-6 py-12 text-center text-gray-400">
                   {userRole === StaffRole.TECHNICIEN
-                    ? "Aucune intervention ne vous est actuellement assignée."
-                    : "Aucun dossier ne correspond aux critères de recherche."}
+                    ? "Aucune intervention assignée."
+                    : "Aucun dossier trouvé."}
                 </td>
               </tr>
             )}

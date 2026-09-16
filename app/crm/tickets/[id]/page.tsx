@@ -83,7 +83,7 @@ export default async function TicketDetailPage({
           className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:text-brand-blue-dark transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Retour à la liste des tickets {ticket.type.toLowerCase()}s</span>
+          <span>Retour aux tickets</span>
         </Link>
       </div>
 

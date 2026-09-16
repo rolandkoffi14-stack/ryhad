@@ -100,17 +100,17 @@ export default async function TicketsContractuelPage({
         <div className="flex items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-              Nouveau Ticket sous Contrat
+              Nouveau Ticket Contrat
             </h1>
             <p className="text-xs text-gray-500 mt-0.5">
-              Prise en charge d&apos;une intervention préventive ou panne pour une entreprise abonnée.
+              Intervention préventive ou curative sous contrat.
             </p>
           </div>
           <Link
             href={contractId ? `/crm/tickets/contractuel?contractId=${contractId}` : "/crm/tickets/contractuel"}
             className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-slate-200"
           >
-            <span>← {contractId ? "Retour au dossier entreprise" : "Retour aux entreprises"}</span>
+            <span>{contractId ? "Retour au dossier" : "Retour à la liste"}</span>
           </Link>
         </div>
 

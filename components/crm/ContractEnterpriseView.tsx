@@ -237,7 +237,7 @@ export function ContractEnterpriseView({
         : `Créée le ${format(new Date(ticket.dateCreation), "dd/MM/yyyy", { locale: fr })}`,
       status: ticket.statut,
       linkHref: `/crm/tickets/${ticket.id}`,
-      linkLabel: "Ouvrir le ticket",
+      linkLabel: "Ouvrir",
       clientName: selectedContract?.client.nom,
       clientPhone: selectedContract?.client.telephone,
       details: [
@@ -358,7 +358,7 @@ export function ContractEnterpriseView({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
-              {isTechnician ? "Mes Entreprises sous Contrat" : "Contrats de Maintenance — Par Entreprise"}
+              {isTechnician ? "Mes Entreprises sous Contrat" : "Contrats par Entreprise"}
             </h1>
             <p className="text-xs text-gray-500 mt-0.5">
               Suivi structuré par entreprise : interventions préventives, pannes ponctuelles et factures périodiques.
@@ -371,8 +371,8 @@ export function ContractEnterpriseView({
                 href="/crm/tickets/contractuel?new=true"
                 className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all"
               >
-                <Plus className="w-4 h-4 text-brand-green" />
-                <span>Nouveau Ticket sous Contrat</span>
+                <Plus className="w-4 h-4 text-white" />
+                <span>Nouveau ticket</span>
               </Link>
             )}
             {isAdmin && (
@@ -381,7 +381,7 @@ export function ContractEnterpriseView({
                 className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all"
               >
                 <Plus className="w-4 h-4 text-brand-blue" />
-                <span>Nouveau Contrat</span>
+                <span>Nouveau contrat</span>
               </Link>
             )}
           </div>
@@ -468,7 +468,7 @@ export function ContractEnterpriseView({
                         </div>
                       </div>
 
-                      <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-emerald-50 text-brand-green border border-emerald-200">
+                      <span className="text-[10px] font-extrabold px-2.5 py-1 rounded-lg bg-brand-blue-light text-brand-blue border border-brand-blue/30">
                         {c.periodicite}
                       </span>
                     </div>
@@ -618,8 +618,8 @@ export function ContractEnterpriseView({
               href={`/crm/tickets/contractuel?new=true&contractId=${selectedContract.id}&clientId=${selectedContract.clientId}`}
               className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all"
             >
-              <Plus className="w-4 h-4 text-brand-green" />
-              <span>Déclarer une Panne Imprévue</span>
+              <Plus className="w-4 h-4 text-white" />
+              <span>Déclarer une panne</span>
             </Link>
           )}
 
@@ -913,8 +913,8 @@ export function ContractEnterpriseView({
                   href={`/crm/tickets/contractuel?new=true&contractId=${selectedContract.id}&clientId=${selectedContract.clientId}`}
                   className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-sm transition-all"
                 >
-                  <Plus className="w-4 h-4 text-brand-green" />
-                  <span>+ Déclarer une panne imprévue</span>
+                  <Plus className="w-4 h-4 text-white" />
+                  <span>Déclarer une panne</span>
                 </Link>
               )}
             </div>
@@ -997,7 +997,7 @@ export function ContractEnterpriseView({
                             <td className="px-5 py-3.5">
                               {t.technicienAssigne ? (
                                 <div className="flex items-center gap-1.5">
-                                  <div className="w-6 h-6 rounded-full bg-brand-green/20 text-brand-green-dark font-extrabold text-[10px] flex items-center justify-center shrink-0">
+                                  <div className="w-6 h-6 rounded-full bg-brand-blue/10 text-brand-blue font-extrabold text-[10px] flex items-center justify-center shrink-0">
                                     {t.technicienAssigne.firstName.charAt(0)}
                                   </div>
                                   <span className="font-semibold text-brand-dark text-xs">
@@ -1177,7 +1177,7 @@ export function ContractEnterpriseView({
                                     titre: `Facture Contrat : ${fac.numero}`,
                                   })
                                 }
-                                className="p-1.5 text-slate-400 hover:text-emerald-700 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer"
+                                className="p-1.5 text-slate-400 hover:text-brand-blue rounded-lg hover:bg-brand-blue/5 transition-colors cursor-pointer"
                                 title="Imprimer ce document"
                               >
                                 <Printer className="w-4 h-4" />
@@ -1204,7 +1204,7 @@ export function ContractEnterpriseView({
             <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-brand-blue/10 text-brand-blue flex items-center justify-center">
-                  <Sparkles className="w-5 h-5 text-brand-green" />
+                  <Sparkles className="w-5 h-5 text-brand-blue" />
                 </div>
                 <div>
                   <h3 className="text-base font-extrabold text-slate-900">
@@ -1233,7 +1233,7 @@ export function ContractEnterpriseView({
                 </div>
               )}
               {generateSuccess && (
-                <div className="p-3 rounded-xl bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
+                <div className="p-3 rounded-xl bg-brand-blue/10 text-brand-blue-dark font-bold border border-brand-blue/20">
                   {generateSuccess}
                 </div>
               )}
@@ -1253,7 +1253,7 @@ export function ContractEnterpriseView({
                       : "Contrat CDI (Reconduction tacite)"}
                   </p>
                 </div>
-                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0">
                   <ShieldCheck className="w-4 h-4" />
                 </div>
               </div>
@@ -1285,7 +1285,7 @@ export function ContractEnterpriseView({
                       onClick={() => setGenerateForm({ ...generateForm, actionType: "PROLONGER" })}
                       className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
                         generateForm.actionType === "PROLONGER"
-                          ? "border-brand-green bg-emerald-50/70 ring-2 ring-brand-green/20"
+                          ? "border-brand-blue bg-blue-50/70 ring-2 ring-brand-blue/20"
                           : "border-slate-200 bg-white hover:bg-slate-50"
                       }`}
                     >
@@ -1403,14 +1403,14 @@ export function ContractEnterpriseView({
                   {generateLoading && <Clock className="w-4 h-4 animate-spin text-white" />}
                   <span>
                     {generateLoading
-                      ? "Traitement en cours..."
+                      ? "Traitement..."
                       : generateSuccess
-                      ? "Opération terminée !"
+                      ? "Terminé !"
                       : preventifTickets.length === 0
-                      ? "Générer les Interventions"
+                      ? "Générer"
                       : generateForm.actionType === "AJUSTER"
-                      ? "Regénérer le Planning"
-                      : "Prolonger le Contrat"}
+                      ? "Mettre à jour"
+                      : "Prolonger"}
                   </span>
                 </button>
               </div>
@@ -1460,8 +1460,8 @@ export function ContractEnterpriseView({
             }
           }}
           montant={paymentModal.montant}
-          titre={`Encaissement Facture ${paymentModal.numero}`}
-          description="Confirmez le mode de règlement de la facture périodique du contrat."
+          titre={`Encaissement ${paymentModal.numero}`}
+          description="Sélectionnez le mode de règlement pour valider l'encaissement."
         />,
         document.body
       )}

@@ -648,8 +648,8 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
     <div className="space-y-8">
       {/* Notifications */}
       {successMsg && (
-        <div className="p-4 rounded-xl bg-emerald-50 border border-brand-green/30 text-brand-green-dark text-xs flex items-center gap-2 font-bold">
-          <CheckCircle2 className="w-4 h-4 text-brand-green shrink-0" />
+        <div className="p-4 rounded-xl bg-brand-blue/10 border border-brand-blue/30 text-brand-blue-dark text-xs flex items-center gap-2 font-bold">
+          <CheckCircle2 className="w-4 h-4 text-brand-blue shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
@@ -688,15 +688,15 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
       {ticket.type === InterventionType.PONCTUEL &&
         (ticket.statut === InterventionStatut.FRAIS_DIAGNOSTIC_ENCAISSE ||
           (ticket.statut === InterventionStatut.NOUVEAU && isDiagPaid)) && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50 border border-emerald-300 flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
+          <div className="p-4 sm:p-5 rounded-2xl bg-brand-blue/5 border border-brand-blue/20 flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0 mt-0.5">
               <CheckCircle2 className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-xs font-extrabold text-emerald-950 uppercase tracking-wide">
+              <h3 className="text-xs font-extrabold text-brand-dark uppercase tracking-wide">
                 Étape 2 : Frais de diagnostic réglés ({diagAmountFormatted}) — Prêt pour analyse
               </h3>
-              <p className="text-[11px] text-emerald-800 mt-0.5 font-medium">
+              <p className="text-[11px] text-slate-600 mt-0.5 font-medium">
                 {userRole === StaffRole.TECHNICIEN
                   ? "Les frais ont été encaissés. Cliquez sur 'Démarrer Diagnostic' lorsque vous prenez le matériel en charge."
                   : "Frais encaissés. En attente du démarrage de l'expertise technique par le technicien."}
@@ -779,17 +779,17 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
 
       {/* 4. Devis Accepté : Facture de réparation en attente d'acompte ou de solde */}
       {ticket.statut === InterventionStatut.DEVIS_ACCEPTE && repDoc && !isRepPaid && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-emerald-50/70 border border-emerald-300 flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
+        <div className="p-4 sm:p-5 rounded-2xl bg-brand-blue/5 border border-brand-blue/20 flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0 mt-0.5">
             <Receipt className="w-5 h-5" />
           </div>
           <div className="flex-1">
-            <h3 className="text-xs font-extrabold text-emerald-950 uppercase tracking-wide">
+            <h3 className="text-xs font-extrabold text-brand-dark uppercase tracking-wide">
               {isRepPartial
                 ? `Étape 5 : Acompte perçu (${formatFCFA(repMontantPaye)}) • Reste à solder au retrait : ${formatFCFA(repResteAPayer)}`
                 : `Étape 5 : Devis accepté — Facture ${repDoc.numero} (${formatFCFA(repDoc.montant)})`}
             </h3>
-            <p className="text-[11px] text-emerald-800 mt-0.5 font-medium">
+            <p className="text-[11px] text-slate-600 mt-0.5 font-medium">
               {isRepPartial
                 ? "L'acompte a été versé. Le technicien a le feu vert pour démarrer les travaux. Le client soldera le reste lors du retrait."
                 : userRole === StaffRole.TECHNICIEN
@@ -852,14 +852,14 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
           className={`p-4 sm:p-5 rounded-2xl border flex items-start gap-3 ${
             repDoc && (!isRepPaid || repResteAPayer > 0)
               ? "bg-amber-50/90 border-amber-300"
-              : "bg-emerald-50/70 border-emerald-300"
+              : "bg-brand-blue/5 border-brand-blue/20"
           }`}
         >
           <div
             className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
               repDoc && (!isRepPaid || repResteAPayer > 0)
                 ? "bg-amber-600 text-white"
-                : "bg-emerald-600 text-white"
+                : "bg-brand-blue text-white"
             }`}
           >
             {repDoc && (!isRepPaid || repResteAPayer > 0) ? (
@@ -873,7 +873,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
               className={`text-xs font-extrabold uppercase tracking-wide ${
                 repDoc && (!isRepPaid || repResteAPayer > 0)
                   ? "text-amber-950"
-                  : "text-emerald-950"
+                  : "text-brand-dark"
               }`}
             >
               {repDoc && (!isRepPaid || repResteAPayer > 0)
@@ -884,7 +884,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
               className={`text-[11px] mt-0.5 font-medium ${
                 repDoc && (!isRepPaid || repResteAPayer > 0)
                   ? "text-amber-800"
-                  : "text-emerald-800"
+                  : "text-slate-600"
               }`}
             >
               {repDoc && (!isRepPaid || repResteAPayer > 0)
@@ -907,10 +907,10 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                       description: `Règlement final du solde restant dû de ${formatFCFA(repResteAPayer)} par le client.`,
                     })
                   }
-                  className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
                 >
                   <CreditCard className="w-3.5 h-3.5" />
-                  <span>💰 Encaisser le solde restant ({formatFCFA(repResteAPayer)})</span>
+                  <span>Encaisser le solde ({formatFCFA(repResteAPayer)})</span>
                 </button>
               )}
               {repDoc && (
@@ -927,7 +927,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                   className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
                 >
                   <Printer className="w-3.5 h-3.5 text-slate-500" />
-                  <span>🖨️ Imprimer Facture ({repDoc.numero})</span>
+                  <span>Imprimer Facture ({repDoc.numero})</span>
                 </button>
               )}
             </div>
@@ -940,14 +940,8 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-gray-100">
           <div>
             <div className="flex items-center gap-2 mb-1.5">
-              <span
-                className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded ${
-                  ticket.type === "CONTRACTUEL"
-                    ? "bg-brand-green-light text-brand-green-dark"
-                    : "bg-brand-blue-light text-brand-blue"
-                }`}
-              >
-                Parcours {ticket.type}
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-brand-blue-light text-brand-blue border border-brand-blue/20">
+                Ticket {ticket.type.toLowerCase()}
               </span>
               <TicketStatusBadge statut={ticket.statut} isPaid={isRepPaid} />
             </div>
@@ -1189,8 +1183,8 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                 disabled={loading}
                 className="inline-flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-bold py-1.5 px-3 rounded-lg shadow-sm transition-all disabled:opacity-50"
               >
-                <Save className="w-3.5 h-3.5 text-brand-green" />
-                <span>Enregistrer note</span>
+                <Save className="w-3.5 h-3.5 text-white" />
+                <span>Enregistrer</span>
               </button>
             ) : (
               <span className="text-[10px] text-gray-500 font-semibold bg-gray-100 px-2 py-0.5 rounded flex items-center gap-1">
@@ -1240,7 +1234,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
         <div className="lg:col-span-7 bg-white rounded-2xl p-6 border border-gray-200 subtle-shadow space-y-6">
           <div className="flex items-center justify-between border-b border-gray-100 pb-3">
             <div className="flex items-center gap-2">
-              <DollarSign className="w-5 h-5 text-brand-green" />
+              <DollarSign className="w-5 h-5 text-brand-blue" />
               <div>
                 <h2 className="text-base font-bold text-brand-dark">
                   {ticket.type === InterventionType.CONTRACTUEL
@@ -1273,17 +1267,17 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
 
           {/* 🛠️ BLOC 1 : MAIN D'ŒUVRE DE RÉPARATION */}
           {ticket.type === InterventionType.CONTRACTUEL ? (
-            <div className="p-4 rounded-xl border border-emerald-200 bg-emerald-50/50 flex items-center justify-between">
+            <div className="p-4 rounded-xl border border-brand-blue/20 bg-brand-blue/5 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-brand-blue/10 text-brand-blue flex items-center justify-center">
                   <CheckCircle2 className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-xs font-bold text-emerald-950">Main d&apos;œuvre Technique & Déplacements</div>
-                  <div className="text-[11px] text-emerald-700">Couvert à 100% par le forfait du contrat de maintenance</div>
+                  <div className="text-xs font-bold text-brand-dark">Main d&apos;œuvre Technique & Déplacements</div>
+                  <div className="text-[11px] text-slate-500">Couvert à 100% par le forfait du contrat de maintenance</div>
                 </div>
               </div>
-              <span className="text-xs font-extrabold text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-300">
+              <span className="text-xs font-extrabold text-brand-blue bg-brand-blue/10 px-2.5 py-1 rounded-lg border border-brand-blue/20">
                 0 FCFA (Inclus)
               </span>
             </div>
@@ -1301,7 +1295,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                     !isTicketStarted
                       ? "bg-slate-100 text-slate-600 border border-slate-200"
                       : currentMO > 0
-                      ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                      ? "bg-brand-blue-light text-brand-blue border border-brand-blue/30"
                       : "bg-red-100 text-red-700 border border-red-300"
                   }`}
                 >
@@ -1340,8 +1334,8 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                       disabled={loading}
                       className="inline-flex items-center gap-1 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold px-3 py-1.5 rounded-lg text-xs transition-all disabled:opacity-50"
                     >
-                      <Save className="w-3.5 h-3.5 text-brand-green" />
-                      <span>Enregistrer la Main d&apos;œuvre</span>
+                      <Save className="w-3.5 h-3.5 text-white" />
+                      <span>Enregistrer</span>
                     </button>
                   </div>
                 </div>
@@ -1358,7 +1352,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
           <div className="space-y-3">
             <div className="flex items-center justify-between border-t border-gray-100 pt-3">
               <div className="flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-brand-green" />
+                <Cpu className="w-4 h-4 text-brand-blue" />
                 <span className="text-xs font-bold text-brand-dark">
                   2. Pièces détachées & Composants <span className="text-gray-400 font-normal">(Facultatif)</span>
                 </span>
@@ -1448,8 +1442,8 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                   disabled={loading || !newPiece.designation.trim()}
                   className="w-full inline-flex items-center justify-center gap-1.5 bg-brand-slate hover:bg-gray-200 text-brand-dark font-bold py-2 rounded-xl text-xs border border-gray-200 shadow-2xs transition-all disabled:opacity-50"
                 >
-                  <Plus className="w-4 h-4 text-brand-green" />
-                  <span>+ Ajouter une pièce au devis</span>
+                  <Plus className="w-4 h-4 text-brand-blue" />
+                  <span>Ajouter une pièce</span>
                 </button>
               </form>
             )}
@@ -1479,8 +1473,8 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
         {userRole !== StaffRole.TECHNICIEN && (
           <div className="lg:col-span-5 bg-white rounded-2xl p-6 border border-gray-200 subtle-shadow space-y-4">
             <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
-              <Receipt className="w-5 h-5 text-brand-green" />
-              <h2 className="text-base font-bold text-brand-dark">Documents Financiers Émis</h2>
+              <Receipt className="w-5 h-5 text-brand-blue" />
+              <h2 className="text-base font-bold text-brand-dark">Documents financiers</h2>
             </div>
 
             <div className="space-y-2.5">
@@ -1545,8 +1539,8 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                       <span
                         className={`text-[10px] font-extrabold px-1.5 py-0.5 rounded border inline-block mt-1 ${
                           isDevis
-                            ? "bg-blue-100 text-brand-blue border-blue-200"
-                            : "bg-emerald-100 text-emerald-800 border-emerald-200"
+                            ? "bg-brand-blue-light text-brand-blue border-brand-blue/20"
+                            : "bg-slate-100 text-slate-700 border-slate-200"
                         }`}
                       >
                         {label}
@@ -1616,14 +1610,14 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
         >
           <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
             <Clock className="w-5 h-5 text-brand-blue" />
-            <h2 className="text-base font-bold text-brand-dark">Journal d&apos;Audit & Historique</h2>
+            <h2 className="text-base font-bold text-brand-dark">Historique du dossier</h2>
           </div>
 
           <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
             {ticket.historique.map((h, idx) => (
               <div
                 key={`hist-item-${h.id || idx}-${idx}`}
-                className="flex items-start gap-3 text-xs border-l-2 border-brand-green pl-3 py-1"
+                className="flex items-start gap-3 text-xs border-l-2 border-brand-blue pl-3 py-1"
               >
                 <div className="flex-1">
                   <span className="font-bold text-brand-dark block">{h.action}</span>

@@ -114,11 +114,11 @@ export function UsersTable({ users, currentUserId = "" }: Props) {
   const getRoleBadge = (role: StaffRole) => {
     switch (role) {
       case StaffRole.ADMIN:
-        return "bg-brand-blue-light text-brand-blue border-brand-blue/30";
+        return "bg-brand-blue-light text-brand-blue border-brand-blue/30 font-extrabold";
       case StaffRole.RECEPTIONNISTE:
-        return "bg-purple-50 text-purple-700 border-purple-200";
+        return "bg-blue-50 text-brand-blue border-blue-200 font-semibold";
       case StaffRole.TECHNICIEN:
-        return "bg-brand-green-light text-brand-green-dark border-brand-green/30";
+        return "bg-slate-100 text-slate-700 border-slate-200 font-semibold";
       default:
         return "bg-gray-100 text-gray-700";
     }
@@ -290,7 +290,7 @@ export function UsersTable({ users, currentUserId = "" }: Props) {
             className="inline-flex items-center gap-2 px-4 py-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer"
           >
             <UserPlus className="w-4 h-4" />
-            <span>Nouveau Collaborateur</span>
+            <span>Nouveau collaborateur</span>
           </button>
         </div>
       </div>
@@ -343,7 +343,7 @@ export function UsersTable({ users, currentUserId = "" }: Props) {
 
                   <td className="px-5 py-3.5">
                     {u.assignableAsTechnician ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-green">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-bold text-brand-blue">
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>Oui</span>
                       </span>
@@ -403,7 +403,7 @@ export function UsersTable({ users, currentUserId = "" }: Props) {
                           className={`p-1.5 rounded-xl border transition-all shadow-2xs cursor-pointer ${
                             u.isActive
                               ? "border-gray-200 bg-white text-gray-400 hover:text-brand-red hover:border-brand-red hover:bg-brand-red-light"
-                              : "border-brand-green/30 bg-brand-green/10 text-brand-green hover:bg-brand-green/20"
+                              : "border-brand-blue/30 bg-brand-blue/10 text-brand-blue hover:bg-brand-blue/20"
                           }`}
                         >
                           <Power className="w-3.5 h-3.5" />

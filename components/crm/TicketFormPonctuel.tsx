@@ -169,10 +169,10 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
             <button
               type="button"
               onClick={() => setShowClientModal(true)}
-              className="inline-flex items-center gap-1 text-[11px] font-extrabold text-brand-green hover:text-brand-green-dark bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg transition-all border border-emerald-200"
+              className="inline-flex items-center gap-1 text-[11px] font-extrabold text-brand-blue hover:text-brand-blue-dark bg-brand-blue/10 hover:bg-brand-blue/20 px-2.5 py-1 rounded-lg transition-all border border-brand-blue/20"
             >
               <UserPlus className="w-3.5 h-3.5" />
-              <span>+ Nouveau Client</span>
+              <span>Nouveau client</span>
             </button>
           </div>
           <select
@@ -289,7 +289,7 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
             className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-2.5 px-6 rounded-xl text-xs shadow transition-all disabled:opacity-50"
           >
             <Save className="w-4 h-4 text-white" />
-            <span>{loading ? "Création..." : "Créer le ticket"}</span>
+            <span>{loading ? "Création..." : "Créer"}</span>
           </button>
         </div>
       </form>
@@ -312,17 +312,17 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
                 </div>
                 <div>
                   <h3 className="text-base font-extrabold text-brand-dark">
-                    Nouveau Client Comptoir
+                    Nouveau client
                   </h3>
                   <p className="text-[11px] text-gray-500">
-                    Enregistrement direct sans quitter le dépôt
+                    Enregistrement rapide
                   </p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowClientModal(false)}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -420,17 +420,17 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
                 <button
                   type="button"
                   onClick={() => setShowClientModal(false)}
-                  className="px-4 py-2 rounded-xl border border-gray-300 text-xs font-bold text-gray-600 hover:bg-gray-50"
+                  className="px-4 py-2 rounded-xl border border-gray-300 text-xs font-bold text-gray-600 hover:bg-gray-50 cursor-pointer"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={clientLoading}
-                  className="inline-flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold px-5 py-2 rounded-xl text-xs shadow transition-all disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold px-5 py-2 rounded-xl text-xs shadow transition-all disabled:opacity-50 cursor-pointer"
                 >
                   <CheckCircle2 className="w-3.5 h-3.5 text-white" />
-                  <span>{clientLoading ? "Enregistrement..." : "Créer le client"}</span>
+                  <span>{clientLoading ? "Enregistrement..." : "Créer"}</span>
                 </button>
               </div>
             </form>
