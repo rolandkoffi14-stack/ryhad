@@ -177,7 +177,7 @@ export function PaymentConfirmationModal({
         {/* Header */}
         <div className="p-5 border-b border-gray-100 bg-brand-slate/60 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-brand-green/20 text-brand-green-dark flex items-center justify-center">
+            <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue flex items-center justify-center">
               <CreditCard className="w-4 h-4" />
             </div>
             <div>
@@ -379,15 +379,15 @@ export function PaymentConfirmationModal({
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-xs transition-all disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-extrabold shadow-xs transition-all disabled:opacity-50"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>
                 {loading
-                  ? "Validation en cours..."
+                  ? "Validation..."
                   : allowPartial
-                  ? `Valider l'Encaissement (${formatFCFA(numMontantSaisi)})`
-                  : "Valider l'Encaissement"}
+                  ? `Valider l'encaissement (${formatFCFA(numMontantSaisi)})`
+                  : "Valider l'encaissement"}
               </span>
             </button>
           </div>

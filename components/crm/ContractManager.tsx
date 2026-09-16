@@ -372,7 +372,7 @@ export function ContractManager({ contracts, clients }: Props) {
 
         <button
           onClick={handleOpenCreateModal}
-          className="inline-flex items-center gap-2 bg-brand-green hover:bg-brand-green-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all self-start sm:self-auto cursor-pointer"
+          className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all self-start sm:self-auto cursor-pointer"
         >
           <Plus className="w-4 h-4" />
           <span>Nouveau Contrat</span>
@@ -569,7 +569,7 @@ export function ContractManager({ contracts, clients }: Props) {
                               title="Émettre la facture de la période"
                               className="inline-flex items-center gap-1 bg-brand-slate hover:bg-gray-200 text-gray-700 px-2 py-1.5 rounded-xl font-bold text-xs transition-all border border-gray-200 shadow-2xs"
                             >
-                              <Receipt className="w-3.5 h-3.5 text-brand-green" />
+                              <Receipt className="w-3.5 h-3.5 text-brand-blue" />
                               <span>Facturer</span>
                             </button>
                           );
@@ -579,7 +579,7 @@ export function ContractManager({ contracts, clients }: Props) {
                         <Link
                           href={`/crm/tickets/contractuel?contractId=${c.id}`}
                           title="Consulter le dossier d'interventions de cette entreprise"
-                          className="inline-flex items-center gap-1 bg-brand-green hover:bg-brand-green-dark text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all shadow-2xs"
+                          className="inline-flex items-center gap-1 bg-brand-blue hover:bg-brand-blue-dark text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all shadow-2xs"
                         >
                           <span>Dossier</span>
                           <ArrowRight className="w-3 h-3" />

@@ -516,12 +516,12 @@ export function AccountingManager({ documents }: Props) {
       {/* Cartes KPIs Financiers avec séparation Main d'œuvre vs Pièces */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* CA Encaissé Global */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-emerald-300 transition-all">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-brand-blue/30 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               CA Encaissé (Total)
             </span>
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-brand-green flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
               <Banknote className="w-5 h-5" />
             </div>
           </div>
@@ -534,7 +534,6 @@ export function AccountingManager({ documents }: Props) {
               <span>{metrics.tauxRecouvrement}% de recouvrement</span>
             </div>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-brand-green" />
         </div>
 
         {/* CA Main d'œuvre & Services */}
@@ -543,7 +542,7 @@ export function AccountingManager({ documents }: Props) {
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               CA Main d&apos;œuvre & Services
             </span>
-            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-brand-blue flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
               <Wrench className="w-5 h-5" />
             </div>
           </div>
@@ -558,31 +557,29 @@ export function AccountingManager({ documents }: Props) {
               </span>
             </p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-brand-blue" />
         </div>
 
         {/* CA Pièces Détachées & Matériel */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-purple-300 transition-all">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-brand-blue/30 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               CA Pièces & Composants
             </span>
-            <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
               <Cpu className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-4">
-            <h3 className="text-2xl font-extrabold text-purple-900 tracking-tight">
+            <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">
               {formatFCFA(metrics.caPieces)}
             </h3>
-            <p className="text-xs text-purple-700 font-bold mt-2 flex items-center justify-between">
+            <p className="text-xs text-slate-600 font-bold mt-2 flex items-center justify-between">
               <span>Composants & vente matériel</span>
-              <span className="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
+              <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
                 {metrics.pctPieces}% du CA
               </span>
             </p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-purple-600" />
         </div>
 
         {/* Créances / Impayés */}
@@ -591,7 +588,7 @@ export function AccountingManager({ documents }: Props) {
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
               Créances à Recouvrer
             </span>
-            <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
               <AlertCircle className="w-5 h-5" />
             </div>
           </div>
@@ -727,13 +724,13 @@ export function AccountingManager({ documents }: Props) {
               }}
               className={`pb-3 text-sm font-extrabold transition-all border-b-2 flex items-center gap-1.5 ${
                 activeTab === "DEVIS"
-                  ? "border-purple-600 text-purple-600"
+                  ? "border-brand-blue text-brand-blue"
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
               <span>Devis Estimatifs</span>
               {devisList.length > 0 && (
-                <span className="bg-purple-100 text-purple-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                <span className="bg-slate-100 text-slate-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
                   {devisList.length}
                 </span>
               )}
@@ -746,7 +743,7 @@ export function AccountingManager({ documents }: Props) {
               }}
               className={`pb-3 text-sm font-extrabold transition-all border-b-2 flex items-center gap-2 ${
                 activeTab === "CREANCES"
-                  ? "border-amber-600 text-amber-600"
+                  ? "border-brand-blue text-brand-blue"
                   : "border-transparent text-slate-500 hover:text-slate-800"
               }`}
             >
@@ -897,7 +894,7 @@ export function AccountingManager({ documents }: Props) {
                                       allowPartial: true,
                                     });
                                   }}
-                                  className="text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-brand-green px-2.5 py-1 rounded-lg transition-colors"
+                                  className="text-xs font-bold bg-brand-blue-light hover:bg-brand-blue hover:text-white text-brand-blue px-2.5 py-1 rounded-lg transition-colors"
                                 >
                                   {doc.statutPaiement === "PARTIEL" ? "Solder" : "Encaisser"}
                                 </button>
@@ -912,7 +909,7 @@ export function AccountingManager({ documents }: Props) {
                                     titre: `Facture : ${doc.numero}`,
                                   })
                                 }
-                                className="text-slate-400 hover:text-emerald-700 p-1.5 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer"
+                                className="text-slate-400 hover:text-brand-blue p-1.5 rounded-lg hover:bg-brand-blue/5 transition-colors cursor-pointer"
                                 title="Imprimer ce document"
                               >
                                 <Printer className="w-4 h-4" />
@@ -968,7 +965,7 @@ export function AccountingManager({ documents }: Props) {
                       const client = getClientData(doc);
                       return (
                         <tr key={doc.id} className="hover:bg-slate-50/80 transition-colors">
-                          <td className="py-4 px-6 font-extrabold text-purple-700">
+                          <td className="py-4 px-6 font-extrabold text-brand-dark">
                             {doc.numero}
                           </td>
                           <td className="py-4 px-6 font-semibold text-slate-600">
@@ -1015,7 +1012,7 @@ export function AccountingManager({ documents }: Props) {
                                     titre: `Devis : ${doc.numero}`,
                                   })
                                 }
-                                className="text-slate-400 hover:text-emerald-700 p-1.5 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer inline-flex"
+                                className="text-slate-400 hover:text-brand-blue p-1.5 rounded-lg hover:bg-brand-blue/5 transition-colors cursor-pointer inline-flex"
                                 title="Imprimer le Devis"
                               >
                                 <Printer className="w-4 h-4" />
@@ -1159,7 +1156,7 @@ export function AccountingManager({ documents }: Props) {
                                     titre: `Document : ${doc.numero}`,
                                   })
                                 }
-                                className="p-1.5 text-slate-400 hover:text-emerald-700 rounded-lg hover:bg-emerald-50 transition-colors cursor-pointer"
+                                className="p-1.5 text-slate-400 hover:text-brand-blue rounded-lg hover:bg-brand-blue/5 transition-colors cursor-pointer"
                                 title="Imprimer ce document"
                               >
                                 <Printer className="w-4 h-4" />

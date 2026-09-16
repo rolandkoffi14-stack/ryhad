@@ -189,7 +189,7 @@ export function CrmSidebar({
               }`}
             >
               <div className="flex items-center gap-2.5 min-w-0">
-                <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-brand-green" : "text-gray-400"}`} />
+                <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-gray-400"}`} />
                 <span className="truncate">{item.label}</span>
               </div>
 

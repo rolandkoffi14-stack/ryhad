@@ -194,11 +194,11 @@ export function PrintDocumentModal({
               type="button"
               onClick={handleTriggerPrint}
               disabled={loading || !data}
-              className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-black shadow-sm hover:shadow transition-all disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm hover:shadow transition-all disabled:opacity-50 cursor-pointer"
               title="Ouvre le document dans un nouvel onglet et lance l'impression"
             >
               <Printer className="w-4 h-4" />
-              <span>🖨️ Imprimer Immédiatement</span>
+              <span>Imprimer le document</span>
             </button>
 
             {/* Partager WhatsApp */}
@@ -252,8 +252,8 @@ export function PrintDocumentModal({
 
         {/* Pied de page de la modale avec bouton Fermer explicite */}
         <div className="bg-white border-t border-slate-200 px-4 py-3 sm:px-6 flex items-center justify-between gap-3 shrink-0">
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <span>Astuce : Vous pouvez aussi appuyer sur <kbd className="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-300 font-mono text-[10px]">Échap</kbd></span>
+          <div className="text-xs text-slate-400 font-medium">
+            <span>{data ? `${data.numero} • Format ${format.toUpperCase()}` : ""}</span>
           </div>
 
           <div className="flex items-center gap-2">

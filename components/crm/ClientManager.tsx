@@ -244,7 +244,7 @@ export function ClientManager({ clients, userRole }: Props) {
       subtitle: cl.type === ClientType.ENTREPRISE ? "Entreprise / Société" : "Client Particulier",
       badge: {
         label: cl.type,
-        className: cl.type === ClientType.ENTREPRISE ? "bg-purple-100 text-purple-800 border-purple-300" : "bg-blue-100 text-brand-blue border-blue-300",
+        className: cl.type === ClientType.ENTREPRISE ? "bg-slate-100 text-slate-800 border-slate-300 font-bold" : "bg-blue-100 text-brand-blue border-blue-300 font-bold",
       },
       clientName: cl.nom,
       clientPhone: cl.telephone,
@@ -291,7 +291,7 @@ export function ClientManager({ clients, userRole }: Props) {
             onClick={() => setIsExportModalOpen(true)}
             className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-2xs hover:border-slate-300 transition-all"
           >
-            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <FileSpreadsheet className="w-4 h-4 text-brand-blue" />
             <span>Exporter en CSV</span>
           </button>
 
@@ -299,7 +299,7 @@ export function ClientManager({ clients, userRole }: Props) {
             onClick={openCreateModal}
             className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all"
           >
-            <UserPlus className="w-4 h-4 text-brand-green" />
+            <UserPlus className="w-4 h-4 text-white" />
             <span>Nouveau Client</span>
           </button>
         </div>
@@ -430,7 +430,7 @@ export function ClientManager({ clients, userRole }: Props) {
                           {cl._count.interventions} ticket(s)
                         </span>
                         {cl._count.contrats > 0 && (
-                          <span className="text-[11px] font-bold bg-brand-green/15 text-brand-green-dark px-2 py-0.5 rounded-md">
+                          <span className="text-[11px] font-bold bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md">
                             {cl._count.contrats} contrat(s)
                           </span>
                         )}
@@ -455,7 +455,7 @@ export function ClientManager({ clients, userRole }: Props) {
                           <Link
                             href={`/crm/tickets/contractuel?new=true&contractId=${cl.contrats[0].id}&clientId=${cl.id}`}
                             title="Intervention sous contrat"
-                            className="p-1.5 rounded-xl bg-brand-green/10 text-brand-green-dark hover:bg-brand-green hover:text-white transition-all shadow-2xs"
+                            className="p-1.5 rounded-xl bg-brand-blue/10 text-brand-blue hover:bg-brand-blue hover:text-white transition-all shadow-2xs"
                           >
                             <Ticket className="w-3.5 h-3.5" />
                           </Link>
@@ -572,7 +572,7 @@ export function ClientManager({ clients, userRole }: Props) {
                   onClick={() => setFormData({ ...formData, type: ClientType.ENTREPRISE })}
                   className={`py-2 rounded-lg font-extrabold transition-all ${
                     formData.type === ClientType.ENTREPRISE
-                      ? "bg-white text-purple-700 shadow-2xs"
+                      ? "bg-white text-brand-blue shadow-2xs"
                       : "text-gray-500 hover:text-gray-800"
                   }`}
                 >

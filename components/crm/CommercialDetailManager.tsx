@@ -203,9 +203,9 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
       case TypeDemandeCommerciale.VENTE_MATERIEL:
         return <ShoppingBag className="w-5 h-5 text-brand-blue" />;
       case TypeDemandeCommerciale.LOCATION_VIDEOPROJECTEUR:
-        return <Tv className="w-5 h-5 text-purple-600" />;
+        return <Tv className="w-5 h-5 text-brand-blue" />;
       case TypeDemandeCommerciale.FORMATION:
-        return <GraduationCap className="w-5 h-5 text-emerald-600" />;
+        return <GraduationCap className="w-5 h-5 text-brand-blue" />;
       default:
         return <Wrench className="w-5 h-5 text-gray-600" />;
     }
@@ -325,7 +325,7 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-xs transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
               >
                 <Clock className="w-3.5 h-3.5 text-white" />
-                <span>Prendre en Charge & Cotation</span>
+                <span>Prendre en charge</span>
               </button>
             )}
 
@@ -346,7 +346,7 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-xs transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
                 >
                   <FileText className="w-3.5 h-3.5 text-white" />
-                  <span>Émettre Devis ({formatFCFA(totalCalculated)})</span>
+                  <span>Émettre le devis ({formatFCFA(totalCalculated)})</span>
                 </button>
               </div>
             )}
@@ -365,10 +365,10 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                 <button
                   onClick={() => handleAction("valider_accord")}
                   disabled={loading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-xs transition-all bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-xs transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Valider Accord Client</span>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                  <span>Valider l&apos;accord</span>
                 </button>
               </div>
             )}
@@ -378,10 +378,10 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
               <button
                 onClick={() => setIsPaymentModalOpen(true)}
                 disabled={loading}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-xs transition-all bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-xs transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
               >
-                <CreditCard className="w-3.5 h-3.5" />
-                <span>Encaisser Facture ({formatFCFA(factDoc?.montant || demande.montantTotal || 0)})</span>
+                <CreditCard className="w-3.5 h-3.5 text-white" />
+                <span>Encaisser la facture ({formatFCFA(factDoc?.montant || demande.montantTotal || 0)})</span>
               </button>
             )}
 
@@ -392,8 +392,8 @@ export function CommercialDetailManager({ demande, userRole, userName }: Props) 
                 disabled={loading}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-5 rounded-xl shadow-sm transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
               >
-                <Archive className="w-3.5 h-3.5 text-brand-green" />
-                <span>Clôturer la Prestation / Vente</span>
+                <Archive className="w-3.5 h-3.5 text-white" />
+                <span>Clôturer le dossier</span>
               </button>
             )}
 

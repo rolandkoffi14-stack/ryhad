@@ -713,10 +713,10 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                         titre: `Reçu de Dépôt (${diagDoc.numero})`,
                       })
                     }
-                    className="inline-flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
+                    className="inline-flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
                   >
-                    <Printer className="w-3.5 h-3.5 text-emerald-200" />
-                    <span>🖨️ Imprimer Reçu de Dépôt ({diagDoc.numero})</span>
+                    <Printer className="w-3.5 h-3.5 text-white" />
+                    <span>Imprimer le reçu</span>
                   </button>
                 </div>
               )}
@@ -752,8 +752,8 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                 }
                 className="inline-flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
               >
-                <Printer className="w-3.5 h-3.5 text-blue-200" />
-                <span>🖨️ Imprimer Devis ({devisDoc.numero})</span>
+                <Printer className="w-3.5 h-3.5 text-white" />
+                <span>Imprimer le devis</span>
               </button>
             </div>
           </div>
@@ -816,13 +816,13 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                         : "Le client peut verser un acompte ou solder la totalité de la facture.",
                     })
                   }
-                  className="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
+                  className="inline-flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
                 >
-                  <CreditCard className="w-3.5 h-3.5" />
+                  <CreditCard className="w-3.5 h-3.5 text-white" />
                   <span>
                     {isRepPartial
-                      ? `💰 Encaisser un complément / solde (${formatFCFA(repResteAPayer)})`
-                      : `💰 Encaisser Acompte / Totalité (${formatFCFA(repDoc.montant)})`}
+                      ? `Encaisser solde (${formatFCFA(repResteAPayer)})`
+                      : `Encaisser acompte / solde (${formatFCFA(repDoc.montant)})`}
                   </span>
                 </button>
               )}
@@ -839,7 +839,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                 className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-extrabold px-3 py-1.5 rounded-xl text-[11px] shadow-xs transition-all cursor-pointer"
               >
                 <Printer className="w-3.5 h-3.5 text-slate-500" />
-                <span>🖨️ Imprimer Facture ({repDoc.numero})</span>
+                <span>Imprimer la facture</span>
               </button>
             </div>
           </div>
@@ -979,10 +979,10 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                     })
                   }
                   disabled={loading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-xs transition-all bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-xs transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
                 >
-                  <CreditCard className="w-3.5 h-3.5" />
-                  <span>Encaisser Diagnostic ({diagAmountFormatted})</span>
+                  <CreditCard className="w-3.5 h-3.5 text-white" />
+                  <span>Encaisser le diagnostic ({diagAmountFormatted})</span>
                 </button>
               ) : (
                 <span className="text-xs font-bold text-slate-600 bg-white px-3.5 py-2 rounded-lg border border-slate-200 shadow-xs flex items-center gap-2">
@@ -1007,10 +1007,10 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                     })
                   }
                   disabled={loading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-xs transition-all bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-xs transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
                 >
-                  <CreditCard className="w-3.5 h-3.5" />
-                  <span>Encaisser Acompte / Facture ({formatFCFA(repDoc.montant)})</span>
+                  <CreditCard className="w-3.5 h-3.5 text-white" />
+                  <span>Encaisser acompte / facture ({formatFCFA(repDoc.montant)})</span>
                 </button>
               ) : (
                 <span className="text-xs font-bold text-slate-600 bg-white px-3.5 py-2 rounded-lg border border-slate-200 shadow-xs flex items-center gap-2">
@@ -1035,10 +1035,10 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                     })
                   }
                   disabled={loading}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-xs transition-all bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-xs font-extrabold py-2.5 px-4 rounded-xl shadow-xs transition-all bg-brand-blue hover:bg-brand-blue-dark text-white disabled:opacity-50"
                 >
-                  <CreditCard className="w-3.5 h-3.5" />
-                  <span>💰 Encaisser le Solde ({formatFCFA(repResteAPayer)})</span>
+                  <CreditCard className="w-3.5 h-3.5 text-white" />
+                  <span>Encaisser le solde ({formatFCFA(repResteAPayer)})</span>
                 </button>
               ) : (
                 <span className="text-xs font-bold text-slate-600 bg-white px-3.5 py-2 rounded-lg border border-slate-200 shadow-xs flex items-center gap-2">
@@ -1589,7 +1589,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                             })
                           }
                           title="Imprimer ce document"
-                          className="p-1 rounded bg-white hover:bg-emerald-600 hover:text-white text-emerald-700 border border-gray-200 transition-all inline-flex items-center shadow-xs cursor-pointer"
+                          className="p-1 rounded bg-white hover:bg-brand-blue hover:text-white text-slate-600 border border-gray-200 transition-all inline-flex items-center shadow-xs cursor-pointer"
                         >
                           <Printer className="w-3 h-3" />
                         </button>

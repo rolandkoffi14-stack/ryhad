@@ -171,17 +171,17 @@ export function NotificationBell() {
       case "TICKET_CREE":
         return <AlertCircle className="w-4 h-4 text-brand-blue" />;
       case "TICKET_ASSIGNE":
-        return <Wrench className="w-4 h-4 text-brand-green" />;
+        return <Wrench className="w-4 h-4 text-brand-blue" />;
       case "STATUT_CHANGE":
-        return <PackageCheck className="w-4 h-4 text-brand-green" />;
+        return <PackageCheck className="w-4 h-4 text-brand-blue" />;
       case "DEVIS_ACCEPTE":
-        return <CheckCircle2 className="w-4 h-4 text-emerald-600" />;
+        return <CheckCircle2 className="w-4 h-4 text-brand-blue" />;
       case "DEVIS_REFUSE":
         return <XCircle className="w-4 h-4 text-brand-red" />;
       case "DEMANDE_COMMERCIALE":
-        return <Briefcase className="w-4 h-4 text-purple-600" />;
+        return <Briefcase className="w-4 h-4 text-brand-blue" />;
       case "FACTURE_PAYEE":
-        return <DollarSign className="w-4 h-4 text-emerald-600" />;
+        return <DollarSign className="w-4 h-4 text-brand-blue" />;
       case "SYSTEME":
       default:
         return <Bell className="w-4 h-4 text-gray-500" />;

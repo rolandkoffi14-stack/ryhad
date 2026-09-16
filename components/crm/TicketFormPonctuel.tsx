@@ -288,8 +288,8 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
             disabled={loading}
             className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-2.5 px-6 rounded-xl text-xs shadow transition-all disabled:opacity-50"
           >
-            <Save className="w-4 h-4 text-brand-green" />
-            <span>{loading ? "Création..." : "Créer le ticket ponctuel"}</span>
+            <Save className="w-4 h-4 text-white" />
+            <span>{loading ? "Création..." : "Créer le ticket"}</span>
           </button>
         </div>
       </form>
@@ -307,7 +307,7 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-gray-200 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-150">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-emerald-100 text-brand-green flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue flex items-center justify-center">
                   <UserPlus className="w-4 h-4" />
                 </div>
                 <div>
@@ -427,10 +427,10 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
                 <button
                   type="submit"
                   disabled={clientLoading}
-                  className="inline-flex items-center gap-1.5 bg-brand-green hover:bg-brand-green-dark text-white font-extrabold px-5 py-2 rounded-xl text-xs shadow transition-all disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold px-5 py-2 rounded-xl text-xs shadow transition-all disabled:opacity-50"
                 >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{clientLoading ? "Enregistrement..." : "Créer & Sélectionner"}</span>
+                  <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                  <span>{clientLoading ? "Enregistrement..." : "Créer le client"}</span>
                 </button>
               </div>
             </form>

@@ -222,10 +222,10 @@ export function TicketFormContractuel({ contracts, technicians, initialContractI
         <button
           type="submit"
           disabled={loading || !currentContract}
-          className="inline-flex items-center gap-2 bg-brand-green hover:bg-brand-green-dark text-white font-extrabold px-6 py-2.5 rounded-xl text-xs shadow transition-all disabled:opacity-50"
+          className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-extrabold px-6 py-2.5 rounded-xl text-xs shadow transition-all disabled:opacity-50"
         >
           <Save className="w-4 h-4" />
-          <span>{loading ? "Création en cours..." : "Créer le Ticket d'Intervention"}</span>
+          <span>{loading ? "Création..." : "Créer le ticket"}</span>
         </button>
       </div>
     </form>
