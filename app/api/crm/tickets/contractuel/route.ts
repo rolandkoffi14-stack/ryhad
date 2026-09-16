@@ -5,6 +5,7 @@ import { ticketContractuelCrmSchema } from "@/lib/validations";
 import { generateInterventionNumber } from "@/lib/documents/numbering";
 import { InterventionType, InterventionStatut, StaffRole } from "@prisma/client";
 import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
+import { notifyTechAssigned } from "@/lib/services/notifications";
 
 export async function POST(request: Request) {
   try {
@@ -52,7 +53,24 @@ export async function POST(request: Request) {
           ],
         },
       },
+      include: {
+        client: true,
+      },
     });
+
+    if (validated.technicienAssigneId) {
+      notifyTechAssigned(
+        {
+          id: ticket.id,
+          numero: ticket.numero,
+          typeMateriel: ticket.typeMateriel,
+          panneDeclaree: ticket.panneDeclaree,
+          clientNom: ticket.client.nom,
+          technicienAssigneId: validated.technicienAssigneId,
+        },
+        (session.user as any).id
+      ).catch((err) => console.error("Error notifying assigned technician:", err));
+    }
 
     broadcastCrmEvent("ticket:created", ticket.id);
 

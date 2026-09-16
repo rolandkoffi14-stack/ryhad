@@ -107,10 +107,10 @@ export default async function TicketsContractuelPage({
             </p>
           </div>
           <Link
-            href="/crm/tickets/contractuel"
+            href={contractId ? `/crm/tickets/contractuel?contractId=${contractId}` : "/crm/tickets/contractuel"}
             className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2.5 rounded-xl text-xs font-bold transition-all border border-slate-200"
           >
-            <span>← Retour aux entreprises</span>
+            <span>← {contractId ? "Retour au dossier entreprise" : "Retour aux entreprises"}</span>
           </Link>
         </div>
 

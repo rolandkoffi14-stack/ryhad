@@ -208,7 +208,13 @@ export function TicketFormContractuel({ contracts, technicians, initialContractI
       <div className="pt-4 border-t border-gray-100 flex items-center justify-end gap-3">
         <button
           type="button"
-          onClick={() => router.push("/crm/tickets/contractuel")}
+          onClick={() =>
+            router.push(
+              initialContractId
+                ? `/crm/tickets/contractuel?contractId=${initialContractId}`
+                : "/crm/tickets/contractuel"
+            )
+          }
           className="px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 text-xs font-bold transition-all"
         >
           Annuler

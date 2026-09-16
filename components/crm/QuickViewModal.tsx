@@ -99,7 +99,7 @@ export function QuickViewModal({ isOpen, onClose, data }: Props) {
                   </span>
                 )}
                 {data.status && data.type === "TICKET" && (
-                  <TicketStatusBadge statut={data.status} />
+                  <TicketStatusBadge statut={data.status} isPaid={data.raw?.isPaid} />
                 )}
               </div>
               {data.subtitle && (
@@ -212,8 +212,8 @@ export function QuickViewModal({ isOpen, onClose, data }: Props) {
               onClick={onClose}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-blue hover:bg-brand-blue-dark text-white text-xs font-extrabold shadow-2xs transition-all"
             >
-              <span>{data.linkLabel || "Ouvrir la fiche complète"}</span>
-              <ArrowRight className="w-3.5 h-3.5 text-brand-green" />
+              <span>{data.linkLabel || "Ouvrir le ticket"}</span>
+              <ArrowRight className="w-3.5 h-3.5 text-white" />
             </Link>
           )}
         </div>

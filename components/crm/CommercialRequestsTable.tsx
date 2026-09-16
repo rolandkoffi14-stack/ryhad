@@ -169,7 +169,7 @@ export function CommercialRequestsTable({ demandes }: Props) {
       )}`,
       badge,
       linkHref: `/crm/demandes-commerciales/${d.id}`,
-      linkLabel: "Traiter la demande complète →",
+      linkLabel: "Traiter la demande",
       clientName: d.client?.nom,
       clientPhone: d.client?.telephone,
       details: [
@@ -339,10 +339,10 @@ export function CommercialRequestsTable({ demandes }: Props) {
 
                       <Link
                         href={`/crm/demandes-commerciales/${d.id}`}
-                        className="inline-flex items-center gap-1 bg-brand-slate hover:bg-brand-blue hover:text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all text-brand-dark shadow-2xs"
+                        className="group inline-flex items-center gap-1 bg-brand-slate hover:bg-brand-blue hover:text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all text-brand-dark shadow-2xs"
                       >
                         <span>Traiter</span>
-                        <ArrowRight className="w-3 h-3 text-brand-green" />
+                        <ArrowRight className="w-3 h-3 text-brand-dark group-hover:text-white transition-colors" />
                       </Link>
                     </div>
                   </td>

@@ -185,7 +185,7 @@ export function TechniciansGrid({ technicians }: Props) {
                         className="text-[11px] font-bold text-brand-blue hover:underline flex items-center gap-1"
                       >
                         <span>Ouvrir</span>
-                        <ArrowRight className="w-3 h-3 text-brand-green" />
+                        <ArrowRight className="w-3 h-3 text-brand-blue" />
                       </Link>
                     </div>
                   </div>

@@ -104,14 +104,12 @@ export function DashboardRecentTicketsTable({ tickets, userRole }: Props) {
 
     setQuickViewData({
       type: "TICKET",
-      title: `${t.numero} — ${t.typeMateriel.replace(/_/g, " ")}`,
-      subtitle: `${t.client.nom} — Créé le ${format(new Date(t.dateCreation), "dd/MM/yyyy 'à' HH:mm", { locale: fr })}`,
-      badge: {
-        label: t.statut.replace(/_/g, " "),
-        className: "bg-blue-100 text-brand-blue border-blue-300 font-bold",
-      },
+      title: `Ticket N°${t.numero}`,
+      subtitle: `Créé le ${format(new Date(t.dateCreation), "dd/MM/yyyy", { locale: fr })}`,
+      status: t.statut,
+      raw: { isPaid: isRepPaid },
       linkHref: `/crm/tickets/${t.id}`,
-      linkLabel: "Ouvrir la fiche complète du dossier →",
+      linkLabel: "Ouvrir le ticket",
       clientName: t.client.nom,
       clientPhone: t.client.telephone,
       details: [
@@ -205,13 +203,7 @@ export function DashboardRecentTicketsTable({ tickets, userRole }: Props) {
                   {/* 1. Référence & Parcours */}
                   <td className="px-5 py-3.5">
                     <div className="font-extrabold text-brand-dark text-xs">{t.numero}</div>
-                    <span
-                      className={`text-[9px] font-extrabold px-1.5 py-0.2 rounded border inline-block mt-0.5 ${
-                        isContract
-                          ? "bg-brand-green-light text-brand-green-dark border-brand-green/30"
-                          : "bg-brand-blue-light text-brand-blue border-brand-blue/30"
-                      }`}
-                    >
+                    <span className="text-[9px] font-extrabold px-1.5 py-0.2 rounded border inline-block mt-0.5 bg-brand-blue-light text-brand-blue border-brand-blue/30">
                       {isContract ? "Contrat Entreprise" : "Atelier Ponctuel"}
                     </span>
                   </td>
@@ -259,10 +251,10 @@ export function DashboardRecentTicketsTable({ tickets, userRole }: Props) {
                       {/* Lien Fiche complète */}
                       <Link
                         href={`/crm/tickets/${t.id}`}
-                        className="inline-flex items-center gap-1 bg-brand-slate hover:bg-brand-blue hover:text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all text-brand-dark shadow-2xs"
+                        className="group inline-flex items-center gap-1 bg-brand-slate hover:bg-brand-blue hover:text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all text-brand-dark shadow-2xs"
                       >
                         <span>{userRole === StaffRole.TECHNICIEN ? "Traiter" : "Gérer"}</span>
-                        <ArrowRight className="w-3 h-3 text-brand-green" />
+                        <ArrowRight className="w-3 h-3 text-brand-dark group-hover:text-white transition-colors" />
                       </Link>
                     </div>
                   </td>

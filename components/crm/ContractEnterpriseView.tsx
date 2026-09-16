@@ -231,18 +231,13 @@ export function ContractEnterpriseView({
   const handleOpenQuickView = (ticket: any) => {
     setQuickViewData({
       type: "TICKET",
-      title: `${ticket.numero} — Intervention Préventive`,
-      subtitle: `${selectedContract?.client.nom} — ${
-        ticket.dateProgrammee
-          ? `Planifiée le ${format(new Date(ticket.dateProgrammee), "dd/MM/yyyy", { locale: fr })}`
-          : `Créée le ${format(new Date(ticket.dateCreation), "dd/MM/yyyy", { locale: fr })}`
-      }`,
-      badge: {
-        label: ticket.statut.replace(/_/g, " "),
-        className: "bg-emerald-100 text-brand-green-dark border-emerald-300 font-bold",
-      },
+      title: `Ticket N°${ticket.numero}`,
+      subtitle: ticket.dateProgrammee
+        ? `Planifiée le ${format(new Date(ticket.dateProgrammee), "dd/MM/yyyy", { locale: fr })}`
+        : `Créée le ${format(new Date(ticket.dateCreation), "dd/MM/yyyy", { locale: fr })}`,
+      status: ticket.statut,
       linkHref: `/crm/tickets/${ticket.id}`,
-      linkLabel: "Ouvrir la fiche complète d'intervention →",
+      linkLabel: "Ouvrir le ticket",
       clientName: selectedContract?.client.nom,
       clientPhone: selectedContract?.client.telephone,
       details: [
@@ -371,13 +366,22 @@ export function ContractEnterpriseView({
           </div>
 
           <div className="flex items-center gap-3 self-start sm:self-auto">
-            {isAdmin && (
+            {!isTechnician && (
               <Link
-                href="/crm/contrats"
+                href="/crm/tickets/contractuel?new=true"
                 className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all"
               >
                 <Plus className="w-4 h-4 text-brand-green" />
-                <span>Nouveau Contrat Entreprise</span>
+                <span>Nouveau Ticket sous Contrat</span>
+              </Link>
+            )}
+            {isAdmin && (
+              <Link
+                href="/crm/contrats"
+                className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all"
+              >
+                <Plus className="w-4 h-4 text-brand-blue" />
+                <span>Nouveau Contrat</span>
               </Link>
             )}
           </div>
@@ -546,7 +550,7 @@ export function ContractEnterpriseView({
                     className="w-full inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-brand-blue text-white py-2.5 rounded-xl text-xs font-extrabold transition-all group-hover:shadow-xs"
                   >
                     <span>Ouvrir le dossier entreprise ({totalTickets} tickets)</span>
-                    <ArrowRight className="w-4 h-4 text-brand-green" />
+                    <ArrowRight className="w-4 h-4 text-white" />
                   </button>
                 </div>
               );
@@ -608,17 +612,29 @@ export function ContractEnterpriseView({
           </div>
         </div>
 
-        {/* Action Administrateur : Configuration / Reconfiguration */}
-        {isAdmin && (
-          <button
-            type="button"
-            onClick={handleOpenGenerateModal}
-            className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all cursor-pointer"
-          >
-            <Sparkles className="w-4 h-4 text-brand-green" />
-            <span>{preventifTickets.length === 0 ? "Configurer" : "Reconfigurer"}</span>
-          </button>
-        )}
+        <div className="flex items-center gap-2.5">
+          {!isTechnician && (
+            <Link
+              href={`/crm/tickets/contractuel?new=true&contractId=${selectedContract.id}&clientId=${selectedContract.clientId}`}
+              className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all"
+            >
+              <Plus className="w-4 h-4 text-brand-green" />
+              <span>Déclarer une Panne Imprévue</span>
+            </Link>
+          )}
+
+          {/* Action Administrateur : Configuration / Reconfiguration */}
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={handleOpenGenerateModal}
+              className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-xs transition-all cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4 text-brand-blue" />
+              <span>{preventifTickets.length === 0 ? "Configurer" : "Reconfigurer"}</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Onglets thématiques du dossier de l'entreprise */}
@@ -859,7 +875,7 @@ export function ContractEnterpriseView({
                                     className="inline-flex items-center gap-1 bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all shadow-2xs"
                                   >
                                     <span>Rapport</span>
-                                    <ArrowRight className="w-3 h-3 text-brand-green" />
+                                    <ArrowRight className="w-3 h-3 text-current" />
                                   </Link>
                                 ) : (
                                   <Link
@@ -867,7 +883,7 @@ export function ContractEnterpriseView({
                                     className="inline-flex items-center gap-1 bg-brand-blue hover:bg-brand-blue-dark text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all shadow-2xs"
                                   >
                                     <span>Gérer</span>
-                                    <ArrowRight className="w-3 h-3 text-brand-green" />
+                                    <ArrowRight className="w-3 h-3 text-white" />
                                   </Link>
                                 )}
                               </div>
@@ -892,13 +908,15 @@ export function ContractEnterpriseView({
               <p className="text-xs text-slate-500 font-medium">
                 Pannes imprévues et réparations curatives survenues sur le parc de cette entreprise.
               </p>
-              <Link
-                href={`/crm/tickets/ponctuel?new=true&clientId=${selectedContract.clientId}`}
-                className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-sm transition-all"
-              >
-                <Plus className="w-4 h-4 text-brand-green" />
-                <span>+ Déclarer une panne imprévue</span>
-              </Link>
+              {!isTechnician && (
+                <Link
+                  href={`/crm/tickets/contractuel?new=true&contractId=${selectedContract.id}&clientId=${selectedContract.clientId}`}
+                  className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-sm transition-all"
+                >
+                  <Plus className="w-4 h-4 text-brand-green" />
+                  <span>+ Déclarer une panne imprévue</span>
+                </Link>
+              )}
             </div>
 
             {ponctuelTickets.length === 0 ? (
@@ -1050,7 +1068,7 @@ export function ContractEnterpriseView({
                                   className="inline-flex items-center gap-1 bg-brand-blue hover:bg-brand-blue-dark text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all shadow-2xs"
                                 >
                                   <span>Gérer</span>
-                                  <ArrowRight className="w-3 h-3 text-brand-green" />
+                                  <ArrowRight className="w-3 h-3 text-white" />
                                 </Link>
                               </div>
                             </td>

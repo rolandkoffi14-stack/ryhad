@@ -138,15 +138,15 @@ export function TicketsContractuelTable({ tickets, isTechnician = false }: Props
 
     setQuickViewData({
       type: "TICKET",
-      title: `Intervention ${t.numero} (Contrat)`,
-      subtitle: `${t.typeMateriel.replace(/_/g, " ")} — Ouvert le ${format(
+      title: `Ticket N°${t.numero}`,
+      subtitle: `Créé le ${format(
         new Date(t.dateCreation),
         "dd/MM/yyyy",
         { locale: fr }
       )}`,
       status: t.statut,
       linkHref: `/crm/tickets/${t.id}`,
-      linkLabel: "Gérer l'intervention complète →",
+      linkLabel: "Ouvrir le ticket",
       clientName: t.client?.nom,
       clientPhone: t.client?.telephone,
       details: [
@@ -330,10 +330,10 @@ export function TicketsContractuelTable({ tickets, isTechnician = false }: Props
 
                       <Link
                         href={`/crm/tickets/${t.id}`}
-                        className="inline-flex items-center gap-1 bg-brand-slate hover:bg-brand-green hover:text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all text-brand-dark shadow-2xs"
+                        className="group inline-flex items-center gap-1 bg-brand-slate hover:bg-brand-blue hover:text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all text-brand-dark shadow-2xs"
                       >
                         <span>Gérer</span>
-                        <ArrowRight className="w-3 h-3 text-brand-green group-hover:text-white" />
+                        <ArrowRight className="w-3 h-3 text-brand-dark group-hover:text-white transition-colors" />
                       </Link>
                     </div>
                   </td>

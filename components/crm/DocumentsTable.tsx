@@ -444,7 +444,7 @@ export function DocumentsTable({ documents }: Props) {
                         className="text-[11px] text-brand-blue hover:underline font-semibold flex items-center gap-0.5 mt-0.5"
                       >
                         <span>{doc.intervention.numero}</span>
-                        <ArrowRight className="w-2.5 h-2.5 text-brand-green" />
+                        <ArrowRight className="w-2.5 h-2.5 text-current" />
                       </Link>
                     )}
                     {doc.demandeCommerciale && (
@@ -453,7 +453,7 @@ export function DocumentsTable({ documents }: Props) {
                         className="text-[11px] text-purple-700 hover:underline font-semibold flex items-center gap-0.5 mt-0.5"
                       >
                         <span>{doc.demandeCommerciale.typeDemande.replace(/_/g, " ")}</span>
-                        <ArrowRight className="w-2.5 h-2.5 text-brand-green" />
+                        <ArrowRight className="w-2.5 h-2.5 text-current" />
                       </Link>
                     )}
                   </td>

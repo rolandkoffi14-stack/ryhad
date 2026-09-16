@@ -291,51 +291,45 @@ export default async function CrmDashboardPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
               <span className="text-xs font-bold uppercase tracking-wider">Tickets en Attente</span>
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
-                <Clock className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
+                <Clock className="w-4 h-4 text-brand-blue-dark" />
               </div>
             </div>
             <div className="text-2xl font-extrabold text-slate-900">{pendingTicketsCount}</div>
-            <Link href="/crm/tickets/ponctuel" className="text-[11px] text-amber-700 font-bold hover:underline block">
-              Prêts à être démarrés par vous →
-            </Link>
+            <p className="text-[11px] text-slate-500">Prêts à être démarrés</p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
               <span className="text-xs font-bold uppercase tracking-wider">Tickets en Cours</span>
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
-                <Wrench className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
+                <Wrench className="w-4 h-4 text-brand-blue-dark" />
               </div>
             </div>
             <div className="text-2xl font-extrabold text-slate-900">{inProgressTicketsCount}</div>
-            <Link href="/crm/tickets/ponctuel" className="text-[11px] text-blue-700 font-bold hover:underline block">
-              En diagnostic ou travaux →
-            </Link>
+            <p className="text-[11px] text-slate-500">Non clôturés</p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
               <span className="text-xs font-bold uppercase tracking-wider">Terminées</span>
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                <CheckCircle2 className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
+                <CheckCircle2 className="w-4 h-4 text-brand-blue-dark" />
               </div>
             </div>
             <div className="text-2xl font-extrabold text-slate-900">{completedTicketsCount}</div>
-            <p className="text-[11px] text-slate-400">Total réparations validées</p>
+            <p className="text-[11px] text-slate-500">Total réparations validées</p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
               <span className="text-xs font-bold uppercase tracking-wider">À Diagnostiquer</span>
-              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
-                <Clock className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
+                <Clock className="w-4 h-4 text-brand-blue-dark" />
               </div>
             </div>
             <div className="text-2xl font-extrabold text-slate-900">{pendingDiagnosticCount}</div>
-            <Link href="/crm/tickets/ponctuel" className="text-[11px] text-slate-700 font-bold hover:underline block">
-              Diagnostics en attente →
-            </Link>
+            <p className="text-[11px] text-slate-500">Diagnostics en attente</p>
           </div>
         </div>
       ) : (
@@ -344,59 +338,59 @@ export default async function CrmDashboardPage() {
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
               <span className="text-xs font-bold uppercase tracking-wider">Tickets en Attente</span>
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
-                <Clock className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
+                <Clock className="w-4 h-4 text-brand-blue-dark" />
               </div>
             </div>
             <div className="text-2xl font-extrabold text-slate-900">{pendingTicketsCount}</div>
-            <p className="text-[11px] text-amber-700 font-bold">
-              Prêts à être démarrés par le tech
+            <p className="text-[11px] text-slate-500">
+              Prêts à être démarrés
             </p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
               <span className="text-xs font-bold uppercase tracking-wider">Tickets en Cours</span>
-              <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
-                <Wrench className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
+                <Wrench className="w-4 h-4 text-brand-blue-dark" />
               </div>
             </div>
             <div className="text-2xl font-extrabold text-slate-900">{inProgressTicketsCount}</div>
             <p className="text-[11px] text-slate-500">
-              Démarrés, non clôturés
+              Non clôturés
             </p>
           </div>
 
           <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
             <div className="flex items-center justify-between text-slate-500">
               <span className="text-xs font-bold uppercase tracking-wider">Demandes Commerciales</span>
-              <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center">
-                <ClipboardList className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
+                <ClipboardList className="w-4 h-4 text-brand-blue-dark" />
               </div>
             </div>
             <div className="text-2xl font-extrabold text-slate-900">{commercialRequestsCount}</div>
-            <p className="text-[11px] text-purple-700 font-semibold">À traiter (Vente/Location)</p>
+            <p className="text-[11px] text-slate-500">Vente, Location et Formation</p>
           </div>
 
           {user.role === StaffRole.ADMIN ? (
             <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
               <div className="flex items-center justify-between text-slate-500">
                 <span className="text-xs font-bold uppercase tracking-wider">Chiffre d&apos;Affaires</span>
-                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-brand-green flex items-center justify-center">
-                  <Receipt className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
+                  <Receipt className="w-4 h-4 text-brand-blue-dark" />
                 </div>
               </div>
-              <div className="text-2xl font-extrabold text-brand-green-dark">
+              <div className="text-2xl font-extrabold text-slate-900">
                 {totalRevenue.toLocaleString("fr-FR")} <span className="text-xs font-bold text-slate-500">FCFA</span>
               </div>
-              <p className="text-[11px] text-slate-500">Encaissé sur factures & diagnostics</p>
+              <p className="text-[11px] text-slate-500">Encaissé total</p>
             </div>
           ) : (
             <div className="bg-white p-5 rounded-2xl border border-slate-200 subtle-shadow space-y-2">
               <div className="flex items-center justify-between text-slate-500">
                 <span className="text-xs font-bold uppercase tracking-wider">Clients Enregistrés</span>
-                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
-                  <Users className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
+                  <Users className="w-4 h-4 text-brand-blue-dark" />
                 </div>
               </div>
               <div className="text-2xl font-extrabold text-slate-900">{clientsCount}</div>
@@ -428,7 +422,7 @@ export default async function CrmDashboardPage() {
             </Link>
             <Link
               href="/crm/tickets/contractuel"
-              className="text-xs font-bold text-brand-green-dark hover:underline bg-brand-green-light px-3 py-1.5 rounded-xl transition-all"
+              className="text-xs font-bold text-brand-blue hover:underline bg-brand-blue-light px-3 py-1.5 rounded-xl transition-all"
             >
               Contrats ({activeContractuelCount})
             </Link>

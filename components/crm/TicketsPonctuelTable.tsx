@@ -134,18 +134,20 @@ export function TicketsPonctuelTable({ tickets, isTechnician = false }: Props) {
     const diagDoc = t.documents.find((d) => d.type === "FACTURE" && d.typeFacture === "DIAGNOSTIC");
     const devisDoc = t.documents.find((d) => d.type === "DEVIS");
     const repDoc = t.documents.find((d) => d.type === "FACTURE" && d.typeFacture === "REPARATION");
+    const isRepPaid = !repDoc || repDoc.statutPaiement === "PAYE";
 
     setQuickViewData({
       type: "TICKET",
-      title: `Dossier ${t.numero}`,
-      subtitle: `${t.typeMateriel.replace(/_/g, " ")} — Déposé le ${format(
+      title: `Ticket N°${t.numero}`,
+      subtitle: `Créé le ${format(
         new Date(t.dateCreation),
         "dd/MM/yyyy",
         { locale: fr }
       )}`,
       status: t.statut,
+      raw: { isPaid: isRepPaid },
       linkHref: `/crm/tickets/${t.id}`,
-      linkLabel: "Gérer le dossier complet →",
+      linkLabel: "Ouvrir le ticket",
       clientName: t.client?.nom,
       clientPhone: t.client?.telephone,
       details: [
@@ -330,10 +332,10 @@ export function TicketsPonctuelTable({ tickets, isTechnician = false }: Props) {
                       {/* Bouton Gérer vers la fiche complète */}
                       <Link
                         href={`/crm/tickets/${t.id}`}
-                        className="inline-flex items-center gap-1 bg-brand-slate hover:bg-brand-blue hover:text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all text-brand-dark shadow-2xs"
+                        className="group inline-flex items-center gap-1 bg-brand-slate hover:bg-brand-blue hover:text-white px-2.5 py-1.5 rounded-xl font-extrabold text-xs transition-all text-brand-dark shadow-2xs"
                       >
                         <span>Gérer</span>
-                        <ArrowRight className="w-3 h-3 text-brand-green" />
+                        <ArrowRight className="w-3 h-3 text-brand-dark group-hover:text-white transition-colors" />
                       </Link>
                     </div>
                   </td>
