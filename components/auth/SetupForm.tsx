@@ -284,16 +284,16 @@ export function SetupForm() {
       <button
         type="submit"
         disabled={loading || !isPasswordValid || !passwordCriteria.match}
-        className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3.5 px-6 rounded-xl text-xs shadow-md transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+        className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3.5 px-6 rounded-xl text-xs shadow-sm transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
       >
         {loading ? (
           <>
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span>Initialisation du CRM en cours...</span>
+            <span>Initialisation en cours...</span>
           </>
         ) : (
           <>
-            <span>Créer l&apos;Administrateur et Initialiser le CRM</span>
+            <span>Initialiser le CRM</span>
             <ArrowRight className="w-4 h-4" />
           </>
         )}

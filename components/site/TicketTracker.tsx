@@ -198,7 +198,7 @@ export function TicketTracker({ initialNumero }: Props) {
             ) : (
               <>
                 <span>Consulter</span>
-                <ArrowRight className="w-4 h-4 text-brand-green" />
+                <ArrowRight className="w-4 h-4 text-white" />
               </>
             )}
           </button>
@@ -237,8 +237,8 @@ export function TicketTracker({ initialNumero }: Props) {
                   {ticket.type === "CONTRACTUEL" ? "Contrat Entreprise" : "Particulier / Ponctuel"}
                 </span>
                 {ticket.isUnlocked ? (
-                  <span className="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded flex items-center gap-1">
-                    <ShieldCheck className="w-3 h-3 text-emerald-600" />
+                  <span className="text-[10px] font-bold bg-brand-blue-light text-brand-blue px-2 py-0.5 rounded flex items-center gap-1">
+                    <ShieldCheck className="w-3 h-3 text-brand-blue" />
                     <span>Dossier Déverrouillé</span>
                   </span>
                 ) : (
@@ -258,7 +258,7 @@ export function TicketTracker({ initialNumero }: Props) {
 
             <div className="text-left sm:text-right text-xs text-gray-500 space-y-1">
               <div className="flex sm:justify-end items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-brand-green" />
+                <Calendar className="w-3.5 h-3.5 text-brand-blue" />
                 <span>
                   Déposé le {format(new Date(ticket.dateCreation), "dd MMMM yyyy 'à' HH:mm", { locale: fr })}
                 </span>
@@ -362,10 +362,10 @@ export function TicketTracker({ initialNumero }: Props) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-brand-blue/10">
                 <div className="flex items-start gap-3">
                   <div className="w-10 h-10 rounded-xl bg-brand-blue text-white flex items-center justify-center shrink-0 mt-0.5">
-                    <FileText className="w-5 h-5 text-brand-green" />
+                    <FileText className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-brand-blue bg-blue-100 px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-brand-blue bg-brand-blue-light px-2 py-0.5 rounded">
                       Action Requise
                     </span>
                     <h3 className="text-lg font-extrabold text-brand-dark mt-1">
@@ -413,10 +413,10 @@ export function TicketTracker({ initialNumero }: Props) {
                   <button
                     type="button"
                     onClick={() => setIsPrintModalOpen(true)}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-3 rounded-xl text-xs font-black shadow-xs transition-all cursor-pointer"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-3 rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer"
                   >
                     <Printer className="w-4 h-4" />
-                    <span>🖨️ Imprimer / Sauvegarder</span>
+                    <span>Imprimer</span>
                   </button>
                 </div>
 
@@ -427,16 +427,16 @@ export function TicketTracker({ initialNumero }: Props) {
                     className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white border border-red-300 text-red-600 hover:bg-red-50 px-4 py-3 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
                   >
                     <XCircle className="w-4 h-4" />
-                    <span>Décliner / Refuser</span>
+                    <span>Refuser</span>
                   </button>
 
                   <button
                     onClick={() => handleClientAction("accept_devis")}
                     disabled={actionLoading}
-                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-green hover:bg-brand-green-dark text-white px-6 py-3 rounded-xl text-xs font-extrabold shadow transition-all disabled:opacity-50"
+                    className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-6 py-3 rounded-xl text-xs font-extrabold shadow-sm transition-all disabled:opacity-50"
                   >
                     <Check className="w-4 h-4" />
-                    <span>Valider & Accepter le Devis</span>
+                    <span>Accepter le devis</span>
                   </button>
                 </div>
               </div>
@@ -456,14 +456,14 @@ export function TicketTracker({ initialNumero }: Props) {
           {/* Contact d'assistance */}
           <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
             <div className="flex items-center gap-2 text-gray-500">
-              <ShieldCheck className="w-4 h-4 text-brand-green" />
+              <ShieldCheck className="w-4 h-4 text-brand-blue" />
               <span>Besoin d&apos;informations complémentaires sur ce dossier ?</span>
             </div>
             <a
               href="tel:+2290190881314"
               className="inline-flex items-center gap-2 text-brand-blue font-bold hover:underline"
             >
-              <Phone className="w-3.5 h-3.5 text-brand-green" />
+              <Phone className="w-3.5 h-3.5 text-brand-blue" />
               <span>Contacter l&apos;atelier : +229 01 90 88 13 14</span>
             </a>
           </div>

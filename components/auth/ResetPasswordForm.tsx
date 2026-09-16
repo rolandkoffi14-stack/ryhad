@@ -222,16 +222,16 @@ export function ResetPasswordForm() {
       <button
         type="submit"
         disabled={loading || !isPasswordValid || !passwordCriteria.match}
-        className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3.5 px-6 rounded-xl text-xs shadow-md transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+        className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3.5 px-6 rounded-xl text-xs shadow-sm transition-all disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
       >
         {loading ? (
           <>
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span>Mise à jour du mot de passe...</span>
+            <span>Enregistrement...</span>
           </>
         ) : (
           <>
-            <span>Enregistrer le nouveau mot de passe</span>
+            <span>Enregistrer</span>
             <ArrowRight className="w-4 h-4" />
           </>
         )}
@@ -242,7 +242,7 @@ export function ResetPasswordForm() {
           href="/login"
           className="text-xs font-bold text-gray-500 hover:text-brand-blue transition-colors"
         >
-          Annuler et retourner à la connexion
+          Annuler
         </Link>
       </div>
     </form>

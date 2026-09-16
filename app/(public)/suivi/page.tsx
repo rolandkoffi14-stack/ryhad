@@ -13,7 +13,7 @@ export default function SuiviLandingPage() {
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
         <div className="inline-flex items-center gap-2 bg-brand-blue-light text-brand-blue px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-          <Search className="w-3.5 h-3.5 text-brand-green" />
+          <Search className="w-3.5 h-3.5 text-brand-blue" />
           <span>Espace Suivi Public</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-brand-dark">
@@ -38,7 +38,7 @@ export default function SuiviLandingPage() {
         </div>
 
         <div className="p-4 rounded-xl bg-brand-slate border border-gray-100 flex items-start gap-3">
-          <Clock className="w-5 h-5 text-brand-green shrink-0 mt-0.5" />
+          <Clock className="w-5 h-5 text-brand-blue shrink-0 mt-0.5" />
           <div>
             <span className="font-bold text-brand-dark block">Mises à jour en direct</span>
             <p className="text-gray-500 mt-0.5">Chaque diagnostic et test est actualisé en temps réel.</p>

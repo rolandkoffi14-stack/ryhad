@@ -17,7 +17,7 @@ export default function DevisPage({
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-8">
       {/* Header */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
-        <div className="inline-flex items-center gap-2 bg-brand-green-light text-brand-green-dark px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+        <div className="inline-flex items-center gap-2 bg-brand-blue-light text-brand-blue px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
           <Sparkles className="w-3.5 h-3.5" />
           <span>Vente • Location • Formation</span>
         </div>
@@ -39,7 +39,7 @@ export default function DevisPage({
           <span>Matériel certifié & garanti</span>
         </div>
         <div className="p-3.5 rounded-xl bg-brand-slate border border-gray-100 flex items-center gap-2.5">
-          <ShoppingBag className="w-4 h-4 text-brand-green shrink-0" />
+          <ShoppingBag className="w-4 h-4 text-brand-blue shrink-0" />
           <span>Tarifs dégressifs pour parcs</span>
         </div>
       </div>

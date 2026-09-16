@@ -277,7 +277,7 @@ export function FAQAccordion() {
                     <Icon className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-brand-green block mb-1">
+                    <span className="text-[11px] font-extrabold uppercase tracking-wider text-brand-blue block mb-1">
                       {item.categoryLabel}
                     </span>
                     <h2 className="text-sm sm:text-base font-bold text-brand-dark leading-snug">
@@ -301,8 +301,8 @@ export function FAQAccordion() {
                 <div className="px-5 pb-6 pt-1 sm:px-6 sm:pb-6 text-xs sm:text-sm text-gray-600 leading-relaxed border-t border-gray-100/80 space-y-3 bg-brand-slate/20">
                   <p>{item.answer}</p>
                   {item.highlight && (
-                    <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-semibold">
-                      <CheckCircle2 className="w-4 h-4 text-brand-green shrink-0" />
+                    <div className="flex items-center gap-2 p-3 rounded-xl bg-brand-blue/10 border border-brand-blue/30 text-brand-dark text-xs font-semibold">
+                      <CheckCircle2 className="w-4 h-4 text-brand-blue shrink-0" />
                       <span>{item.highlight}</span>
                     </div>
                   )}
@@ -345,7 +345,7 @@ export function FAQAccordion() {
         <div className="flex items-center gap-3 shrink-0">
           <Link
             href="/demande-intervention"
-            className="bg-brand-green hover:bg-brand-green-dark text-white text-xs sm:text-sm font-bold px-5 py-3 rounded-xl shadow-md transition-all inline-flex items-center gap-2"
+            className="bg-white hover:bg-slate-100 text-brand-blue text-xs sm:text-sm font-bold px-5 py-3 rounded-xl shadow-sm transition-all inline-flex items-center gap-2"
           >
             <span>Déposer un appareil</span>
             <ArrowRight className="w-4 h-4" />

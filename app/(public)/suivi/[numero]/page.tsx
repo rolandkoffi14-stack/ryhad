@@ -19,7 +19,7 @@ export default async function SuiviDetailPage({
       <div>
         <Link
           href="/suivi"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:text-brand-green transition-colors mb-3"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:text-brand-blue-dark transition-colors mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Rechercher un autre numéro</span>

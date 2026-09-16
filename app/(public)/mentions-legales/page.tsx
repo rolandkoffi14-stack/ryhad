@@ -12,7 +12,7 @@ export default function MentionsLegalesPage() {
       <div className="space-y-2 border-b border-gray-200 pb-4">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:text-brand-green transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:text-brand-blue-dark transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Retour à l&apos;accueil</span>
@@ -43,10 +43,10 @@ export default function MentionsLegalesPage() {
         <section className="bg-white p-6 rounded-xl border border-gray-200 subtle-shadow space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-brand-dark flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-brand-green" />
+              <ShieldCheck className="w-4 h-4 text-brand-blue" />
               <span>2. Protection des Données Personnelles (APDP Bénin)</span>
             </h2>
-            <Link href="/confidentialite" className="text-xs font-bold text-brand-blue hover:text-brand-green transition-colors">
+            <Link href="/confidentialite" className="text-xs font-bold text-brand-blue hover:text-brand-blue-dark transition-colors">
               Voir la politique complète →
             </Link>
           </div>
@@ -68,7 +68,7 @@ export default function MentionsLegalesPage() {
               <FileText className="w-4 h-4 text-brand-blue" />
               <span>3. Conditions Générales d&apos;Intervention & Garantie</span>
             </h2>
-            <Link href="/conditions-generales" className="text-xs font-bold text-brand-blue hover:text-brand-green transition-colors">
+            <Link href="/conditions-generales" className="text-xs font-bold text-brand-blue hover:text-brand-blue-dark transition-colors">
               Voir les conditions complètes →
             </Link>
           </div>

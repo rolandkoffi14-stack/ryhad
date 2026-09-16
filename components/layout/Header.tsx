@@ -30,7 +30,7 @@ export function Header() {
               href="/suivi"
               className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors"
             >
-              <Search className="w-3 h-3 text-brand-green" />
+              <Search className="w-3 h-3 text-gray-400" />
               <span>Suivi réparation</span>
             </Link>
           </div>
@@ -57,7 +57,7 @@ export function Header() {
                 <span className="text-xl font-extrabold tracking-tight text-brand-blue group-hover:text-brand-blue-dark transition-colors">
                   RyHaD
                 </span>
-                <span className="text-xs font-bold uppercase tracking-wider bg-brand-green-light text-brand-green px-1.5 py-0.5 rounded">
+                <span className="text-xs font-bold uppercase tracking-wider bg-brand-blue/10 text-brand-blue px-1.5 py-0.5 rounded">
                   Tic-Medic
                 </span>
               </div>
@@ -84,7 +84,7 @@ export function Header() {
           <div className="hidden sm:flex items-center gap-4">
             <Link
               href="/demande-intervention"
-              className="inline-flex items-center gap-2 bg-brand-green text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-md hover:bg-brand-green-dark active:scale-[0.98] transition-all"
+              className="inline-flex items-center gap-2 bg-brand-blue text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-brand-blue-dark active:scale-[0.98] transition-all"
             >
               <span>Demander une intervention</span>
               <ArrowRight className="w-4 h-4 text-white" />
@@ -121,7 +121,7 @@ export function Header() {
             <Link
               href="/demande-intervention"
               onClick={() => setIsOpen(false)}
-              className="flex items-center justify-center gap-2 bg-brand-green text-white py-2.5 rounded-xl font-bold text-sm shadow hover:bg-brand-green-dark transition-all"
+              className="flex items-center justify-center gap-2 bg-brand-blue text-white py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-brand-blue-dark transition-all"
             >
               <span>Demander une intervention</span>
               <ArrowRight className="w-4 h-4 text-white" />
@@ -131,7 +131,7 @@ export function Header() {
               onClick={() => setIsOpen(false)}
               className="flex items-center justify-center gap-2 border border-gray-200 text-brand-dark hover:bg-brand-slate py-2.5 rounded-xl font-semibold text-sm transition-colors"
             >
-              <span>Demande commerciale (Vente/Location)</span>
+              <span>Devis & Vente / Location</span>
             </Link>
           </div>
         </div>

@@ -129,15 +129,15 @@ export default function HomePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-16 lg:py-24 w-full">
           <div className="max-w-3xl space-y-6">
             {/* Badge de réassurance */}
-            <div className="inline-flex items-center gap-2 bg-brand-dark/80 border border-brand-green/40 text-brand-green-light px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-brand-green animate-pulse"></span>
+            <div className="inline-flex items-center gap-2 bg-brand-dark/80 border border-brand-blue-light/30 text-brand-blue-light px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
               <span>Atelier Spécialisé à Cotonou • Gbégamey</span>
             </div>
 
             {/* Titre Principal */}
             <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold text-white leading-tight tracking-tight">
               Maintenance Experte & Solutions Tech pour{" "}
-              <span className="text-brand-green">
+              <span className="text-brand-blue-light">
                 Tous Vos Équipements
               </span>
             </h1>
@@ -151,7 +151,7 @@ export default function HomePage() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
               <Link
                 href="/demande-intervention"
-                className="inline-flex items-center justify-center gap-3 bg-brand-green hover:bg-brand-green-dark text-white font-bold px-7 py-4 rounded-xl shadow-md active:scale-[0.98] transition-all duration-200 text-sm sm:text-base group"
+                className="inline-flex items-center justify-center gap-3 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold px-7 py-4 rounded-xl shadow-md active:scale-[0.98] transition-all duration-200 text-sm sm:text-base group"
               >
                 <span>Demander une intervention</span>
                 <ArrowRight className="w-5 h-5 transition-transform" />
@@ -161,7 +161,7 @@ export default function HomePage() {
                 href="/suivi"
                 className="inline-flex items-center justify-center gap-2.5 bg-white/10 hover:bg-white/20 text-white font-bold px-6 py-4 rounded-xl border border-white/25 active:scale-[0.98] transition-all text-sm sm:text-base"
               >
-                <Search className="w-4 h-4 text-brand-green" />
+                <Search className="w-4 h-4 text-white" />
                 <span>Suivre ma réparation</span>
               </Link>
 
@@ -169,14 +169,15 @@ export default function HomePage() {
                 href="/devis"
                 className="inline-flex items-center justify-center gap-2 text-xs font-semibold text-gray-300 hover:text-white sm:pl-2 transition-colors"
               >
-                <span>Vente & Location de matériel →</span>
+                <span>Vente & Location</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
             {/* Points forts / Badges intégrés */}
             <div className="pt-8 border-t border-white/15 grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="flex items-center gap-3 bg-white/5 p-3.5 rounded-xl border border-white/10">
-                <ShieldCheck className="w-5 h-5 text-brand-green shrink-0" />
+                <ShieldCheck className="w-5 h-5 text-brand-blue-light shrink-0" />
                 <div>
                   <span className="text-xs font-bold text-white block">Pièces garanties</span>
                   <span className="text-[11px] text-gray-300">Composants testés & certifiés</span>
@@ -184,7 +185,7 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-center gap-3 bg-white/5 p-3.5 rounded-xl border border-white/10">
-                <Clock className="w-5 h-5 text-brand-green shrink-0" />
+                <Clock className="w-5 h-5 text-brand-blue-light shrink-0" />
                 <div>
                   <span className="text-xs font-bold text-white block">Diagnostic rapide</span>
                   <span className="text-[11px] text-gray-300">Devis clair sous 24h à 48h</span>
@@ -192,7 +193,7 @@ export default function HomePage() {
               </div>
 
               <div className="flex items-center gap-3 bg-white/5 p-3.5 rounded-xl border border-white/10">
-                <MapPin className="w-5 h-5 text-brand-green shrink-0" />
+                <MapPin className="w-5 h-5 text-brand-blue-light shrink-0" />
                 <div>
                   <span className="text-xs font-bold text-white block">Atelier Gbégamey</span>
                   <span className="text-[11px] text-gray-300">Lun - Ven : 9h00 - 20h00</span>
@@ -242,7 +243,7 @@ export default function HomePage() {
                 <div className="pt-4 mt-4 border-t border-gray-100">
                   <Link
                     href={`/services#${srv.id}`}
-                    className="inline-flex items-center gap-1 text-xs font-bold text-brand-blue hover:text-brand-green transition-colors"
+                    className="inline-flex items-center gap-1 text-xs font-bold text-brand-blue hover:text-brand-blue-dark transition-colors"
                   >
                     <span>Détails & Tarifs</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -259,7 +260,7 @@ export default function HomePage() {
             className="inline-flex items-center gap-2 text-sm font-bold text-brand-blue hover:text-brand-blue-dark transition-colors"
           >
             <span>Voir la description complète de tous nos services</span>
-            <ArrowRight className="w-4 h-4 text-brand-green" />
+            <ArrowRight className="w-4 h-4 text-brand-blue" />
           </Link>
         </div>
       </section>
@@ -296,19 +297,19 @@ export default function HomePage() {
         <div className="bg-brand-blue rounded-2xl text-white p-8 sm:p-12 shadow-xl">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center divide-y lg:divide-y-0 lg:divide-x divide-white/10">
             <div className="space-y-1 pt-4 lg:pt-0">
-              <div className="text-3xl sm:text-4xl font-extrabold text-brand-green">+2 500</div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-white">+2 500</div>
               <p className="text-xs text-brand-blue-light/90 font-medium">Interventions réalisées</p>
             </div>
             <div className="space-y-1 pt-4 lg:pt-0">
-              <div className="text-3xl sm:text-4xl font-extrabold text-brand-green">98%</div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-white">98%</div>
               <p className="text-xs text-brand-blue-light/90 font-medium">Satisfaction client</p>
             </div>
             <div className="space-y-1 pt-4 lg:pt-0">
-              <div className="text-3xl sm:text-4xl font-extrabold text-brand-green">10+ ans</div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-white">10+ ans</div>
               <p className="text-xs text-brand-blue-light/90 font-medium">D&apos;expérience combinée</p>
             </div>
             <div className="space-y-1 pt-4 lg:pt-0">
-              <div className="text-3xl sm:text-4xl font-extrabold text-brand-green">24-48h</div>
+              <div className="text-3xl sm:text-4xl font-extrabold text-white">24-48h</div>
               <p className="text-xs text-brand-blue-light/90 font-medium">Délai moyen de diagnostic</p>
             </div>
           </div>
@@ -373,9 +374,9 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-3 shrink-0">
             <Link
               href="/demande-intervention"
-              className="bg-brand-green hover:bg-brand-green-dark text-white font-bold px-6 py-3 rounded-xl text-sm shadow-md transition-all text-center"
+              className="bg-white hover:bg-slate-100 text-brand-blue font-extrabold px-6 py-3 rounded-xl text-sm shadow-sm transition-all text-center"
             >
-              Créer une demande d&apos;intervention
+              Demander une intervention
             </Link>
             <Link
               href="/contact"

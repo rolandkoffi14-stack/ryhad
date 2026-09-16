@@ -9,7 +9,7 @@ export function Footer() {
       <div className="bg-brand-blue py-6 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-white">
           <div className="flex items-center gap-3">
-            <ShieldCheck className="w-8 h-8 text-brand-green shrink-0" />
+            <ShieldCheck className="w-8 h-8 text-white shrink-0" />
             <div>
               <h4 className="font-bold text-base">Atelier Technique Spécialisé à Cotonou</h4>
               <p className="text-xs text-brand-blue-light/80">
@@ -20,7 +20,7 @@ export function Footer() {
           <div className="flex items-center gap-3">
             <Link
               href="/demande-intervention"
-              className="bg-brand-green text-white hover:bg-brand-green-dark px-5 py-2.5 rounded-lg text-sm font-bold shadow-md transition-all"
+              className="bg-white hover:bg-slate-100 text-brand-blue px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-all"
             >
               Déposer un appareil
             </Link>
@@ -51,7 +51,7 @@ export function Footer() {
               </div>
               <div>
                 <span className="text-xl font-extrabold tracking-tight text-white">RyHaD</span>
-                <span className="text-xs font-bold uppercase ml-1.5 bg-brand-green/20 text-brand-green px-1.5 py-0.5 rounded">
+                <span className="text-xs font-bold uppercase ml-1.5 bg-brand-blue/30 text-brand-blue-light px-1.5 py-0.5 rounded">
                   Tic-Medic
                 </span>
               </div>
@@ -145,23 +145,23 @@ export function Footer() {
             </h4>
             <div className="space-y-3 text-xs">
               <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-brand-green shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-brand-blue-light shrink-0 mt-0.5" />
                 <span>Gbégamey, rue avant le collège Clé de la réussite, Cotonou, Bénin</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-brand-green shrink-0" />
+                <Phone className="w-4 h-4 text-brand-blue-light shrink-0" />
                 <a href="tel:+2290190881314" className="hover:text-white">
                   +229 01 90 88 13 14
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-brand-green shrink-0" />
+                <Mail className="w-4 h-4 text-brand-blue-light shrink-0" />
                 <a href="mailto:ryhadticmedic@gmail.com" className="hover:text-white">
                   ryhadticmedic@gmail.com
                 </a>
               </div>
               <div className="flex items-start gap-2.5 pt-1">
-                <Clock className="w-4 h-4 text-brand-green shrink-0 mt-0.5" />
+                <Clock className="w-4 h-4 text-brand-blue-light shrink-0 mt-0.5" />
                 <div>
                   <span className="font-semibold text-white">Lundi - Vendredi : 9h00 - 20h00</span>
                   <p className="text-[11px] text-gray-400">Permanence technique sur rendez-vous</p>

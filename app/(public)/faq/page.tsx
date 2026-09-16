@@ -13,8 +13,8 @@ export default function FAQPage() {
       {/* Header */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 bg-brand-green-light text-brand-green-dark px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-            <HelpCircle className="w-3.5 h-3.5 text-brand-green" />
+          <div className="inline-flex items-center gap-2 bg-brand-blue-light text-brand-blue px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+            <HelpCircle className="w-3.5 h-3.5 text-brand-blue" />
             <span>Foire Aux Questions</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-brand-dark">

@@ -157,10 +157,10 @@ export function InterventionRequestForm({ initialType }: Props) {
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
           <button
             onClick={() => router.push(`/suivi/${successData.numero}`)}
-            className="inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs sm:text-sm shadow-md transition-all"
+            className="inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs sm:text-sm shadow-sm transition-all"
           >
             <span>Accéder au suivi en direct</span>
-            <ArrowRight className="w-4 h-4 text-brand-green" />
+            <ArrowRight className="w-4 h-4 text-white" />
           </button>
           <button
             onClick={() => {
@@ -178,7 +178,7 @@ export function InterventionRequestForm({ initialType }: Props) {
             }}
             className="inline-flex items-center justify-center gap-2 bg-white hover:bg-brand-slate text-gray-700 font-semibold py-3 px-6 rounded-xl border border-gray-300 text-xs sm:text-sm transition-all"
           >
-            Déposer une autre demande
+            Nouvelle demande
           </button>
         </div>
       </div>
@@ -386,7 +386,7 @@ export function InterventionRequestForm({ initialType }: Props) {
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
             <label className="cursor-pointer inline-flex items-center gap-2 bg-brand-slate hover:bg-gray-200 border border-gray-300 text-brand-dark px-4 py-2.5 rounded-xl text-xs font-bold transition-all">
               <Upload className="w-4 h-4 text-brand-blue" />
-              <span>{uploading ? "Téléversement en cours..." : "Téléverser une photo / document"}</span>
+              <span>{uploading ? "Téléversement..." : "Ajouter une photo / document"}</span>
               <input
                 type="file"
                 accept="image/*,.pdf"
@@ -410,21 +410,21 @@ export function InterventionRequestForm({ initialType }: Props) {
       {/* Soumission */}
       <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="text-[11px] text-gray-500 flex items-center gap-1.5">
-          <ShieldCheck className="w-4 h-4 text-brand-green shrink-0" />
+          <ShieldCheck className="w-4 h-4 text-brand-blue shrink-0" />
           <span>Données traitées en toute confidentialité sous protocole sécurisé.</span>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-brand-green hover:bg-brand-green-dark text-white font-bold py-3.5 px-8 rounded-xl text-xs sm:text-sm shadow-md active:scale-[0.98] transition-all disabled:opacity-50"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3.5 px-8 rounded-xl text-xs sm:text-sm shadow-sm active:scale-[0.98] transition-all disabled:opacity-50"
         >
           {loading ? (
-            <span>Enregistrement du dossier...</span>
+            <span>Envoi en cours...</span>
           ) : (
             <>
               <Send className="w-4 h-4 text-white" />
-              <span>Valider et obtenir mon numéro de ticket</span>
+              <span>Envoyer la demande</span>
             </>
           )}
         </button>

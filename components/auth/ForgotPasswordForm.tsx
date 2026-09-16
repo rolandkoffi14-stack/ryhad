@@ -62,7 +62,7 @@ export function ForgotPasswordForm() {
             className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:underline"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Retour à la page de connexion</span>
+            <span>Retour à la connexion</span>
           </Link>
         </div>
       </div>
@@ -99,16 +99,16 @@ export function ForgotPasswordForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs shadow-md transition-all disabled:opacity-75 cursor-pointer disabled:cursor-not-allowed"
+        className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs shadow-sm transition-all disabled:opacity-75 cursor-pointer disabled:cursor-not-allowed"
       >
         {loading ? (
           <>
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            <span>Envoi de la demande...</span>
+            <span>Envoi en cours...</span>
           </>
         ) : (
           <>
-            <span>Envoyer le lien de réinitialisation</span>
+            <span>Envoyer le lien</span>
             <ArrowRight className="w-4 h-4" />
           </>
         )}

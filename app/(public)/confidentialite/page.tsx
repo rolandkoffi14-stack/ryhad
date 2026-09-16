@@ -13,7 +13,7 @@ export default function ConfidentialitePage() {
       <div className="space-y-2 border-b border-gray-200 pb-4">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:text-brand-green transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-blue hover:text-brand-blue-dark transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Retour à l&apos;accueil</span>
@@ -47,7 +47,7 @@ export default function ConfidentialitePage() {
         {/* Section 2 */}
         <section className="bg-white p-6 rounded-xl border border-gray-200 subtle-shadow space-y-3">
           <h2 className="text-base font-bold text-brand-dark flex items-center gap-2">
-            <FileText className="w-4 h-4 text-brand-green" />
+            <FileText className="w-4 h-4 text-brand-blue" />
             <span>2. Données Collectées & Finalités</span>
           </h2>
           <p>
@@ -86,7 +86,7 @@ export default function ConfidentialitePage() {
         {/* Section 4 */}
         <section className="bg-white p-6 rounded-xl border border-gray-200 subtle-shadow space-y-3">
           <h2 className="text-base font-bold text-brand-dark flex items-center gap-2">
-            <Eye className="w-4 h-4 text-brand-green" />
+            <Eye className="w-4 h-4 text-brand-blue" />
             <span>4. Suivi en Ligne Sécurisé & Accès Restreint</span>
           </h2>
           <p>
@@ -112,7 +112,7 @@ export default function ConfidentialitePage() {
         {/* Section 6 */}
         <section className="bg-white p-6 rounded-xl border border-gray-200 subtle-shadow space-y-3">
           <h2 className="text-base font-bold text-brand-dark flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-brand-green" />
+            <CheckCircle2 className="w-4 h-4 text-brand-blue" />
             <span>6. Vos Droits & Exercice</span>
           </h2>
           <p>

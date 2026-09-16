@@ -14,7 +14,7 @@ export default function AProposPage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="bg-gradient-to-r from-brand-blue via-brand-blue-dark to-brand-dark text-white rounded-2xl p-8 sm:p-12 shadow-lg">
           <div className="max-w-3xl space-y-4">
-            <div className="inline-flex items-center gap-2 bg-brand-green/20 text-brand-green px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 bg-brand-blue-light/20 text-brand-blue-light px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
               <Award className="w-3.5 h-3.5" />
               <span>Excellence & Proximité à Cotonou</span>
             </div>
@@ -45,7 +45,7 @@ export default function AProposPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div className="p-4 rounded-xl bg-brand-slate border border-gray-100 space-y-1">
                 <div className="flex items-center gap-2 text-brand-blue font-bold text-sm">
-                  <Wrench className="w-4 h-4 text-brand-green" />
+                  <Wrench className="w-4 h-4 text-brand-blue" />
                   <span>Atelier Outillé</span>
                 </div>
                 <p className="text-xs text-gray-500">
@@ -55,7 +55,7 @@ export default function AProposPage() {
 
               <div className="p-4 rounded-xl bg-brand-slate border border-gray-100 space-y-1">
                 <div className="flex items-center gap-2 text-brand-blue font-bold text-sm">
-                  <HeartPulse className="w-4 h-4 text-brand-green" />
+                  <HeartPulse className="w-4 h-4 text-brand-blue" />
                   <span>Rigueur Biomédicale</span>
                 </div>
                 <p className="text-xs text-gray-500">
@@ -80,7 +80,7 @@ export default function AProposPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <Clock className="w-4 h-4 text-brand-green shrink-0 mt-0.5" />
+                <Clock className="w-4 h-4 text-brand-blue shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold text-gray-800 block">Horaires de service</span>
                   <span className="text-gray-600">Lundi – Vendredi : 9h00 – 20h00</span>
@@ -96,7 +96,7 @@ export default function AProposPage() {
               </div>
 
               <div className="flex items-start gap-3">
-                <ShieldCheck className="w-4 h-4 text-brand-green shrink-0 mt-0.5" />
+                <ShieldCheck className="w-4 h-4 text-brand-blue shrink-0 mt-0.5" />
                 <div>
                   <span className="font-bold text-gray-800 block">Garantie Qualité</span>
                   <span className="text-gray-600">Traçabilité 100% numérique et suivi sans déplacement</span>
@@ -109,7 +109,7 @@ export default function AProposPage() {
                 href="/contact"
                 className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-all"
               >
-                <span>Prendre contact avec l&apos;équipe</span>
+                <span>Nous contacter</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -141,7 +141,7 @@ export default function AProposPage() {
             </div>
 
             <div className="bg-white p-6 rounded-xl border border-gray-200/80 shadow-sm space-y-3">
-              <div className="w-10 h-10 rounded-lg bg-brand-green-light text-brand-green flex items-center justify-center font-extrabold">
+              <div className="w-10 h-10 rounded-lg bg-brand-blue-light text-brand-blue flex items-center justify-center font-extrabold">
                 2
               </div>
               <h3 className="font-bold text-sm text-brand-dark">Traçabilité en Ligne</h3>
@@ -161,7 +161,7 @@ export default function AProposPage() {
             </div>
 
             <div className="bg-white p-6 rounded-xl border border-gray-200/80 shadow-sm space-y-3">
-              <div className="w-10 h-10 rounded-lg bg-brand-green-light text-brand-green flex items-center justify-center font-extrabold">
+              <div className="w-10 h-10 rounded-lg bg-brand-blue-light text-brand-blue flex items-center justify-center font-extrabold">
                 4
               </div>
               <h3 className="font-bold text-sm text-brand-dark">Réactivité Exceptionnelle</h3>

@@ -50,8 +50,8 @@ export function LoginForm() {
     <div className="w-full max-w-md space-y-6">
       {/* Alertes de succès */}
       {isSetupSuccess && (
-        <div className="p-4 rounded-2xl bg-brand-green/10 border border-brand-green/30 text-brand-green-dark text-xs flex items-start gap-2.5 animate-fade-in">
-          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-brand-green" />
+        <div className="p-4 rounded-2xl bg-brand-blue/10 border border-brand-blue/30 text-brand-dark text-xs flex items-start gap-2.5 animate-fade-in">
+          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-brand-blue" />
           <span>
             <strong>Initialisation réussie !</strong> Votre compte Administrateur est prêt. Connectez-vous ci-dessous.
           </span>
@@ -59,8 +59,8 @@ export function LoginForm() {
       )}
 
       {isResetSuccess && (
-        <div className="p-4 rounded-2xl bg-brand-green/10 border border-brand-green/30 text-brand-green-dark text-xs flex items-start gap-2.5 animate-fade-in">
-          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-brand-green" />
+        <div className="p-4 rounded-2xl bg-brand-blue/10 border border-brand-blue/30 text-brand-dark text-xs flex items-start gap-2.5 animate-fade-in">
+          <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-brand-blue" />
           <span>
             <strong>Mot de passe modifié !</strong> Vous pouvez désormais vous connecter avec votre nouveau mot de passe.
           </span>
@@ -133,22 +133,22 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={loading || isSuccess}
-          className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs shadow-md transition-all disabled:opacity-75 cursor-pointer disabled:cursor-not-allowed"
+          className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs shadow-sm transition-all disabled:opacity-75 cursor-pointer disabled:cursor-not-allowed"
         >
           {isSuccess ? (
             <>
-              <ShieldCheck className="w-4 h-4 text-brand-green animate-bounce" />
-              <span>Connexion réussie ! Chargement de l&apos;atelier...</span>
+              <ShieldCheck className="w-4 h-4 text-white animate-bounce" />
+              <span>Connexion réussie...</span>
             </>
           ) : loading ? (
             <>
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <span>Vérification des identifiants...</span>
+              <span>Connexion en cours...</span>
             </>
           ) : (
             <>
-              <Lock className="w-4 h-4 text-brand-green" />
-              <span>Accéder à l&apos;Espace CRM Atelier</span>
+              <Lock className="w-4 h-4 text-white" />
+              <span>Se connecter</span>
             </>
           )}
         </button>

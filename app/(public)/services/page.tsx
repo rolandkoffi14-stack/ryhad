@@ -171,7 +171,7 @@ export default function ServicesPage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="bg-gradient-to-r from-brand-blue via-brand-blue-dark to-brand-dark text-white rounded-2xl p-8 sm:p-12 shadow-lg relative overflow-hidden">
           <div className="max-w-3xl space-y-4 relative z-10">
-            <div className="inline-flex items-center gap-2 bg-brand-green/20 text-brand-green px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 bg-brand-blue-light/20 text-brand-blue-light px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
               <Wrench className="w-3.5 h-3.5" />
               <span>Savoir-faire Technique & Métiers</span>
             </div>
@@ -202,7 +202,7 @@ export default function ServicesPage() {
                     <Icon className="w-6 h-6 text-brand-blue" />
                   </div>
                   <div>
-                    <span className="text-[11px] font-bold uppercase tracking-wider bg-brand-green-light text-brand-green-dark px-2.5 py-0.5 rounded-full">
+                    <span className="text-[11px] font-bold uppercase tracking-wider bg-brand-blue-light text-brand-blue px-2.5 py-0.5 rounded-full">
                       {service.badge}
                     </span>
                     <h2 className="text-xl font-extrabold text-brand-dark mt-1">
@@ -217,10 +217,10 @@ export default function ServicesPage() {
                 <div className="pt-2">
                   <Link
                     href={service.ctaLink}
-                    className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white text-xs sm:text-sm font-bold px-5 py-2.5 rounded-lg shadow transition-all"
+                    className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white text-xs sm:text-sm font-bold px-5 py-2.5 rounded-lg shadow-sm transition-all"
                   >
                     <span>{service.ctaText}</span>
-                    <ArrowRight className="w-4 h-4 text-brand-green" />
+                    <ArrowRight className="w-4 h-4 text-white" />
                   </Link>
                 </div>
               </div>
@@ -248,7 +248,7 @@ export default function ServicesPage() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="bg-brand-slate rounded-2xl p-8 border border-gray-200 grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
           <div className="space-y-2">
-            <ShieldCheck className="w-8 h-8 text-brand-green mx-auto" />
+            <ShieldCheck className="w-8 h-8 text-brand-blue mx-auto" />
             <h4 className="font-bold text-sm text-brand-dark">Garantie sur Interventions</h4>
             <p className="text-xs text-gray-500">Toutes nos réparations matérielles bénéficient d&apos;une garantie sur les pièces changées.</p>
           </div>
@@ -258,7 +258,7 @@ export default function ServicesPage() {
             <p className="text-xs text-gray-500">Diagnostic précis communiqué avant toute intervention sans mauvaise surprise sur la facture.</p>
           </div>
           <div className="space-y-2">
-            <Sparkles className="w-8 h-8 text-brand-green mx-auto" />
+            <Sparkles className="w-8 h-8 text-brand-blue mx-auto" />
             <h4 className="font-bold text-sm text-brand-dark">Contrats Sur Mesure</h4>
             <p className="text-xs text-gray-500">Offres personnalisées avec visites préventives mensuelles ou trimestrielles pour votre parc.</p>
           </div>

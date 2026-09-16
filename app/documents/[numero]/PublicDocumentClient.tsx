@@ -93,14 +93,14 @@ export function PublicDocumentClient({ data, initialFormat, autoPrint }: Props) 
             </button>
           </div>
 
-          {/* GROS BOUTON VERT D'IMPRESSION / SAUVEGARDE PDF */}
+          {/* BOUTON D'IMPRESSION / SAUVEGARDE PDF */}
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-black shadow-sm hover:shadow transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm transition-all cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            <span>🖨️ Imprimer / PDF</span>
+            <span>Imprimer</span>
           </button>
 
           {/* Bouton Suivi en Direct (si intervention liée) */}

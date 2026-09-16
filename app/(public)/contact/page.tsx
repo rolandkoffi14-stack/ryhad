@@ -47,7 +47,7 @@ export default function ContactPage() {
       {/* Header */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 bg-brand-green-light text-brand-green-dark px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 bg-brand-blue-light text-brand-blue px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
             <span>Contact & Localisation</span>
           </div>
           <h1 className="text-3xl sm:text-4xl font-extrabold text-brand-dark">
@@ -71,7 +71,7 @@ export default function ContactPage() {
 
               <div className="space-y-4 text-xs sm:text-sm">
                 <div className="flex items-start gap-3">
-                  <MapPin className="w-5 h-5 text-brand-green shrink-0 mt-0.5" />
+                  <MapPin className="w-5 h-5 text-brand-blue-light shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold text-white block">Adresse physique</span>
                     <span className="text-brand-blue-light/90">
@@ -81,12 +81,12 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Phone className="w-5 h-5 text-brand-green shrink-0 mt-0.5" />
+                  <Phone className="w-5 h-5 text-brand-blue-light shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold text-white block">Téléphone & WhatsApp</span>
                     <a
                       href="tel:+2290190881314"
-                      className="text-brand-green font-bold text-base hover:underline"
+                      className="text-white font-extrabold text-base hover:underline"
                     >
                       +229 01 90 88 13 14
                     </a>
@@ -94,7 +94,7 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <Mail className="w-5 h-5 text-brand-green shrink-0 mt-0.5" />
+                  <Mail className="w-5 h-5 text-brand-blue-light shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold text-white block">Email officiel</span>
                     <a
@@ -107,7 +107,7 @@ export default function ContactPage() {
                 </div>
 
                 <div className="flex items-start gap-3 pt-2 border-t border-white/10">
-                  <Clock className="w-5 h-5 text-brand-green shrink-0 mt-0.5" />
+                  <Clock className="w-5 h-5 text-brand-blue-light shrink-0 mt-0.5" />
                   <div>
                     <span className="font-bold text-white block">Horaires de réception</span>
                     <span className="text-brand-blue-light/90">
@@ -129,7 +129,7 @@ export default function ContactPage() {
               </p>
               <Link
                 href="/demande-intervention"
-                className="inline-flex items-center gap-2 text-xs font-bold text-brand-blue hover:text-brand-green transition-colors"
+                className="inline-flex items-center gap-2 text-xs font-bold text-brand-blue hover:text-brand-blue-dark transition-colors"
               >
                 <span>Accéder au formulaire de panne</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -262,17 +262,17 @@ export default function ContactPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs sm:text-sm shadow-md active:scale-[0.99] transition-all disabled:opacity-50"
+                    className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs sm:text-sm shadow-sm active:scale-[0.99] transition-all disabled:opacity-50"
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin text-brand-green" />
+                        <Loader2 className="w-4 h-4 animate-spin text-white" />
                         <span>Envoi en cours...</span>
                       </>
                     ) : (
                       <>
-                        <Send className="w-4 h-4 text-brand-green" />
-                        <span>Envoyer mon message</span>
+                        <Send className="w-4 h-4 text-white" />
+                        <span>Envoyer</span>
                       </>
                     )}
                   </button>

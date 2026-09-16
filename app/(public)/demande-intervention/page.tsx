@@ -18,7 +18,7 @@ export default function DemandeInterventionPage({
       {/* Header */}
       <div className="text-center max-w-3xl mx-auto space-y-3">
         <div className="inline-flex items-center gap-2 bg-brand-blue-light text-brand-blue px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
-          <Wrench className="w-3.5 h-3.5 text-brand-green" />
+          <Wrench className="w-3.5 h-3.5 text-brand-blue" />
           <span>Prise en charge Immédiate</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-brand-dark">
@@ -39,7 +39,7 @@ export default function DemandeInterventionPage({
           </div>
         </div>
         <div className="bg-brand-slate p-3.5 rounded-xl flex items-center gap-3 border border-gray-100">
-          <Clock className="w-5 h-5 text-brand-green shrink-0" />
+          <Clock className="w-5 h-5 text-brand-blue shrink-0" />
           <div>
             <span className="font-bold text-brand-dark block">Ouvert 9h00 – 20h00</span>
             <span className="text-gray-500">Du lundi au vendredi</span>

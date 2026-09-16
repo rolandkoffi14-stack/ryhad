@@ -111,9 +111,9 @@ export function CommercialRequestForm({ initialType }: Props) {
                 description: "",
               });
             }}
-            className="bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-2.5 px-6 rounded-xl text-xs sm:text-sm shadow"
+            className="bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-2.5 px-6 rounded-xl text-xs sm:text-sm shadow-sm transition-all"
           >
-            Faire une autre demande
+            Nouvelle demande
           </button>
         </div>
       </div>
@@ -241,14 +241,14 @@ export function CommercialRequestForm({ initialType }: Props) {
         <button
           type="submit"
           disabled={loading}
-          className="w-full inline-flex items-center justify-center gap-2 bg-brand-green hover:bg-brand-green-dark text-white font-bold py-3.5 px-6 rounded-xl text-xs sm:text-sm shadow-md active:scale-[0.98] transition-all disabled:opacity-50"
+          className="w-full inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3.5 px-6 rounded-xl text-xs sm:text-sm shadow-sm active:scale-[0.98] transition-all disabled:opacity-50"
         >
           {loading ? (
             <span>Envoi en cours...</span>
           ) : (
             <>
               <Send className="w-4 h-4 text-white" />
-              <span>Transmettre ma demande commerciale</span>
+              <span>Envoyer la demande</span>
             </>
           )}
         </button>
