@@ -87,7 +87,6 @@ export function CrmSidebar({
       href: "/crm/comptabilite",
       label: "Comptabilité",
       icon: CircleDollarSign,
-      badge: "Admin",
       roles: [StaffRole.ADMIN],
     },
     {
@@ -106,7 +105,6 @@ export function CrmSidebar({
       href: "/crm/utilisateurs",
       label: "Utilisateurs",
       icon: UserCog,
-      badge: "Admin",
       roles: [StaffRole.ADMIN],
     },
   ];

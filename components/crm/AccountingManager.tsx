@@ -14,7 +14,6 @@ import {
   Building2,
   Phone,
   MessageCircle,
-  CheckCircle2,
   Clock,
   ArrowUpRight,
   ShieldCheck,
@@ -516,32 +515,31 @@ export function AccountingManager({ documents }: Props) {
 
       {/* Cartes KPIs Financiers avec séparation Main d'œuvre vs Pièces */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* CA Encaissé Global */}
+        {/* TOTAL ENCAISSE */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-brand-blue/30 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              CA Encaissé (Total)
+              TOTAL ENCAISSE
             </span>
             <div className="w-10 h-10 rounded-2xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
               <Banknote className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-4">
-            <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            <h3 className="text-2xl font-extrabold text-brand-blue tracking-tight">
               {formatFCFA(metrics.totalEncaisse)}
             </h3>
-            <div className="flex items-center gap-1.5 mt-2 text-xs font-bold text-emerald-600">
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>{metrics.tauxRecouvrement}% de recouvrement</span>
-            </div>
+            <p className="text-[11px] text-slate-500 mt-2">
+              {metrics.tauxRecouvrement}% de recouvrement
+            </p>
           </div>
         </div>
 
-        {/* CA Main d'œuvre & Services */}
+        {/* MAIN D'OEUVRE ET SERVICES */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-brand-blue/30 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              CA Main d&apos;œuvre & Services
+              MAIN D&apos;OEUVRE ET SERVICES
             </span>
             <div className="w-10 h-10 rounded-2xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
               <Wrench className="w-5 h-5" />
@@ -551,57 +549,50 @@ export function AccountingManager({ documents }: Props) {
             <h3 className="text-2xl font-extrabold text-brand-blue tracking-tight">
               {formatFCFA(metrics.caMainOeuvre)}
             </h3>
-            <p className="text-xs text-brand-blue font-bold mt-2 flex items-center justify-between">
-              <span>Diagnostics, rép. & contrats</span>
-              <span className="bg-blue-100 text-brand-blue px-2 py-0.5 rounded-full text-[10px] font-extrabold">
-                {metrics.pctMainOeuvre}% du CA
-              </span>
+            <p className="text-[11px] text-slate-500 mt-2">
+              Diagnostics, rép. & contrats
             </p>
           </div>
         </div>
 
-        {/* CA Pièces Détachées & Matériel */}
+        {/* PIECES ET COMPOSANTS */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-brand-blue/30 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              CA Pièces & Composants
+              PIECES ET COMPOSANTS
             </span>
             <div className="w-10 h-10 rounded-2xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
               <Cpu className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-4">
-            <h3 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            <h3 className="text-2xl font-extrabold text-brand-blue tracking-tight">
               {formatFCFA(metrics.caPieces)}
             </h3>
-            <p className="text-xs text-slate-600 font-bold mt-2 flex items-center justify-between">
-              <span>Composants & vente matériel</span>
-              <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full text-[10px] font-extrabold">
-                {metrics.pctPieces}% du CA
-              </span>
+            <p className="text-[11px] text-slate-500 mt-2">
+              Composants & vente matériel
             </p>
           </div>
         </div>
 
-        {/* Créances / Impayés */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-amber-300 transition-all">
+        {/* CREANCES A RECOUVRER */}
+        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-brand-blue/30 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Créances à Recouvrer
+              CREANCES A RECOUVRER
             </span>
             <div className="w-10 h-10 rounded-2xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
               <AlertCircle className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-4">
-            <h3 className="text-2xl font-extrabold text-amber-600 tracking-tight">
+            <h3 className="text-2xl font-extrabold text-brand-blue tracking-tight">
               {formatFCFA(metrics.totalCreances)}
             </h3>
-            <p className="text-xs text-amber-700/80 font-bold mt-2">
+            <p className="text-[11px] text-slate-500 mt-2">
               {creancesList.length} facture(s) en attente
             </p>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-500" />
         </div>
       </div>
 
