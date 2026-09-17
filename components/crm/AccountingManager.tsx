@@ -515,11 +515,11 @@ export function AccountingManager({ documents }: Props) {
 
       {/* Cartes KPIs Financiers avec séparation Main d'œuvre vs Pièces */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* TOTAL ENCAISSE */}
+        {/* TOTAL ENCAISSÉ */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-brand-blue/30 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              TOTAL ENCAISSE
+              TOTAL ENCAISSÉ
             </span>
             <div className="w-10 h-10 rounded-2xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
               <Banknote className="w-5 h-5" />
@@ -535,11 +535,11 @@ export function AccountingManager({ documents }: Props) {
           </div>
         </div>
 
-        {/* MAIN D'OEUVRE ET SERVICES */}
+        {/* MAIN D'ŒUVRE ET SERVICES */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-brand-blue/30 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              MAIN D&apos;OEUVRE ET SERVICES
+              MAIN D&apos;ŒUVRE ET SERVICES
             </span>
             <div className="w-10 h-10 rounded-2xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
               <Wrench className="w-5 h-5" />
@@ -555,11 +555,11 @@ export function AccountingManager({ documents }: Props) {
           </div>
         </div>
 
-        {/* PIECES ET COMPOSANTS */}
+        {/* PIÈCES ET COMPOSANTS */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-brand-blue/30 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              PIECES ET COMPOSANTS
+              PIÈCES ET COMPOSANTS
             </span>
             <div className="w-10 h-10 rounded-2xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
               <Cpu className="w-5 h-5" />
@@ -575,11 +575,11 @@ export function AccountingManager({ documents }: Props) {
           </div>
         </div>
 
-        {/* CREANCES A RECOUVRER */}
+        {/* CRÉANCES À RECOUVRER */}
         <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-brand-blue/30 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              CREANCES A RECOUVRER
+              CRÉANCES À RECOUVRER
             </span>
             <div className="w-10 h-10 rounded-2xl bg-brand-blue-light text-brand-blue-dark flex items-center justify-center">
               <AlertCircle className="w-5 h-5" />
