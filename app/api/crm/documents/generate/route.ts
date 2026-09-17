@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { generateDocumentNumber } from "@/lib/documents/numbering";
+import { getNextUnbilledContractPeriod } from "@/lib/documents/contract-invoicing";
 import { documentGenerateSchema, documentUpdateSchema } from "@/lib/validations";
 import { DocumentType, FactureType, StatutPaiement, StaffRole } from "@prisma/client";
 import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
@@ -24,11 +25,10 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validated = documentGenerateSchema.parse(body);
 
-    const docType: DocumentType = (validated.type as DocumentType) || DocumentType.FACTURE;
-    const numero = await generateDocumentNumber(docType);
-
+    const docType = validated.type || DocumentType.FACTURE;
     let docMontant = validated.montant ? Number(validated.montant) : undefined;
     let computedTypeFacture: FactureType | null = null;
+    let emissionDate = new Date();
 
     if (docType === DocumentType.FACTURE) {
       if (validated.typeFacture) {
@@ -40,14 +40,42 @@ export async function POST(request: Request) {
       }
     }
 
+    // Si contrat : vérification anti-doublon universelle et respect de termeFacturation
+    if (validated.contractId) {
+      const contract = await db.contract.findUnique({
+        where: { id: validated.contractId },
+        include: {
+          client: true,
+          facturesPeriodiques: {
+            orderBy: { dateEmission: "desc" },
+            select: { dateEmission: true, numero: true },
+          },
+        },
+      });
 
-    // Si contrat, récupérer le montant main d'œuvre si non spécifié
-    if (validated.contractId && !docMontant) {
-      const contract = await db.contract.findUnique({ where: { id: validated.contractId } });
-      if (contract) {
+      if (!contract) {
+        return NextResponse.json({ success: false, message: "Contrat introuvable." }, { status: 404 });
+      }
+
+      const nextPeriod = getNextUnbilledContractPeriod(contract, contract.facturesPeriodiques);
+      if (!nextPeriod) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Toutes les factures prévues pour ce contrat (${contract.client.nom}) ont déjà été générées. Aucune nouvelle facture n'est due pour le moment.`,
+          },
+          { status: 400 }
+        );
+      }
+
+      emissionDate = nextPeriod.emissionDate;
+      if (!docMontant) {
         docMontant = contract.montantMainOeuvre;
       }
     }
+
+    const targetYear = emissionDate.getFullYear();
+    const numero = await generateDocumentNumber(docType, targetYear);
 
     const doc = await db.financialDocument.create({
       data: {
@@ -58,6 +86,7 @@ export async function POST(request: Request) {
         contractId: validated.contractId || null,
         montant: docMontant || 10000,
         statutPaiement: validated.statutPaiement || StatutPaiement.EN_ATTENTE,
+        dateEmission: emissionDate,
       },
     });
 

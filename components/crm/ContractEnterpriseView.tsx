@@ -126,16 +126,24 @@ export function ContractEnterpriseView({
   const [generateLoading, setGenerateLoading] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [generateSuccess, setGenerateSuccess] = useState<string | null>(null);
+  const formatDaysLabel = (days: number[]): string => {
+    const sorted = [...days].sort((a, b) => a - b);
+    if (sorted.length === 0) return "";
+    return sorted.map((d) => (d === 1 ? "1er" : `${d}`)).join(" et ") + " du mois";
+  };
+
   const [generateForm, setGenerateForm] = useState<{
     actionType: "INITIAL" | "AJUSTER" | "PROLONGER";
     jourPassage: string;
+    joursPassage: number[];
     termeFacturation: string;
     technicienAssigneId: string;
     checklistPrevue: string;
     genererFactures: boolean;
   }>({
     actionType: "AJUSTER",
-    jourPassage: "1er et 15 de chaque mois",
+    jourPassage: "1er et 15 du mois",
+    joursPassage: [1, 15],
     termeFacturation: "ECHU",
     technicienAssigneId: technicians[0]?.id || "",
     checklistPrevue:
@@ -148,15 +156,31 @@ export function ContractEnterpriseView({
     setGenerateError(null);
     setGenerateSuccess(null);
     const hasScheduled = preventifTickets.length > 0;
+    const freq = selectedContract.frequenceVisites || 1;
+
+    let initialJours: number[] = [1];
+    if (freq === 2) {
+      initialJours = [1, 15];
+    } else if (freq === 4) {
+      initialJours = [1, 8, 15, 22];
+    } else {
+      initialJours = [1];
+    }
+
+    if (selectedContract.jourPassage) {
+      const matches = selectedContract.jourPassage.match(/\b([1-9]|[12][0-9]|28)\b/g);
+      if (matches && matches.length > 0) {
+        const parsed = Array.from(new Set(matches.map(Number))).filter((n) => n >= 1 && n <= 28);
+        if (parsed.length > 0) {
+          initialJours = parsed.slice(0, freq);
+        }
+      }
+    }
+
     setGenerateForm({
       actionType: hasScheduled ? "AJUSTER" : "INITIAL",
-      jourPassage:
-        selectedContract.jourPassage ||
-        (selectedContract.frequenceVisites === 2
-          ? "1er et 15 du mois"
-          : selectedContract.frequenceVisites === 4
-          ? "Chaque semaine"
-          : "1er du mois"),
+      jourPassage: formatDaysLabel(initialJours),
+      joursPassage: initialJours,
       termeFacturation: selectedContract.termeFacturation || "ECHU",
       technicienAssigneId: selectedContract.interventions[0]?.technicienAssigneId || technicians[0]?.id || "",
       checklistPrevue:
@@ -165,6 +189,42 @@ export function ContractEnterpriseView({
       genererFactures: true,
     });
     setShowGenerateModal(true);
+  };
+
+  const togglePassageDay = (day: number) => {
+    if (!selectedContract) return;
+    const required = selectedContract.frequenceVisites || 1;
+    let newDays = [...generateForm.joursPassage];
+
+    if (newDays.includes(day)) {
+      newDays = newDays.filter((d) => d !== day);
+    } else {
+      if (newDays.length < required) {
+        newDays.push(day);
+      } else {
+        if (required === 1) {
+          newDays = [day];
+        } else {
+          newDays.shift();
+          newDays.push(day);
+        }
+      }
+    }
+
+    newDays.sort((a, b) => a - b);
+    setGenerateForm((prev) => ({
+      ...prev,
+      joursPassage: newDays,
+      jourPassage: formatDaysLabel(newDays),
+    }));
+  };
+
+  const applyPassagePreset = (days: number[]) => {
+    setGenerateForm((prev) => ({
+      ...prev,
+      joursPassage: days,
+      jourPassage: formatDaysLabel(days),
+    }));
   };
 
   // Modal d'encaissement de facture
@@ -1309,18 +1369,132 @@ export function ContractEnterpriseView({
                   </div>
                 )}
 
-                {/* Jours convenus */}
-                <div className="space-y-1.5">
-                  <label className="font-extrabold text-slate-700">Jours / Périodes de passage</label>
-                  <input
-                    type="text"
-                    value={generateForm.jourPassage}
-                    onChange={(e) =>
-                      setGenerateForm({ ...generateForm, jourPassage: e.target.value })
-                    }
-                    placeholder="Ex: 1er et 15 du mois, ou 5 et 20..."
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-blue"
-                  />
+                {/* Jours convenus structurés */}
+                <div className="space-y-2.5 p-3.5 rounded-2xl bg-slate-50/70 border border-slate-200/80">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="font-extrabold text-slate-800 text-xs block">
+                        Jours de passage préventif dans le mois
+                      </label>
+                      <span className="text-[11px] text-slate-500">
+                        Contrat stipulant <strong className="text-brand-blue font-bold">{selectedContract.frequenceVisites || 1} visite{(selectedContract.frequenceVisites || 1) > 1 ? "s" : ""}</strong> par mois
+                      </span>
+                    </div>
+                    <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold border ${
+                      generateForm.joursPassage.length === (selectedContract.frequenceVisites || 1)
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-amber-50 text-amber-700 border-amber-200"
+                    }`}>
+                      {generateForm.joursPassage.length} / {selectedContract.frequenceVisites || 1} sélectionné{(selectedContract.frequenceVisites || 1) > 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  {/* Raccourcis fréquents (Presets) */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase mr-1">Raccourcis :</span>
+                    {(selectedContract.frequenceVisites || 1) === 1 && (
+                      <>
+                        {[1, 5, 10, 15, 20, 25].map((d) => (
+                          <button
+                            key={d}
+                            type="button"
+                            onClick={() => applyPassagePreset([d])}
+                            className={`px-2 py-0.5 text-[11px] rounded-lg font-bold transition-all cursor-pointer ${
+                              generateForm.joursPassage.length === 1 && generateForm.joursPassage[0] === d
+                                ? "bg-brand-blue text-white shadow-xs"
+                                : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
+                            }`}
+                          >
+                            {d === 1 ? "1er" : d} du mois
+                          </button>
+                        ))}
+                      </>
+                    )}
+                    {(selectedContract.frequenceVisites || 1) === 2 && (
+                      <>
+                        {[
+                          { label: "1er et 15", days: [1, 15] },
+                          { label: "5 et 20", days: [5, 20] },
+                          { label: "10 et 25", days: [10, 25] },
+                        ].map((preset) => (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            onClick={() => applyPassagePreset(preset.days)}
+                            className={`px-2 py-0.5 text-[11px] rounded-lg font-bold transition-all cursor-pointer ${
+                              JSON.stringify(generateForm.joursPassage) === JSON.stringify(preset.days)
+                                ? "bg-brand-blue text-white shadow-xs"
+                                : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
+                            }`}
+                          >
+                            {preset.label}
+                          </button>
+                        ))}
+                      </>
+                    )}
+                    {(selectedContract.frequenceVisites || 1) === 4 && (
+                      <>
+                        {[
+                          { label: "1, 8, 15, 22", days: [1, 8, 15, 22] },
+                          { label: "7, 14, 21, 28", days: [7, 14, 21, 28] },
+                        ].map((preset) => (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            onClick={() => applyPassagePreset(preset.days)}
+                            className={`px-2 py-0.5 text-[11px] rounded-lg font-bold transition-all cursor-pointer ${
+                              JSON.stringify(generateForm.joursPassage) === JSON.stringify(preset.days)
+                                ? "bg-brand-blue text-white shadow-xs"
+                                : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
+                            }`}
+                          >
+                            {preset.label}
+                          </button>
+                        ))}
+                      </>
+                    )}
+                  </div>
+
+                  {/* Sélecteur de jours numérotés 1 à 28 (7 colonnes x 4 lignes) */}
+                  <div className="bg-white p-2.5 rounded-xl border border-slate-200">
+                    <div className="grid grid-cols-7 gap-1 sm:gap-1.5 text-center">
+                      {Array.from({ length: 28 }, (_, i) => i + 1).map((day) => {
+                        const isSelected = generateForm.joursPassage.includes(day);
+                        return (
+                          <button
+                            key={day}
+                            type="button"
+                            onClick={() => togglePassageDay(day)}
+                            className={`h-7 sm:h-8 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center ${
+                              isSelected
+                                ? "bg-brand-blue text-white shadow-sm ring-2 ring-brand-blue/30 scale-105"
+                                : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                            }`}
+                          >
+                            {day === 1 ? "1er" : day}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-400">
+                      <span>Jours 1 à 28 (garantit la parité sur tous les mois)</span>
+                      {generateForm.joursPassage.length > 0 && (
+                        <span className="font-bold text-slate-700">
+                          {generateForm.jourPassage}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Alerte si le nombre de jours ne correspond pas */}
+                  {generateForm.joursPassage.length !== (selectedContract.frequenceVisites || 1) && (
+                    <p className="text-[11px] font-bold text-amber-600 flex items-center gap-1 bg-amber-50 p-2 rounded-lg border border-amber-200">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>
+                        Sélectionnez exactement {selectedContract.frequenceVisites || 1} jour(s) pour correspondre à la fréquence contractuelle.
+                      </span>
+                    </p>
+                  )}
                 </div>
 
                 {/* Technicien référent */}
@@ -1407,7 +1581,11 @@ export function ContractEnterpriseView({
                 </button>
                 <button
                   type="submit"
-                  disabled={generateLoading || Boolean(generateSuccess)}
+                  disabled={
+                    generateLoading ||
+                    Boolean(generateSuccess) ||
+                    generateForm.joursPassage.length !== (selectedContract.frequenceVisites || 1)
+                  }
                   className="bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2.5 rounded-xl font-extrabold shadow-sm disabled:opacity-50 transition-all flex items-center gap-2 cursor-pointer text-xs"
                 >
                   {generateLoading && <Clock className="w-4 h-4 animate-spin text-white" />}

@@ -13,6 +13,85 @@ import {
   TermeFacturation,
 } from "@prisma/client";
 import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
+import { generateDocumentNumber } from "@/lib/documents/numbering";
+import {
+  getStepMonths,
+  calculateInvoiceEmissionDate,
+  isContractPeriodInvoiced,
+} from "@/lib/documents/contract-invoicing";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+
+/**
+ * Infère intelligemment le type de matériel dominant depuis le périmètre d'équipements couverts.
+ */
+function inferTypeMateriel(equipements: string = ""): TypeMateriel {
+  const text = equipements.toLowerCase();
+  if (
+    text.includes("médical") ||
+    text.includes("medical") ||
+    text.includes("biomédical") ||
+    text.includes("hopital") ||
+    text.includes("santé")
+  ) {
+    return TypeMateriel.APPAREIL_MEDICAL;
+  }
+  if (
+    text.includes("vidéoprojecteur") ||
+    text.includes("videoprojecteur") ||
+    text.includes("projecteur")
+  ) {
+    return TypeMateriel.VIDEOPROJECTEUR;
+  }
+  if (
+    text.includes("caméra") ||
+    text.includes("camera") ||
+    text.includes("surveillance") ||
+    text.includes("vidéosurveillance")
+  ) {
+    return TypeMateriel.CAMERA_VIDEOSURVEILLANCE;
+  }
+  if (
+    text.includes("réseau") ||
+    text.includes("reseau") ||
+    text.includes("switch") ||
+    text.includes("baie") ||
+    text.includes("routeur") ||
+    text.includes("serveur")
+  ) {
+    return TypeMateriel.EQUIPEMENT_RESEAU;
+  }
+  if (
+    text.includes("topographie") ||
+    text.includes("topographique") ||
+    text.includes("gps")
+  ) {
+    return TypeMateriel.EQUIPEMENT_TOPOGRAPHIE;
+  }
+  if (
+    text.includes("tv") ||
+    text.includes("télé") ||
+    text.includes("ecran")
+  ) {
+    return TypeMateriel.TV;
+  }
+  if (
+    text.includes("portable") ||
+    text.includes("laptop")
+  ) {
+    return TypeMateriel.PC_PORTABLE;
+  }
+  if (
+    text.includes("bureau") ||
+    text.includes("fixe") ||
+    text.includes("desktop") ||
+    text.includes("pc") ||
+    text.includes("poste")
+  ) {
+    return TypeMateriel.PC_BUREAU;
+  }
+  return TypeMateriel.AUTRE;
+}
 
 export async function POST(
   request: Request,
@@ -38,6 +117,7 @@ export async function POST(
     const {
       actionType = "INITIAL", // "INITIAL" | "AJUSTER" | "PROLONGER"
       jourPassage,
+      joursPassage, // tableau de nombres précis [1, 15]
       termeFacturation = "ECHU",
       technicienAssigneId,
       checklistPrevue = "Dépoussiérage et soufflage complet, contrôle antivirus et mises à jour, vérification des sauvegardes, test des onduleurs et tensions électriques, vérification de l'intégrité du réseau local.",
@@ -57,16 +137,58 @@ export async function POST(
       return NextResponse.json({ success: false, message: "Contrat introuvable." }, { status: 404 });
     }
 
-    // La fréquence est la clause contractuelle fixe du contrat
+    // La fréquence est la clause contractuelle fixe du contrat (1, 2 ou 4 passages/mois)
     const freqNum = contract.frequenceVisites || 1;
-    const resolvedJourPassage =
-      jourPassage ||
-      contract.jourPassage ||
-      (freqNum === 2
-        ? "1er et 15 du mois"
-        : freqNum === 4
-        ? "Chaque semaine"
-        : "1er du mois");
+
+    // 1. Détermination précise et robuste des jours du mois
+    let days: number[] = [];
+
+    if (Array.isArray(joursPassage) && joursPassage.length > 0) {
+      days = joursPassage
+        .map(Number)
+        .filter((d) => !isNaN(d) && d >= 1 && d <= 28)
+        .sort((a, b) => a - b);
+    }
+
+    // Si non fourni sous forme de tableau, extraction depuis le texte ou repli par défaut
+    if (days.length === 0) {
+      const rawText = (jourPassage || contract.jourPassage || "").toLowerCase();
+      if (freqNum === 2) {
+        if (rawText.includes("5") && rawText.includes("20")) {
+          days = [5, 20];
+        } else if (rawText.includes("10") && rawText.includes("25")) {
+          days = [10, 25];
+        } else {
+          days = [1, 15];
+        }
+      } else if (freqNum === 1) {
+        if (rawText.includes("10")) {
+          days = [10];
+        } else if (rawText.includes("15")) {
+          days = [15];
+        } else if (rawText.includes("20")) {
+          days = [20];
+        } else if (rawText.includes("25")) {
+          days = [25];
+        } else if (rawText.includes("5")) {
+          days = [5];
+        } else {
+          days = [1];
+        }
+      } else if (freqNum === 4) {
+        days = [1, 8, 15, 22];
+      }
+    }
+
+    // Construction d'un libellé clair pour affichage
+    let resolvedJourPassage = "";
+    if (days.length === 1) {
+      resolvedJourPassage = `Le ${days[0] === 1 ? "1er" : days[0]} de chaque mois`;
+    } else if (days.length === 2) {
+      resolvedJourPassage = `Le ${days[0] === 1 ? "1er" : days[0]} et le ${days[1]} de chaque mois`;
+    } else {
+      resolvedJourPassage = days.map((d) => (d === 1 ? "1er" : d.toString())).join(", ");
+    }
 
     // Mettre à jour les paramètres logistiques sur le contrat
     await db.contract.update({
@@ -80,37 +202,14 @@ export async function POST(
       },
     });
 
-    // Jours réels de passage
-    let days: number[] = [1];
-    const passageLower = resolvedJourPassage.toLowerCase();
-
-    if (freqNum === 2) {
-      if (passageLower.includes("5") && passageLower.includes("20")) {
-        days = [5, 20];
-      } else if (passageLower.includes("10") && passageLower.includes("25")) {
-        days = [10, 25];
-      } else {
-        days = [1, 15];
-      }
-    } else if (freqNum === 1) {
-      if (passageLower.includes("10")) {
-        days = [10];
-      } else if (passageLower.includes("15")) {
-        days = [15];
-      } else if (passageLower.includes("20")) {
-        days = [20];
-      } else {
-        days = [1];
-      }
-    } else if (freqNum === 4) {
-      days = [1, 8, 15, 22];
-    }
+    // Détermination du matériel dominant
+    const inferredTypeMateriel = inferTypeMateriel(contract.equipementsCouverts);
 
     const existingScheduled = contract.interventions
       .filter((i) => i.dateProgrammee !== null)
       .sort((a, b) => new Date(a.dateProgrammee!).getTime() - new Date(b.dateProgrammee!).getTime());
 
-    // Détermination de l'action réelle si non spécifiée
+    // Détermination de l'action réelle si premier passage
     const effectiveAction = existingScheduled.length === 0 ? "INITIAL" : actionType;
 
     const currentYear = new Date().getFullYear();
@@ -126,47 +225,43 @@ export async function POST(
       if (!isNaN(seq)) currentSeq = seq + 1;
     }
 
-    const visitDates: Date[] = [];
+    const createdTickets = [];
+    let updatedTicketsCount = 0;
     let feedbackMessage = "";
 
     // -------------------------------------------------------------
-    // CAS 1 : AJUSTEMENT DU PLANNING RESTANT (tickets futurs non démarrés)
+    // CAS 1 : AJUSTEMENT DU PLANNING (Tickets non démarrés : futurs + passés ratés)
     // -------------------------------------------------------------
     if (effectiveAction === "AJUSTER") {
-      const now = new Date();
-      // On cible uniquement les tickets programmés après aujourd'hui qui sont strictement à l'état NOUVEAU
-      const futureTickets = existingScheduled.filter(
-        (t) => new Date(t.dateProgrammee!) > now && t.statut === InterventionStatut.NOUVEAU
-      );
+      // Sélection de tous les tickets encore à l'état NOUVEAU (y compris passés non réalisés)
+      const untouchedTickets = existingScheduled
+        .filter((t) => t.statut === InterventionStatut.NOUVEAU)
+        .sort((a, b) => new Date(a.dateProgrammee!).getTime() - new Date(b.dateProgrammee!).getTime());
 
-      if (futureTickets.length === 0) {
+      if (untouchedTickets.length === 0) {
         return NextResponse.json(
           {
             success: false,
-            message: "Aucune intervention future non démarrée à réajuster. Utilisez l'option 'Prolonger le contrat' pour planifier un nouveau cycle.",
+            message:
+              "Aucune intervention non démarrée à réajuster. Utilisez l'option 'Prolonger le contrat' pour planifier un nouveau cycle.",
           },
           { status: 400 }
         );
       }
 
-      // Supprimer les tickets futurs non démarrés
-      await db.intervention.deleteMany({
-        where: {
-          id: { in: futureTickets.map((t) => t.id) },
-        },
-      });
-
-      // Recalculer les dates futures à partir du mois courant/prochain
+      const now = new Date();
       let loopYear = now.getFullYear();
       let loopMonth = now.getMonth();
-      const quotaToReplace = futureTickets.length;
+      const newDates: Date[] = [];
+      const quotaToReschedule = untouchedTickets.length;
 
-      while (visitDates.length < quotaToReplace) {
+      // Calcul des nouvelles dates à partir d'aujourd'hui
+      while (newDates.length < quotaToReschedule) {
         for (const day of days) {
-          if (visitDates.length >= quotaToReplace) break;
+          if (newDates.length >= quotaToReschedule) break;
           const candidateDate = new Date(loopYear, loopMonth, day, 9, 0, 0);
           if (candidateDate > now) {
-            visitDates.push(candidateDate);
+            newDates.push(candidateDate);
           }
         }
         loopMonth++;
@@ -176,7 +271,34 @@ export async function POST(
         }
       }
 
-      feedbackMessage = `Planning réajusté : ${visitDates.length} intervention(s) future(s) reprogrammée(s). Les factures et l'historique passé sont conservés intacts.`;
+      // MISE À JOUR en place des tickets (Zéro suppression, Zéro crash de clé étrangère)
+      for (let i = 0; i < untouchedTickets.length; i++) {
+        const ticket = untouchedTickets[i];
+        const targetDate = newDates[i];
+
+        await db.intervention.update({
+          where: { id: ticket.id },
+          data: {
+            dateProgrammee: targetDate,
+            technicienAssigneId:
+              technicienAssigneId !== undefined
+                ? technicienAssigneId || null
+                : ticket.technicienAssigneId,
+            checklistPrevue: checklistPrevue || ticket.checklistPrevue,
+            typeMateriel: inferredTypeMateriel !== TypeMateriel.AUTRE ? inferredTypeMateriel : ticket.typeMateriel,
+            historique: {
+              create: {
+                auteurId: (session.user as any).id,
+                action: "Planning réajusté",
+                note: `Date reprogrammée au ${format(targetDate, "dd/MM/yyyy", { locale: fr })} selon les nouveaux jours convenus (${resolvedJourPassage}).`,
+              },
+            },
+          },
+        });
+        updatedTicketsCount++;
+      }
+
+      feedbackMessage = `Planning réajusté : ${updatedTicketsCount} intervention(s) reprogrammée(s) avec succès. Les interventions en cours/terminées et les factures existantes sont conservées.`;
     }
 
     // -------------------------------------------------------------
@@ -188,7 +310,7 @@ export async function POST(
         ? new Date(lastTicketInContract.dateProgrammee)
         : new Date();
 
-      // Nouveau cycle commence le mois suivant le dernier ticket
+      // Nouveau cycle commence le mois suivant la dernière date planifiée
       let loopYear = lastDate.getFullYear();
       let loopMonth = lastDate.getMonth() + 1;
       if (loopMonth > 11) {
@@ -216,6 +338,7 @@ export async function POST(
       }
 
       const quotaNewVisites = extensionMonths * freqNum;
+      const visitDates: Date[] = [];
 
       while (visitDates.length < quotaNewVisites) {
         for (const day of days) {
@@ -230,11 +353,35 @@ export async function POST(
         }
       }
 
-      feedbackMessage = `Contrat prolongé : ${visitDates.length} nouvelles interventions planifiées (${contract.dateFin ? "Prolongation CDD de " + extensionMonths + " mois" : "Nouveau cycle CDI de 12 mois"}).`;
+      for (const vDate of visitDates) {
+        const paddedSeq = currentSeq.toString().padStart(4, "0");
+        const ticketNum = `INT-${currentYear}-${paddedSeq}`;
+        currentSeq++;
+
+        const ticket = await db.intervention.create({
+          data: {
+            numero: ticketNum,
+            clientId: contract.clientId,
+            contractId: contract.id,
+            type: InterventionType.CONTRACTUEL,
+            typeMateriel: inferredTypeMateriel,
+            panneDeclaree: `Maintenance préventive contractuelle — ${contract.equipementsCouverts || "Parc complet"}`,
+            modeIntervention: ModeIntervention.DOMICILE,
+            statut: InterventionStatut.NOUVEAU,
+            dateProgrammee: vDate,
+            checklistPrevue: checklistPrevue,
+            technicienAssigneId: technicienAssigneId || null,
+            montantMainOeuvre: 0,
+          },
+        });
+        createdTickets.push(ticket);
+      }
+
+      feedbackMessage = `Contrat prolongé : ${createdTickets.length} nouvelles interventions planifiées (${contract.dateFin ? "Prolongation CDD de " + extensionMonths + " mois" : "Nouveau cycle CDI de 12 mois"}).`;
     }
 
     // -------------------------------------------------------------
-    // CAS 3 : INITIALISATION (Première génération)
+    // CAS 3 : INITIALISATION (Première génération avec quota garanti)
     // -------------------------------------------------------------
     else {
       const startDate = new Date(contract.dateDebut);
@@ -247,7 +394,9 @@ export async function POST(
         totalMonths = Math.max(1, diffMonths);
       }
 
+      // Quota mathématiquement garanti (Règle 2-A)
       const quotaTotalVisites = totalMonths * freqNum;
+      const visitDates: Date[] = [];
       let loopYear = startDate.getFullYear();
       let loopMonth = startDate.getMonth();
 
@@ -255,6 +404,7 @@ export async function POST(
         for (const day of days) {
           if (visitDates.length >= quotaTotalVisites) break;
           const candidateDate = new Date(loopYear, loopMonth, day, 9, 0, 0);
+          // N'inclure que les dates à partir de la date de début
           if (candidateDate >= startDate) {
             visitDates.push(candidateDate);
           }
@@ -266,102 +416,107 @@ export async function POST(
         }
       }
 
-      feedbackMessage = `${visitDates.length} interventions programmées (${contract.dateFin ? "CDD de " + totalMonths + " mois" : "CDI — cycle initial de 12 mois"}).`;
+      for (const vDate of visitDates) {
+        const paddedSeq = currentSeq.toString().padStart(4, "0");
+        const ticketNum = `INT-${currentYear}-${paddedSeq}`;
+        currentSeq++;
+
+        const ticket = await db.intervention.create({
+          data: {
+            numero: ticketNum,
+            clientId: contract.clientId,
+            contractId: contract.id,
+            type: InterventionType.CONTRACTUEL,
+            typeMateriel: inferredTypeMateriel,
+            panneDeclaree: `Maintenance préventive contractuelle — ${contract.equipementsCouverts || "Parc complet"}`,
+            modeIntervention: ModeIntervention.DOMICILE,
+            statut: InterventionStatut.NOUVEAU,
+            dateProgrammee: vDate,
+            checklistPrevue: checklistPrevue,
+            technicienAssigneId: technicienAssigneId || null,
+            montantMainOeuvre: 0,
+          },
+        });
+        createdTickets.push(ticket);
+      }
+
+      feedbackMessage = `${createdTickets.length} interventions programmées (${contract.dateFin ? "CDD de " + totalMonths + " mois" : "CDI — cycle initial de 12 mois"}).`;
     }
 
-    // Création en base des nouveaux tickets calculés
-    const createdTickets = [];
-    for (const vDate of visitDates) {
-      const paddedSeq = currentSeq.toString().padStart(4, "0");
-      const ticketNum = `INT-${currentYear}-${paddedSeq}`;
-      currentSeq++;
-
-      const ticket = await db.intervention.create({
-        data: {
-          numero: ticketNum,
-          clientId: contract.clientId,
-          contractId: contract.id,
-          type: InterventionType.CONTRACTUEL,
-          typeMateriel: TypeMateriel.AUTRE,
-          panneDeclaree: `Maintenance préventive contractuelle — ${contract.equipementsCouverts || "Parc complet"}`,
-          modeIntervention: ModeIntervention.DOMICILE,
-          statut: InterventionStatut.NOUVEAU,
-          dateProgrammee: vDate,
-          checklistPrevue: checklistPrevue,
-          technicienAssigneId: technicienAssigneId || null,
-          montantMainOeuvre: 0,
-        },
-      });
-
-      createdTickets.push(ticket);
-    }
-
-    // Génération conditionnelle des factures (uniquement pour INITIAL et PROLONGER)
+    // -------------------------------------------------------------
+    // GÉNÉRATION DES FACTURES (Automatique en lot avec anti-doublon universel)
+    // -------------------------------------------------------------
     let createdInvoicesCount = 0;
-    if ((effectiveAction === "INITIAL" || effectiveAction === "PROLONGER") && genererFactures && contract.montantMainOeuvre > 0) {
-      let stepMonths = 1;
-      if (contract.periodicite === "TRIMESTRIEL") stepMonths = 3;
-      if (contract.periodicite === "ANNUEL") stepMonths = 12;
-
-      // Déterminer la date de départ de facturation
+    if (
+      (effectiveAction === "INITIAL" || effectiveAction === "PROLONGER") &&
+      genererFactures &&
+      contract.montantMainOeuvre > 0
+    ) {
+      const stepMonths = getStepMonths(contract.periodicite);
       const existingInvoices = await db.financialDocument.findMany({
         where: {
           contractId: contract.id,
           type: DocumentType.FACTURE,
           typeFacture: FactureType.CONTRAT,
         },
-        select: { dateEmission: true },
+        select: { dateEmission: true, numero: true },
         orderBy: { dateEmission: "desc" },
       });
 
       let invoiceStartDate: Date;
+      let targetPeriodsCount = 12 / stepMonths;
+
       if (effectiveAction === "PROLONGER" && existingInvoices.length > 0) {
         const lastInvDate = new Date(existingInvoices[0].dateEmission);
-        invoiceStartDate = new Date(lastInvDate);
-        invoiceStartDate.setMonth(invoiceStartDate.getMonth() + stepMonths);
+        invoiceStartDate = new Date(lastInvDate.getFullYear(), lastInvDate.getMonth() + stepMonths, 1);
+        if (contract.dateFin) {
+          const start = new Date(contract.dateDebut);
+          const end = new Date(contract.dateFin);
+          const origMonths = Math.max(
+            1,
+            (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth())
+          );
+          targetPeriodsCount = Math.max(1, Math.floor(origMonths / stepMonths));
+        }
       } else {
         invoiceStartDate = new Date(contract.dateDebut);
+        if (contract.dateFin) {
+          const start = new Date(contract.dateDebut);
+          const end = new Date(contract.dateFin);
+          const diffMonths = Math.max(
+            1,
+            (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth())
+          );
+          targetPeriodsCount = Math.max(1, Math.floor(diffMonths / stepMonths));
+        }
       }
 
-      let totalInvoicesTarget = 12 / stepMonths;
-      if (effectiveAction === "PROLONGER" && contract.dateFin) {
-        const start = new Date(contract.dateDebut);
-        const end = new Date(contract.dateFin);
-        const origMonths = Math.max(1, (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()));
-        totalInvoicesTarget = Math.max(1, Math.floor(origMonths / stepMonths));
-      } else if (effectiveAction === "INITIAL" && contract.dateFin) {
-        const start = new Date(contract.dateDebut);
-        const end = new Date(contract.dateFin);
-        const diffMonths = Math.max(1, (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()));
-        totalInvoicesTarget = Math.max(1, Math.floor(diffMonths / stepMonths));
-      }
+      for (let i = 0; i < targetPeriodsCount; i++) {
+        const periodStart = new Date(
+          invoiceStartDate.getFullYear(),
+          invoiceStartDate.getMonth() + i * stepMonths,
+          1
+        );
 
-      const lastInvoice = await db.financialDocument.findFirst({
-        where: { numero: { startsWith: `FAC-${currentYear}-` } },
-        orderBy: { numero: "desc" },
-      });
+        // Si CDD, ne pas dépasser la date de fin
+        if (contract.dateFin) {
+          const endDate = new Date(contract.dateFin);
+          if (periodStart > endDate) break;
+        }
 
-      let invoiceSeq = 1;
-      if (lastInvoice?.numero) {
-        const parts = lastInvoice.numero.split("-");
-        const seq = parseInt(parts[2], 10);
-        if (!isNaN(seq)) invoiceSeq = seq + 1;
-      }
-
-      for (let i = 0; i < totalInvoicesTarget; i++) {
-        const invDate = new Date(invoiceStartDate);
-        invDate.setMonth(invDate.getMonth() + i * stepMonths);
-
-        const alreadyExists = existingInvoices.some((ef) => {
-          const d = new Date(ef.dateEmission);
-          return d.getFullYear() === invDate.getFullYear() && d.getMonth() === invDate.getMonth();
-        });
-
+        // Vérification anti-doublon stricte sur la période
+        const alreadyExists = isContractPeriodInvoiced(existingInvoices, periodStart, stepMonths);
         if (alreadyExists) continue;
 
-        const paddedSeq = invoiceSeq.toString().padStart(4, "0");
-        const invNum = `FAC-${currentYear}-${paddedSeq}`;
-        invoiceSeq++;
+        // Calcul de la date d'émission selon termeFacturation (ECHU vs A_ECHOIR)
+        const emissionDate = calculateInvoiceEmissionDate(
+          periodStart,
+          stepMonths,
+          contract.termeFacturation
+        );
+
+        const targetYear = emissionDate.getFullYear();
+        const invNum = await generateDocumentNumber(DocumentType.FACTURE, targetYear);
 
         await db.financialDocument.create({
           data: {
@@ -371,7 +526,7 @@ export async function POST(
             contractId: contract.id,
             montant: contract.montantMainOeuvre,
             statutPaiement: StatutPaiement.EN_ATTENTE,
-            dateEmission: invDate,
+            dateEmission: emissionDate,
           },
         });
 
@@ -383,7 +538,10 @@ export async function POST(
     await db.notification.create({
       data: {
         userId: (session.user as any).id,
-        titre: effectiveAction === "AJUSTER" ? "Planning contrat réajusté" : "Tickets contractuels générés",
+        titre:
+          effectiveAction === "AJUSTER"
+            ? "Planning contrat réajusté"
+            : "Tickets contractuels générés",
         message: `${feedbackMessage} ${createdInvoicesCount > 0 ? createdInvoicesCount + " facture(s) émise(s)." : ""}`,
         type: "SYSTEME",
       },
@@ -396,6 +554,7 @@ export async function POST(
       success: true,
       message: `${feedbackMessage} ${createdInvoicesCount > 0 ? createdInvoicesCount + " facture(s) générée(s)." : ""}`,
       ticketsCount: createdTickets.length,
+      updatedTicketsCount,
       invoicesCount: createdInvoicesCount,
       actionType: effectiveAction,
     });
@@ -407,3 +566,4 @@ export async function POST(
     );
   }
 }
+

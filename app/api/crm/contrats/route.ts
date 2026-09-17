@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { contractFormSchema } from "@/lib/validations";
-import { ContractStatus, VisiteStatus, Periodicite, StaffRole } from "@prisma/client";
+import { ContractStatus, Periodicite, StaffRole } from "@prisma/client";
 import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 export async function POST(request: Request) {
@@ -66,37 +66,6 @@ export async function POST(request: Request) {
       }
     }
 
-    // Durée de projection pour les visites initiales : durée du CDD ou 1 an pour un CDI
-    const defaultEnd = new Date(startDate);
-    defaultEnd.setFullYear(defaultEnd.getFullYear() + 1);
-    const horizonDate = finalEndDate || defaultEnd;
-
-    // Calculer le pas d'intervalle en mois selon la périodicité
-    let intervalMonths = 1;
-    if (validated.periodicite === Periodicite.TRIMESTRIEL) intervalMonths = 3;
-    else if (validated.periodicite === Periodicite.ANNUEL) intervalMonths = 12;
-
-    const visitesToCreate: { datePrevue: Date; statut: VisiteStatus }[] = [];
-    const currentDate = new Date(startDate);
-    currentDate.setMonth(currentDate.getMonth() + intervalMonths);
-
-    while (currentDate <= horizonDate) {
-      visitesToCreate.push({
-        datePrevue: new Date(currentDate),
-        statut: VisiteStatus.PLANIFIEE,
-      });
-      currentDate.setMonth(currentDate.getMonth() + intervalMonths);
-    }
-
-    if (visitesToCreate.length === 0) {
-      const fallbackDate = new Date(startDate);
-      fallbackDate.setMonth(fallbackDate.getMonth() + intervalMonths);
-      visitesToCreate.push({
-        datePrevue: fallbackDate,
-        statut: VisiteStatus.PLANIFIEE,
-      });
-    }
-
     const contract = await db.contract.create({
       data: {
         clientId: validated.clientId,
@@ -107,9 +76,6 @@ export async function POST(request: Request) {
         frequenceVisites: validated.frequenceVisites || 1,
         equipementsCouverts: validated.equipementsCouverts,
         statut: ContractStatus.ACTIF,
-        visitesPlanifiees: {
-          create: visitesToCreate,
-        },
       },
     });
 

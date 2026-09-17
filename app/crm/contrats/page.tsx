@@ -29,8 +29,8 @@ export default async function CrmContratsPage() {
       db.contract.findMany({
         include: {
           client: true,
-          visitesPlanifiees: {
-            orderBy: { datePrevue: "asc" },
+          interventions: {
+            orderBy: [{ dateProgrammee: "asc" }, { dateCreation: "desc" }],
           },
           facturesPeriodiques: {
             orderBy: { dateEmission: "desc" },

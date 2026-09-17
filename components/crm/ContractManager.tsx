@@ -21,7 +21,7 @@ import {
   Download,
   X,
 } from "lucide-react";
-import { Periodicite, ContractStatus, VisiteStatus } from "@prisma/client";
+import { Periodicite, ContractStatus } from "@prisma/client";
 import { formatFCFA } from "@/lib/format";
 import { PaginationControls } from "@/components/crm/PaginationControls";
 import { QuickViewModal, QuickViewData } from "@/components/crm/QuickViewModal";
@@ -39,11 +39,11 @@ interface ContractItem {
   equipementsCouverts: string;
   statut: ContractStatus;
   client: { nom: string; telephone: string };
-  visitesPlanifiees: {
+  interventions?: {
     id: string;
-    datePrevue: string;
-    statut: VisiteStatus;
-    interventionId: string | null;
+    numero: string;
+    dateProgrammee: string | null;
+    statut: string;
   }[];
   facturesPeriodiques: {
     id: string;

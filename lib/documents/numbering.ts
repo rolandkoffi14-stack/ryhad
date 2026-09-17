@@ -17,9 +17,9 @@ export function getDocumentPrefix(type: DocumentType): string {
  * Génère un numéro de document unique incrémental du type : PREFIXE-ANNEE-XXXX
  * Ex: DEV-2026-0001, FAC-2026-0042
  */
-export async function generateDocumentNumber(type: DocumentType): Promise<string> {
+export async function generateDocumentNumber(type: DocumentType, targetYear?: number): Promise<string> {
   const prefix = getDocumentPrefix(type);
-  const year = new Date().getFullYear();
+  const year = targetYear || new Date().getFullYear();
 
   try {
     const lastDoc = await db.financialDocument.findFirst({
