@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  productionBrowserSourceMaps: false,
   serverExternalPackages: ["@prisma/client", "bcryptjs", "@react-pdf/renderer"],
   images: {
     qualities: [75, 85],

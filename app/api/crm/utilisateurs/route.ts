@@ -61,19 +61,42 @@ export async function POST(request: Request) {
       },
     });
 
-    // Envoi de l'email de bienvenue avec ses accès
+    // Envoi de l'email de bienvenue avec lien d'activation sécurisé (aucun mot de passe en clair)
     try {
       const { sendWelcomeUserEmail } = await import("@/lib/services/email");
       const { env } = await import("@/lib/env");
+      const crypto = await import("crypto");
+
+      // Création d'un token d'invitation/activation (valide 48h)
+      const rawToken = crypto.randomBytes(32).toString("hex");
+      const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+      const expiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+
+      // Invalider d'anciens tokens pour cet email s'il en existait
+      await db.passwordResetToken.deleteMany({
+        where: { email: newUser.email },
+      });
+
+      await db.passwordResetToken.create({
+        data: {
+          email: newUser.email,
+          tokenHash,
+          expiresAt,
+        },
+      });
+
+      const baseUrl = env.NEXT_PUBLIC_APP_URL || "https://www.ryhad.bj";
+      const activationUrl = `${baseUrl}/reinitialisation-mot-de-passe?token=${rawToken}`;
+
       await sendWelcomeUserEmail({
         email: newUser.email,
         firstName: newUser.firstName,
         role: newUser.role,
-        temporaryPassword: validatedData.password,
-        loginUrl: `${env.NEXT_PUBLIC_APP_URL || "https://www.ryhad.bj"}/login`,
+        activationUrl,
+        loginUrl: `${baseUrl}/crm`,
       });
     } catch (mailErr) {
-      console.error("Erreur lors de l'envoi du mail de bienvenue (non bloquant):", mailErr);
+      console.error("Erreur lors de l'envoi du mail de bienvenue sécurisé (non bloquant):", mailErr);
     }
 
     broadcastCrmEvent("utilisateur:updated", newUser.id);

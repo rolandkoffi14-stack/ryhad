@@ -296,20 +296,20 @@ export async function sendPasswordChangedAlert({
 }
 
 /**
- * Envoie un email de bienvenue à un nouveau collaborateur avec ses identifiants
+ * Envoie un email de bienvenue à un nouveau collaborateur avec lien d'activation sécurisé
  */
 export async function sendWelcomeUserEmail({
   email,
   firstName,
   role,
-  temporaryPassword,
+  activationUrl,
   loginUrl,
 }: {
   email: string;
   firstName: string;
   role: string;
-  temporaryPassword?: string;
-  loginUrl: string;
+  activationUrl?: string;
+  loginUrl?: string;
 }) {
   if (!resend) {
     console.log(`[EMAIL DEV MODE] Bienvenue collaborateur ${firstName} (${email}) - Rôle: ${role}`);
@@ -322,6 +322,11 @@ export async function sendWelcomeUserEmail({
       RECEPTIONNISTE: "Réceptionniste / Accueil",
       TECHNICIEN: "Technicien d'Atelier",
     };
+
+    const targetUrl = activationUrl || loginUrl || `${appUrl}/crm`;
+    const actionButtonLabel = activationUrl
+      ? "Activer mon compte & définir mon mot de passe"
+      : "Accéder à l'espace CRM";
 
     const res = await resend.emails.send({
       from: emailFrom,
@@ -339,16 +344,15 @@ export async function sendWelcomeUserEmail({
               Votre compte collaborateur a été créé sur l'application CRM de RyHaD Tic-Medic avec le rôle : <strong>${roleLabels[role] || role}</strong>.
             </p>
             <div style="background-color: #F4F6F8; border-radius: 8px; padding: 15px; margin: 20px 0; font-size: 13px;">
-              <p style="margin: 0 0 8px 0;"><strong>Identifiant (Email) :</strong> ${email}</p>
-              ${temporaryPassword ? `<p style="margin: 0;"><strong>Mot de passe initial :</strong> <code style="background: #E5E7EB; padding: 2px 6px; border-radius: 4px;">${temporaryPassword}</code></p>` : ""}
+              <p style="margin: 0;"><strong>Identifiant de connexion :</strong> ${email}</p>
             </div>
             <div style="text-align: center; margin: 25px 0;">
-              <a href="${loginUrl}" style="background-color: #1E4D8B; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
-                Accéder au CRM Atelier
+              <a href="${targetUrl}" style="background-color: #1E4D8B; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
+                ${actionButtonLabel}
               </a>
             </div>
             <p style="color: #6B7280; font-size: 12px; margin-top: 20px;">
-              Nous vous recommandons de modifier votre mot de passe dès votre première connexion.
+              Pour des raisons de sécurité, votre mot de passe n'est jamais transmis par courrier électronique.
             </p>
           </div>
         </div>

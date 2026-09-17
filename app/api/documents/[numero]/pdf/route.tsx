@@ -22,6 +22,12 @@ export async function GET(
     if (url.searchParams.get("auto") === "true" || url.searchParams.get("download") === "true") {
       targetUrl.searchParams.set("auto", "true");
     }
+    if (url.searchParams.has("phone")) {
+      targetUrl.searchParams.set("phone", url.searchParams.get("phone")!);
+    }
+    if (url.searchParams.has("phoneSuffix")) {
+      targetUrl.searchParams.set("phoneSuffix", url.searchParams.get("phoneSuffix")!);
+    }
 
     return NextResponse.redirect(targetUrl, 307);
   } catch (error) {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { DocumentPrintData } from "@/types/documents";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 import { DocumentType } from "@prisma/client";
@@ -7,6 +8,20 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
 export const dynamic = "force-dynamic";
+
+function maskClientName(name: string): string {
+  if (!name) return "Client";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return parts[0].length > 2 ? `${parts[0].slice(0, 2)}***` : `${parts[0]}***`;
+  }
+  return parts
+    .map((part, index) => {
+      if (index === 0) return part;
+      return `${part.charAt(0)}.`;
+    })
+    .join(" ");
+}
 
 export async function GET(
   request: Request,
@@ -60,6 +75,36 @@ export async function GET(
       email: null,
       adresse: "Gbégamey, Cotonou, Bénin",
     };
+
+    // Contrôle d'accès : Session CRM staff ou vérification des 4 derniers chiffres du téléphone
+    const session = await auth();
+    const isStaff = !!session?.user;
+
+    const url = new URL(request.url);
+    const phoneInput = url.searchParams.get("phone") || url.searchParams.get("phoneSuffix") || "";
+    const cleanClientPhone = (client.telephone || "").replace(/\D/g, "");
+    const cleanInputPhone = phoneInput.replace(/\D/g, "");
+    const isUnlocked =
+      isStaff ||
+      (cleanInputPhone.length >= 4 &&
+        cleanClientPhone.length >= 4 &&
+        cleanClientPhone.endsWith(cleanInputPhone.slice(-4)));
+
+    if (!isUnlocked) {
+      return NextResponse.json({
+        success: true,
+        isUnlocked: false,
+        requiresVerification: true,
+        document: {
+          numero: doc.numero,
+          type: doc.type,
+          typeFacture: doc.typeFacture,
+          clientNom: maskClientName(client.nom),
+        },
+        message:
+          "Vérification requise : veuillez renseigner les 4 derniers chiffres du numéro de téléphone associé à ce dossier pour afficher ce document.",
+      });
+    }
 
     // Recalcul du montant total conforme
     let docMontant = doc.montant;
@@ -155,7 +200,7 @@ export async function GET(
         : null,
     };
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true, isUnlocked: true, data });
   } catch (error: any) {
     console.error("Erreur récupération document JSON:", error);
     return NextResponse.json(

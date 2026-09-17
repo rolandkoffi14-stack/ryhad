@@ -111,14 +111,26 @@ export async function checkRateLimit(
  * Extrait l'adresse IP du client depuis les en-têtes de la requête
  */
 export function getClientIp(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
+  // 1. En-tête certifié Cloudflare Edge
+  const cfIp = request.headers.get("cf-connecting-ip");
+  if (cfIp) {
+    return cfIp.trim();
   }
+
+  // 2. En-tête certifié Nginx / Vercel
   const realIp = request.headers.get("x-real-ip");
   if (realIp) {
     return realIp.trim();
   }
+
+  // 3. En-tête standard avec proxy chain : le dernier élément est le plus proche de l'infrastructure
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) {
+    const parts = forwarded.split(",");
+    const clientIp = parts[parts.length - 1]?.trim();
+    if (clientIp) return clientIp;
+  }
+
   return "127.0.0.1";
 }
 

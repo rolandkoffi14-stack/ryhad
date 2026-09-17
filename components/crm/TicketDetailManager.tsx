@@ -1080,12 +1080,14 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                 typeof window !== "undefined"
                   ? window.location.origin
                   : (process.env.NEXT_PUBLIC_APP_URL || "https://ryhad.2krdigital.online");
+              const cleanPhone = (ticket.client.telephone || "").replace(/\D/g, "");
+              const phoneParam = cleanPhone.length >= 4 ? `?phone=${cleanPhone.slice(-4)}` : "";
               let waText = `Bonjour ${ticket.client.nom},\n\n`;
 
               if (devisDoc && (ticket.statut === InterventionStatut.DIAGNOSTIC_TERMINE || ticket.statut === InterventionStatut.DEVIS_ENVOYE)) {
-                waText += `Votre devis de réparation RyHaD Tic-Medic est disponible :\n📄 Devis N° : ${devisDoc.numero}\n💰 Montant estimé : ${formatFCFA(devisDoc.montant)}\n⚙️ Matériel : ${ticket.typeMateriel.replace(/_/g, " ")}\n\n👉 Consulter votre devis officiel :\n${appBaseUrl}/documents/${devisDoc.numero}\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou`;
+                waText += `Votre devis de réparation RyHaD Tic-Medic est disponible :\n📄 Devis N° : ${devisDoc.numero}\n💰 Montant estimé : ${formatFCFA(devisDoc.montant)}\n⚙️ Matériel : ${ticket.typeMateriel.replace(/_/g, " ")}\n\n👉 Consulter votre devis officiel :\n${appBaseUrl}/documents/${devisDoc.numero}${phoneParam}\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou`;
               } else if (repDoc && ticket.statut === InterventionStatut.DEVIS_ACCEPTE) {
-                waText += `Votre facture de réparation N° ${repDoc.numero} (${formatFCFA(repDoc.montant)}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} chez RyHaD Tic-Medic est disponible.\n\n👉 Consulter votre facture officielle :\n${appBaseUrl}/documents/${repDoc.numero}\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}`;
+                waText += `Votre facture de réparation N° ${repDoc.numero} (${formatFCFA(repDoc.montant)}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} chez RyHaD Tic-Medic est disponible.\n\n👉 Consulter votre facture officielle :\n${appBaseUrl}/documents/${repDoc.numero}${phoneParam}\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}`;
               } else if (ticket.statut === InterventionStatut.TERMINE) {
                 waText += `Bonne nouvelle ! Votre ${ticket.typeMateriel.replace(/_/g, " ")} (Dossier ${ticket.numero}) est réparé et disponible à notre atelier de Gbégamey pour retrait.\n\n🔍 Suivre votre dossier :\n${appBaseUrl}/suivi/${ticket.numero}`;
               } else {
@@ -1559,19 +1561,24 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                         <span className={`text-[9px] px-2 py-0.5 rounded border ${badgeClass}`}>
                           {badgeLabel}
                         </span>
-                        {ticket.client.telephone && (
-                          <a
-                            href={`https://wa.me/${ticket.client.telephone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                              `Bonjour ${ticket.client.nom},\n\nVoici votre ${label} RyHaD Tic-Medic :\n📄 Réf : ${doc.numero}\n💰 Montant : ${formatFCFA(doc.montant)}\n\n👉 Consulter votre document officiel :\n${typeof window !== "undefined" ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || "https://ryhad.2krdigital.online")}/documents/${doc.numero}\n\n🔍 Suivi de votre dossier : ${typeof window !== "undefined" ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || "https://ryhad.2krdigital.online")}/suivi/${ticket.numero}`
-                            )}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            title="Partager ce document sur WhatsApp"
-                            className="p-1 rounded bg-white hover:bg-[#25D366] hover:text-white text-[#128C7E] border border-gray-200 transition-all inline-flex items-center shadow-xs"
-                          >
-                            <MessageCircle className="w-3 h-3" />
-                          </a>
-                        )}
+                        {ticket.client.telephone && (() => {
+                          const docOrigin = typeof window !== "undefined" ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || "https://ryhad.2krdigital.online");
+                          const cleanP = (ticket.client.telephone || "").replace(/\D/g, "");
+                          const pParam = cleanP.length >= 4 ? `?phone=${cleanP.slice(-4)}` : "";
+                          return (
+                            <a
+                              href={`https://wa.me/${ticket.client.telephone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                                `Bonjour ${ticket.client.nom},\n\nVoici votre ${label} RyHaD Tic-Medic :\n📄 Réf : ${doc.numero}\n💰 Montant : ${formatFCFA(doc.montant)}\n\n👉 Consulter votre document officiel :\n${docOrigin}/documents/${doc.numero}${pParam}\n\n🔍 Suivi de votre dossier : ${docOrigin}/suivi/${ticket.numero}`
+                              )}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              title="Partager ce document sur WhatsApp"
+                              className="p-1 rounded bg-white hover:bg-[#25D366] hover:text-white text-[#128C7E] border border-gray-200 transition-all inline-flex items-center shadow-xs"
+                            >
+                              <MessageCircle className="w-3 h-3" />
+                            </a>
+                          );
+                        })()}
                         <button
                           type="button"
                           onClick={() =>

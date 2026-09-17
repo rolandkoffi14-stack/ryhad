@@ -109,7 +109,7 @@ export function PrintDocumentModal({
       ? window.location.origin
       : (process.env.NEXT_PUBLIC_APP_URL || "https://ryhad.2krdigital.online");
 
-  // Préparation du message WhatsApp officiel RyHaD
+  // Préparation du message WhatsApp officiel RyHaD avec déverrouillage automatique sécurisé
   let waText = "";
   if (data) {
     const clientNom = data.client.nom;
@@ -119,7 +119,11 @@ export function PrintDocumentModal({
         : data.type === "DEVIS"
         ? "Devis"
         : "Facture";
-    waText = `Bonjour ${clientNom},\n\nVoici votre ${typeLibelle} officiel RyHaD Tic-Medic :\n📄 N° : ${data.numero}\n💰 Montant : ${formatFCFA(data.montant)}\n\n👉 Consulter et télécharger votre document officiel :\n${appOrigin}/documents/${data.numero}`;
+    const cleanPhone = (data.client.telephone || "").replace(/\D/g, "");
+    const phoneParam = cleanPhone.length >= 4 ? `?phone=${cleanPhone.slice(-4)}` : "";
+    const docUrl = `${appOrigin}/documents/${data.numero}${phoneParam}`;
+
+    waText = `Bonjour ${clientNom},\n\nVoici votre ${typeLibelle} officiel RyHaD Tic-Medic :\n📄 N° : ${data.numero}\n💰 Montant : ${formatFCFA(data.montant)}\n\n👉 Consulter et télécharger votre document officiel :\n${docUrl}`;
     if (data.intervention?.numero) {
       waText += `\n\n🔍 Suivi de votre matériel en direct :\n${appOrigin}/suivi/${data.intervention.numero}`;
     }

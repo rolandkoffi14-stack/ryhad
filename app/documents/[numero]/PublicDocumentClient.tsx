@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { DocumentPrintData } from "@/types/documents";
 import { DocumentPrintTemplate } from "@/components/documents/DocumentPrintTemplate";
+import { DocumentUnlockGate } from "./DocumentUnlockGate";
 import { Printer, FileText, Receipt, ArrowLeft, MessageCircle, ExternalLink, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { formatFCFA } from "@/lib/format";
@@ -11,19 +12,27 @@ interface Props {
   data: DocumentPrintData;
   initialFormat: "a4" | "ticket";
   autoPrint: boolean;
+  initialUnlocked?: boolean;
 }
 
-export function PublicDocumentClient({ data, initialFormat, autoPrint }: Props) {
+export function PublicDocumentClient({
+  data: initialData,
+  initialFormat,
+  autoPrint,
+  initialUnlocked = true,
+}: Props) {
+  const [data, setData] = useState<DocumentPrintData>(initialData);
+  const [unlocked, setUnlocked] = useState(initialUnlocked);
   const [format, setFormat] = useState<"a4" | "ticket">(initialFormat);
 
   useEffect(() => {
-    if (autoPrint) {
+    if (autoPrint && unlocked) {
       const timer = setTimeout(() => {
         window.print();
       }, 400);
       return () => clearTimeout(timer);
     }
-  }, [autoPrint]);
+  }, [autoPrint, unlocked]);
 
   const docTitle =
     data.typeFacture === "DIAGNOSTIC"
@@ -33,6 +42,34 @@ export function PublicDocumentClient({ data, initialFormat, autoPrint }: Props) 
       : "Facture officielle";
 
   const waSupportText = `Bonjour RyHaD Tic-Medic, je vous contacte concernant mon document N° ${data.numero} (${formatFCFA(data.montant)}).`;
+
+  if (!unlocked) {
+    return (
+      <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center py-8 px-4">
+        <header className="w-full max-w-lg mb-4 flex items-center justify-between">
+          <Link
+            href="/"
+            className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-200/60 transition-colors inline-flex items-center gap-1.5 text-xs font-bold"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Retour à l'accueil RyHaD</span>
+          </Link>
+          <span className="text-xs font-mono font-bold text-slate-400">
+            {data.numero}
+          </span>
+        </header>
+        <DocumentUnlockGate
+          documentNumero={data.numero}
+          documentType={data.type}
+          maskedClientName={data.client.nom}
+          onUnlocked={(unlockedData) => {
+            setData(unlockedData);
+            setUnlocked(true);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 flex flex-col items-center py-4 sm:py-8 px-2 sm:px-4">

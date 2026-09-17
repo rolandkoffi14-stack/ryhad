@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import { DocumentPrintData } from "@/types/documents";
 import { DocumentType } from "@prisma/client";
@@ -11,7 +12,21 @@ export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ numero: string }>;
-  searchParams: Promise<{ format?: string; auto?: string }>;
+  searchParams: Promise<{ format?: string; auto?: string; phone?: string; phoneSuffix?: string }>;
+}
+
+function maskClientName(name: string): string {
+  if (!name) return "Client";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return parts[0].length > 2 ? `${parts[0].slice(0, 2)}***` : `${parts[0]}***`;
+  }
+  return parts
+    .map((part, index) => {
+      if (index === 0) return part;
+      return `${part.charAt(0)}.`;
+    })
+    .join(" ");
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -29,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PublicDocumentPage({ params, searchParams }: Props) {
   const { numero } = await params;
-  const { format: reqFormat, auto } = await searchParams;
+  const { format: reqFormat, auto, phone, phoneSuffix } = await searchParams;
 
   const cleanNum = decodeURIComponent(numero).toUpperCase().trim();
 
@@ -68,6 +83,18 @@ export default async function PublicDocumentPage({ params, searchParams }: Props
     email: null,
     adresse: "Gbégamey, Cotonou, Bénin",
   };
+
+  // Contrôle d'accès : Session CRM staff ou vérification des 4 derniers chiffres du téléphone
+  const session = await auth();
+  const isStaff = !!session?.user;
+
+  const cleanClientPhone = (client.telephone || "").replace(/\D/g, "");
+  const cleanInputPhone = (phone || phoneSuffix || "").replace(/\D/g, "");
+  const isUnlocked =
+    isStaff ||
+    (cleanInputPhone.length >= 4 &&
+      cleanClientPhone.length >= 4 &&
+      cleanClientPhone.endsWith(cleanInputPhone.slice(-4)));
 
   let docMontant = doc.montant;
   if (
@@ -123,19 +150,28 @@ export default async function PublicDocumentPage({ params, searchParams }: Props
       datePaiement: format(new Date(t.datePaiement), "dd/MM/yyyy 'à' HH:mm", { locale: fr }),
       note: t.note,
     })),
-    client: {
-      nom: client.nom || "Client",
-      telephone: client.telephone || "",
-      email: client.email || null,
-      adresse: client.adresse || null,
-    },
+    client: isUnlocked
+      ? {
+          nom: client.nom || "Client",
+          telephone: client.telephone || "",
+          email: client.email || null,
+          adresse: client.adresse || null,
+        }
+      : {
+          nom: maskClientName(client.nom),
+          telephone: client.telephone
+            ? `+229 •• •• •• ${client.telephone.replace(/\D/g, "").slice(-2)}`
+            : "",
+          email: null,
+          adresse: "Cotonou, Bénin (accès restreint)",
+        },
     intervention: doc.intervention
       ? {
           id: doc.intervention.id,
           numero: doc.intervention.numero,
           typeMateriel: doc.intervention.typeMateriel || "MATÉRIEL",
-          panneDeclaree: doc.intervention.panneDeclaree || "Non spécifiée",
-          diagnosticTechnicien: doc.intervention.diagnosticTechnicien || null,
+          panneDeclaree: isUnlocked ? (doc.intervention.panneDeclaree || "Non spécifiée") : "Détails confidentiels (saisissez votre téléphone)",
+          diagnosticTechnicien: isUnlocked ? (doc.intervention.diagnosticTechnicien || null) : null,
           montantMainOeuvre: doc.intervention.montantMainOeuvre || 0,
           libelleMainOeuvre: doc.intervention.libelleMainOeuvre || null,
           piecesUtilisees: (doc.intervention.piecesUtilisees || []).map((p) => ({
@@ -156,7 +192,7 @@ export default async function PublicDocumentPage({ params, searchParams }: Props
       ? {
           id: doc.demandeCommerciale.id,
           typeDemande: doc.demandeCommerciale.typeDemande.replace(/_/g, " "),
-          description: doc.demandeCommerciale.description || "",
+          description: isUnlocked ? (doc.demandeCommerciale.description || "") : "Détails confidentiels",
           articles: commercialArticles,
         }
       : null,
@@ -170,6 +206,7 @@ export default async function PublicDocumentPage({ params, searchParams }: Props
       data={data}
       initialFormat={initialFormat}
       autoPrint={shouldAutoPrint}
+      initialUnlocked={isUnlocked}
     />
   );
 }

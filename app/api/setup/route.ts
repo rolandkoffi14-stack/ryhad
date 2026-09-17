@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // 5. Envoi du mail de bienvenue avec ses accès
+    // 5. Envoi du mail de confirmation sans mot de passe en clair
     try {
       const { sendWelcomeUserEmail } = await import("@/lib/services/email");
       const { env } = await import("@/lib/env");
@@ -85,8 +85,7 @@ export async function POST(request: Request) {
         email: adminUser.email,
         firstName: adminUser.firstName,
         role: adminUser.role,
-        temporaryPassword: validatedData.password,
-        loginUrl: `${env.NEXT_PUBLIC_APP_URL || "https://www.ryhad.bj"}/login`,
+        loginUrl: `${env.NEXT_PUBLIC_APP_URL || "https://www.ryhad.bj"}/crm`,
       });
     } catch (mailErr) {
       console.error("Erreur lors de l'envoi du mail de bienvenue admin (non bloquant):", mailErr);
