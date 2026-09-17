@@ -11,11 +11,39 @@ import {
   StatutPaiement,
 } from "@prisma/client";
 
+import { isValidBeninPhone, normalizeBeninPhone } from "@/lib/format/phone";
+
+// Schéma réutilisable de téléphone béninois (validation 10 chiffres + normalisation automatique)
+export const beninPhoneSchema = z
+  .string()
+  .min(1, "Numéro de téléphone requis")
+  .refine(
+    (val) => isValidBeninPhone(val),
+    {
+      message: "Numéro de téléphone béninois invalide. Format attendu : 10 chiffres (ex: 01 90 88 13 14 ou +229 01 90 88 13 14)",
+    }
+  )
+  .transform((val) => normalizeBeninPhone(val));
+
+// Schéma réutilisable d'email optionnel (transforme chaîne vide en null et minuscules)
+export const optionalEmailSchema = z
+  .string()
+  .optional()
+  .nullable()
+  .transform((val) => {
+    if (!val || val.trim() === "") return null;
+    return val.trim().toLowerCase();
+  })
+  .refine(
+    (val) => val === null || z.string().email().safeParse(val).success,
+    { message: "Adresse email invalide" }
+  );
+
 // Formulaire public de demande d'intervention
 export const interventionRequestSchema = z.object({
   nom: z.string().min(2, "Le nom doit comporter au moins 2 caractères"),
-  telephone: z.string().min(8, "Numéro de téléphone invalide (ex: +229 01 90 88 13 14)"),
-  email: z.string().email("Adresse email invalide").optional().or(z.literal("")),
+  telephone: beninPhoneSchema,
+  email: optionalEmailSchema,
   adresse: z.string().optional(),
   typeMateriel: z.nativeEnum(TypeMateriel, {
     errorMap: () => ({ message: "Veuillez sélectionner un type de matériel valide" }),
@@ -32,8 +60,8 @@ export type InterventionRequestInput = z.infer<typeof interventionRequestSchema>
 // Formulaire public de demande commerciale (Vente / Location / Formation)
 export const commercialRequestSchema = z.object({
   nom: z.string().min(2, "Le nom doit comporter au moins 2 caractères"),
-  telephone: z.string().min(8, "Numéro de téléphone requis"),
-  email: z.string().email("Adresse email invalide").optional().or(z.literal("")),
+  telephone: beninPhoneSchema,
+  email: optionalEmailSchema,
   entreprise: z.string().optional(),
   typeDemande: z.nativeEnum(TypeDemandeCommerciale, {
     errorMap: () => ({ message: "Veuillez sélectionner le type de demande" }),
@@ -46,8 +74,8 @@ export type CommercialRequestInput = z.infer<typeof commercialRequestSchema>;
 // Formulaire public de contact général
 export const contactFormSchema = z.object({
   nom: z.string().min(2, "Le nom doit comporter au moins 2 caractères"),
-  telephone: z.string().min(8, "Numéro de téléphone requis"),
-  email: z.string().email("Adresse email invalide").optional().or(z.literal("")),
+  telephone: beninPhoneSchema,
+  email: optionalEmailSchema,
   sujet: z.string().min(2, "Objet de la demande requis"),
   message: z.string().min(10, "Le message doit comporter au moins 10 caractères"),
 });
@@ -59,8 +87,8 @@ export const clientFormSchema = z.object({
   type: z.nativeEnum(ClientType),
   nom: z.string().min(2, "Nom requis"),
   contactNom: z.string().optional(),
-  telephone: z.string().min(8, "Téléphone requis"),
-  email: z.string().email().optional().or(z.literal("")),
+  telephone: beninPhoneSchema,
+  email: optionalEmailSchema,
   adresse: z.string().optional(),
 });
 

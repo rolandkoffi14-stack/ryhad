@@ -12,9 +12,10 @@ import { InstallPwaHeaderButton } from "@/components/pwa/InstallPwaHeaderButton"
 interface Props {
   user: SessionUser;
   onMenuToggle?: () => void;
+  onRequestLogout?: () => void;
 }
 
-export function CrmHeader({ user, onMenuToggle }: Props) {
+export function CrmHeader({ user, onMenuToggle, onRequestLogout }: Props) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +53,12 @@ export function CrmHeader({ user, onMenuToggle }: Props) {
   };
 
   const handleSignOut = async () => {
-    await signOut({ callbackUrl: "/login" });
+    setShowUserMenu(false);
+    if (onRequestLogout) {
+      onRequestLogout();
+    } else {
+      await signOut({ callbackUrl: "/login" });
+    }
   };
 
   return (

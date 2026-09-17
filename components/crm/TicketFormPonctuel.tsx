@@ -360,13 +360,14 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
                   <input
                     type="tel"
                     required
-                    placeholder="Numéro de téléphone"
+                    placeholder="Ex: 01 90 88 13 14"
                     value={newClient.telephone}
                     onChange={(e) =>
                       setNewClient({ ...newClient, telephone: e.target.value })
                     }
                     className="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none font-medium"
                   />
+                  <p className="text-[10px] text-gray-500 mt-0.5">Bénin 10 chiffres (préfixe 01)</p>
                 </div>
               </div>
 
@@ -391,7 +392,7 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
                   </label>
                   <input
                     type="text"
-                    placeholder="Adresse"
+                    placeholder="Quartier ou adresse"
                     value={newClient.adresse}
                     onChange={(e) =>
                       setNewClient({ ...newClient, adresse: e.target.value })
@@ -402,11 +403,11 @@ export function TicketFormPonctuel({ clients, technicians, preselectedClientId }
 
                 <div>
                   <label className="block text-[11px] font-bold text-gray-700 mb-1">
-                    Email
+                    Email (optionnel mais unique)
                   </label>
                   <input
                     type="email"
-                    placeholder="Email"
+                    placeholder="client@domaine.bj"
                     value={newClient.email}
                     onChange={(e) =>
                       setNewClient({ ...newClient, email: e.target.value })

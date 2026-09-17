@@ -23,10 +23,10 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validatedData = interventionRequestSchema.parse(body);
 
-    // 1. Rechercher ou créer le client par téléphone
-    let client = await db.client.findFirst({
+    // 1. Rechercher le client par téléphone (normalisé) ou par email
+    let client = await db.client.findUnique({
       where: {
-        telephone: validatedData.telephone.trim(),
+        telephone: validatedData.telephone,
       },
       include: {
         contrats: {
@@ -37,19 +37,52 @@ export async function POST(request: Request) {
       },
     });
 
+    // Si non trouvé par téléphone et qu'un email est renseigné, chercher par email
+    if (!client && validatedData.email) {
+      client = await db.client.findUnique({
+        where: {
+          email: validatedData.email,
+        },
+        include: {
+          contrats: {
+            where: {
+              statut: ContractStatus.ACTIF,
+            },
+          },
+        },
+      });
+    }
+
     if (!client) {
       client = await db.client.create({
         data: {
           type: ClientType.PARTICULIER,
           nom: validatedData.nom.trim(),
-          telephone: validatedData.telephone.trim(),
-          email: validatedData.email ? validatedData.email.trim() : null,
+          telephone: validatedData.telephone,
+          email: validatedData.email || null,
           adresse: validatedData.adresse ? validatedData.adresse.trim() : null,
         },
         include: {
           contrats: true,
         },
       });
+    } else if (!client.email && validatedData.email) {
+      // Enrichir l'email du client existant si absent
+      try {
+        client = await db.client.update({
+          where: { id: client.id },
+          data: { email: validatedData.email },
+          include: {
+            contrats: {
+              where: {
+                statut: ContractStatus.ACTIF,
+              },
+            },
+          },
+        });
+      } catch {
+        // En cas de conflit d'email concurrent, ne pas interrompre la création du ticket
+      }
     }
 
     // 2. Déterminer le parcours (PONCTUEL ou CONTRACTUEL selon contrat actif)
@@ -124,7 +157,8 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error("Erreur création demande intervention:", error);
     if (error.name === "ZodError") {
-      return NextResponse.json({ success: false, errors: error.errors }, { status: 400 });
+      const firstMsg = error.errors?.[0]?.message || "Données du formulaire invalides";
+      return NextResponse.json({ success: false, message: firstMsg, errors: error.errors }, { status: 400 });
     }
     return NextResponse.json(
       { success: false, message: "Une erreur est survenue lors de l'enregistrement de votre demande." },

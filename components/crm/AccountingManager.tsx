@@ -27,6 +27,7 @@ import {
   Printer,
 } from "lucide-react";
 import { formatFCFA } from "@/lib/format";
+import { toWhatsAppNumber } from "@/lib/format/phone";
 import { format, differenceInDays } from "date-fns";
 import { fr } from "date-fns/locale";
 import { PaginationControls } from "@/components/crm/PaginationControls";
@@ -1080,7 +1081,7 @@ export function AccountingManager({ documents }: Props) {
                       );
 
                       const whatsappUrl = client?.telephone
-                        ? `https://wa.me/229${client.telephone.replace(/\s+/g, "").replace(/^\+229/, "")}?text=${whatsappText}`
+                        ? `https://wa.me/${toWhatsAppNumber(client.telephone)}?text=${whatsappText}`
                         : null;
 
                       return (

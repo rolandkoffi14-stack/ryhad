@@ -123,9 +123,9 @@ export function PrintDocumentModal({
     const phoneParam = cleanPhone.length >= 4 ? `?phone=${cleanPhone.slice(-4)}` : "";
     const docUrl = `${appOrigin}/documents/${data.numero}${phoneParam}`;
 
-    waText = `Bonjour ${clientNom},\n\nVoici votre ${typeLibelle} officiel RyHaD Tic-Medic :\n📄 N° : ${data.numero}\n💰 Montant : ${formatFCFA(data.montant)}\n\n👉 Consulter et télécharger votre document officiel :\n${docUrl}`;
+    waText = `Bonjour ${clientNom},\n\nVoici votre ${typeLibelle} officiel RyHaD Tic-Medic :\n• Référence : ${data.numero}\n• Montant : ${formatFCFA(data.montant)}\n\nConsulter et télécharger votre document officiel :\n${docUrl}`;
     if (data.intervention?.numero) {
-      waText += `\n\n🔍 Suivi de votre matériel en direct :\n${appOrigin}/suivi/${data.intervention.numero}`;
+      waText += `\n\nSuivi de votre matériel en direct :\n${appOrigin}/suivi/${data.intervention.numero}`;
     }
     waText += `\n\nRyHaD Tic-Medic • Gbégamey, Cotonou\nTél : +229 01 90 88 13 14`;
   }

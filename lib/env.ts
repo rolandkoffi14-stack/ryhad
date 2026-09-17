@@ -24,7 +24,7 @@ const envSchema = z.object({
 function validateEnv() {
   const parsed = envSchema.safeParse(process.env);
   if (!parsed.success) {
-    console.error("❌ ERREUR DE CONFIGURATION ENVIRONNEMENT :");
+    console.error("[CONFIG ERROR] Erreur de configuration de l'environnement :");
     console.error(parsed.error.format());
     // En production, lever une erreur bloquante explicite
     if (process.env.NODE_ENV === "production") {

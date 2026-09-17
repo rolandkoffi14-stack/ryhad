@@ -77,7 +77,7 @@ export function DocumentUnlockGate({
           <Lock className="w-7 h-7 text-brand-blue" />
         </div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-xs font-semibold text-slate-600 mb-2">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+          <ShieldCheck className="w-3.5 h-3.5 text-brand-blue" />
           <span>Espace Client Sécurisé • RyHaD Tic-Medic</span>
         </div>
         <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">

@@ -33,6 +33,8 @@ import {
   MessageCircle,
   Laptop,
   Printer,
+  RotateCcw,
+  CalendarPlus,
 } from "lucide-react";
 import { formatFCFA } from "@/lib/format";
 import { format, isToday, isBefore, isAfter, startOfDay, differenceInDays } from "date-fns";
@@ -1273,7 +1275,8 @@ export function ContractEnterpriseView({
                       }`}
                     >
                       <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                        <span>🔄 Réajuster le planning</span>
+                        <RotateCcw className="w-4 h-4 text-brand-blue shrink-0" />
+                        <span>Réajuster le planning</span>
                       </div>
                       <p className="text-[11px] text-slate-500 mt-1 leading-snug">
                         Reprogramme les visites futures non démarrées du cycle en cours. Les factures sont préservées.
@@ -1290,7 +1293,8 @@ export function ContractEnterpriseView({
                       }`}
                     >
                       <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                        <span>📅 Prolonger le contrat</span>
+                        <CalendarPlus className="w-4 h-4 text-brand-blue shrink-0" />
+                        <span>Prolonger le contrat</span>
                       </div>
                       <p className="text-[11px] text-slate-500 mt-1 leading-snug">
                         Ajoute un nouveau cycle ({selectedContract.dateFin ? "prolongation CDD" : "+12 mois CDI"}) à la suite du calendrier.

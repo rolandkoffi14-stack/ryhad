@@ -228,13 +228,13 @@ export function InterventionRequestForm({ initialType }: Props) {
             <input
               type="tel"
               required
-              placeholder="Numéro de téléphone"
+              placeholder="Ex: 01 90 88 13 14"
               value={formData.telephone}
               onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
               className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"
             />
             <p className="text-[10px] text-gray-500 mt-1">
-              Si vous avez un contrat actif, nous le détecterons automatiquement via ce numéro.
+              Format Bénin 10 chiffres (ex: 01 90 88 13 14). Permet la détection automatique de vos contrats.
             </p>
           </div>
         </div>
@@ -246,11 +246,14 @@ export function InterventionRequestForm({ initialType }: Props) {
             </label>
             <input
               type="email"
-              placeholder="Email"
+              placeholder="votre.email@exemple.com"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full px-3.5 py-2.5 rounded-lg border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue focus:border-brand-blue outline-none transition-all"
             />
+            <p className="text-[10px] text-gray-500 mt-1">
+              Pour la réception instantanée de vos devis et avis de fin d&apos;intervention.
+            </p>
           </div>
 
           <div>

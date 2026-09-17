@@ -21,12 +21,20 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validatedData = commercialRequestSchema.parse(body);
 
-    // 1. Rechercher ou créer le client
-    let client = await db.client.findFirst({
+    // 1. Rechercher le client par téléphone (normalisé) ou par email
+    let client = await db.client.findUnique({
       where: {
-        telephone: validatedData.telephone.trim(),
+        telephone: validatedData.telephone,
       },
     });
+
+    if (!client && validatedData.email) {
+      client = await db.client.findUnique({
+        where: {
+          email: validatedData.email,
+        },
+      });
+    }
 
     if (!client) {
       client = await db.client.create({
@@ -36,10 +44,19 @@ export async function POST(request: Request) {
             ? `${validatedData.entreprise.trim()} (${validatedData.nom.trim()})`
             : validatedData.nom.trim(),
           contactNom: validatedData.entreprise ? validatedData.nom.trim() : null,
-          telephone: validatedData.telephone.trim(),
-          email: validatedData.email ? validatedData.email.trim() : null,
+          telephone: validatedData.telephone,
+          email: validatedData.email || null,
         },
       });
+    } else if (!client.email && validatedData.email) {
+      try {
+        client = await db.client.update({
+          where: { id: client.id },
+          data: { email: validatedData.email },
+        });
+      } catch {
+        // En cas de conflit d'email concurrent, ne pas bloquer la demande
+      }
     }
 
     // 2. Créer la demande commerciale séparée (modèle DemandeCommerciale)
@@ -74,7 +91,8 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error("Erreur création demande commerciale:", error);
     if (error.name === "ZodError") {
-      return NextResponse.json({ success: false, errors: error.errors }, { status: 400 });
+      const firstMsg = error.errors?.[0]?.message || "Données du formulaire invalides";
+      return NextResponse.json({ success: false, message: firstMsg, errors: error.errors }, { status: 400 });
     }
     return NextResponse.json(
       { success: false, message: "Une erreur est survenue lors de l'enregistrement de votre demande." },

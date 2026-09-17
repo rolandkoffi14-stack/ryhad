@@ -40,7 +40,7 @@ export async function sendInterventionNotification({
     const atelierRes = await resend.emails.send({
       from: emailFrom,
       to: workshopEmail,
-      subject: `🚨 Nouveau Ticket Reçu : ${numeroTicket} (${clientNom})`,
+      subject: `Nouveau Ticket Reçu : ${numeroTicket} (${clientNom})`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B;">
           <h2 style="color: #1E4D8B;">Nouveau dossier d'intervention déposé</h2>
@@ -121,7 +121,7 @@ export async function sendCommercialNotification(data: {
     await resend.emails.send({
       from: emailFrom,
       to: workshopEmail,
-      subject: `💼 Demande Commerciale : ${data.typeDemande.replace(/_/g, " ")} (${data.nom})`,
+      subject: `Demande Commerciale : ${data.typeDemande.replace(/_/g, " ")} (${data.nom})`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B;">
           <h2 style="color: #1E4D8B;">Nouvelle demande commerciale reçue</h2>
@@ -166,7 +166,7 @@ export async function sendContactNotification(data: {
       from: emailFrom,
       to: workshopEmail,
       replyTo: data.email || undefined,
-      subject: `📩 Message de Contact Site : ${data.sujet} (${data.nom})`,
+      subject: `Message de Contact : ${data.sujet} (${data.nom})`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B;">
           <h2 style="color: #1E4D8B;">Nouveau message reçu depuis le site RyHaD Tic-Medic</h2>
@@ -213,7 +213,7 @@ export async function sendPasswordResetEmail({
     const res = await resend.emails.send({
       from: emailFrom,
       to: email,
-      subject: "🔒 Réinitialisation de votre mot de passe — RyHaD Tic-Medic",
+      subject: "Réinitialisation de votre mot de passe — RyHaD Tic-Medic",
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 25px;">
@@ -275,16 +275,16 @@ export async function sendPasswordChangedAlert({
     await resend.emails.send({
       from: emailFrom,
       to: email,
-      subject: "🛡️ Confirmation : votre mot de passe a été modifié — RyHaD Tic-Medic",
+      subject: "Confirmation : votre mot de passe a été modifié — RyHaD Tic-Medic",
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #2CA58D;">Mot de passe mis à jour avec succès</h2>
           <p>Bonjour <strong>${firstName}</strong>,</p>
           <p>Nous vous confirmons que le mot de passe de votre compte staff <strong>${email}</strong> vient d'être modifié avec succès.</p>
           <p>Si vous êtes à l'origine de cette action, aucune démarche supplémentaire n'est requise.</p>
-          <p style="color: #E2574C; font-size: 13px; font-weight: bold; margin-top: 20px;">
-            ⚠️ Si vous n'avez pas modifié votre mot de passe, contactez immédiatement l'administrateur de l'atelier RyHaD.
-          </p>
+          <div style="background-color: #FDEEEC; border-left: 4px solid #E2574C; padding: 12px; margin-top: 20px; border-radius: 4px; color: #E2574C; font-size: 13px; font-weight: bold;">
+            Attention : Si vous n'avez pas modifié votre mot de passe, contactez immédiatement l'administrateur de l'atelier RyHaD.
+          </div>
         </div>
       `,
     });
@@ -331,7 +331,7 @@ export async function sendWelcomeUserEmail({
     const res = await resend.emails.send({
       from: emailFrom,
       to: email,
-      subject: "🎉 Bienvenue dans l'équipe RyHaD Tic-Medic — Vos accès CRM",
+      subject: "Bienvenue dans l'équipe RyHaD Tic-Medic — Vos accès CRM",
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 25px;">

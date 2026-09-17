@@ -139,7 +139,7 @@ export async function notifyNewInterventionToStaff(ticket: {
 
   if (!allStaffIds.length) return;
 
-  const titre = `🚨 Nouveau Ticket : ${ticket.numero}`;
+  const titre = `Nouveau Ticket : ${ticket.numero}`;
   const message = `Client ${ticket.clientNom} (${ticket.clientTelephone}) — ${ticket.typeMateriel.replace(/_/g, " ")} : ${ticket.panneDeclaree}`;
   const lien = `/crm/tickets/ponctuel`;
 
@@ -167,7 +167,7 @@ export async function notifyNewInterventionToStaff(ticket: {
     type: NotificationType.TICKET_CREE,
     lien,
     sendPush: true,
-    emailSubject: `🚨 Nouveau Ticket Reçu : ${ticket.numero} (${ticket.clientNom})`,
+    emailSubject: `Nouveau Ticket Reçu : ${ticket.numero} (${ticket.clientNom})`,
     emailHtml,
   });
 }
@@ -194,7 +194,7 @@ export async function notifyTechAssigned(
 
   if (!tech || !tech.isActive) return;
 
-  const titre = `🛠️ Nouveau dossier assigné : ${ticket.numero}`;
+  const titre = `Nouveau dossier assigné : ${ticket.numero}`;
   const message = `Le dossier ${ticket.numero} (${ticket.typeMateriel.replace(/_/g, " ")}) pour ${ticket.clientNom} vous a été confié.`;
   const lien = `/crm/tickets/${ticket.id}`;
 
@@ -225,7 +225,7 @@ export async function notifyTechAssigned(
     type: NotificationType.TICKET_ASSIGNE,
     lien,
     sendPush: true,
-    emailSubject: `🛠️ Nouveau Dossier Assigné : ${ticket.numero} (${ticket.typeMateriel.replace(/_/g, " ")})`,
+    emailSubject: `Nouveau Dossier Assigné : ${ticket.numero} (${ticket.typeMateriel.replace(/_/g, " ")})`,
     emailHtml,
   });
 }
@@ -257,7 +257,7 @@ export async function notifyDiagTermineToStaff({
   const receptionIds = reception.map((r) => r.id);
   if (!receptionIds.length) return;
 
-  const titre = `📋 Devis prêt à envoyer : ${numero}`;
+  const titre = `Devis prêt à envoyer : ${numero}`;
   const message = `Diagnostic terminé pour ${clientNom} (${typeMateriel.replace(/_/g, " ")}). Devis chiffré à ${formatFCFA(montantDevis)}. Prêt pour transmission.`;
 
   await sendStaffNotification({
@@ -294,7 +294,7 @@ export async function notifyDevisAccepteEnLigneToStaff({
   const receptionIds = reception.map((r) => r.id);
   if (!receptionIds.length) return;
 
-  const titre = `✅ Devis validé en ligne : ${numero}`;
+  const titre = `Devis validé en ligne : ${numero}`;
   const message = `Le client ${clientNom} a validé son devis depuis le portail de suivi. Facture émise en attente de règlement.`;
 
   await sendStaffNotification({
@@ -340,7 +340,7 @@ export async function notifyPaymentReceivedToTech({
 
   if (!tech || !tech.isActive) return;
 
-  const titre = `💰 Règlement encaissé — Feu vert : ${numero}`;
+  const titre = `Règlement encaissé — Feu vert : ${numero}`;
   const message = `La ${typeFactureLibelle} (${formatFCFA(montant)}) pour ${clientNom} (${typeMateriel.replace(/_/g, " ")}) a été encaissée. Vous pouvez procéder aux opérations techniques !`;
 
   await sendStaffNotification({
@@ -379,7 +379,7 @@ export async function notifyReparationTermineeToStaff({
   const receptionIds = reception.map((r) => r.id);
   if (!receptionIds.length) return;
 
-  const titre = `🎉 Réparation achevée : ${numero}`;
+  const titre = `Réparation achevée : ${numero}`;
   const message = `L'équipement de ${clientNom} (${typeMateriel.replace(/_/g, " ")}) a passé les tests de conformité. Prêt pour retrait au comptoir.`;
 
   await sendStaffNotification({
@@ -418,7 +418,7 @@ export async function notifyTicketClosedToAdmin({
 
   const emailHtml = `
     <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B;">
-      <h2 style="color: #2CA58D;">✅ Dossier Clôturé & Restitué</h2>
+      <h2 style="color: #2CA58D;">Dossier Clôturé & Restitué</h2>
       <p>Le dossier <strong>${numero}</strong> (${typeMateriel.replace(/_/g, " ")}) pour le client <strong>${clientNom}</strong> a été restitué et clôturé avec succès par <strong>${actorName}</strong>.</p>
       <p style="margin-top: 20px;">
         <a href="${appUrl}/crm/tickets/ponctuel" style="background-color: #1E4D8B; color: #ffffff; padding: 10px 18px; text-decoration: none; border-radius: 6px; font-weight: bold;">
@@ -435,7 +435,7 @@ export async function notifyTicketClosedToAdmin({
     titre: `Dossier ${numero} clôturé`,
     message: `Dossier ${numero} (${clientNom}) clôturé et livré.`,
     type: NotificationType.STATUT_CHANGE,
-    emailSubject: `✅ Dossier Clôturé : ${numero} (${clientNom})`,
+    emailSubject: `Dossier Clôturé : ${numero} (${clientNom})`,
     emailHtml,
   });
 }
@@ -466,7 +466,7 @@ export async function notifyNewCommercialRequestToStaff(demande: {
 
   if (!allStaffIds.length) return;
 
-  const titre = `💼 Demande Commerciale : ${demande.typeDemande.replace(/_/g, " ")}`;
+  const titre = `Demande Commerciale : ${demande.typeDemande.replace(/_/g, " ")}`;
   const message = `Prospect ${demande.nom} (${demande.telephone}) — ${demande.description.slice(0, 80)}...`;
   const lien = `/crm/demandes-commerciales/${demande.id}`;
 
@@ -495,7 +495,7 @@ export async function notifyNewCommercialRequestToStaff(demande: {
     type: NotificationType.DEMANDE_COMMERCIALE,
     lien,
     sendPush: true,
-    emailSubject: `💼 Nouvelle Demande Commerciale : ${demande.nom} (${demande.typeDemande.replace(/_/g, " ")})`,
+    emailSubject: `Nouvelle Demande Commerciale : ${demande.nom} (${demande.typeDemande.replace(/_/g, " ")})`,
     emailHtml,
   });
 }
@@ -531,7 +531,7 @@ export async function sendClientQuoteEmail({
     await resend.emails.send({
       from: emailFrom,
       to: clientEmail,
-      subject: `📄 Votre devis de réparation N° ${numeroDevis} — RyHaD Tic-Medic`,
+      subject: `Votre devis de réparation N° ${numeroDevis} — RyHaD Tic-Medic`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 25px;">
@@ -550,10 +550,10 @@ export async function sendClientQuoteEmail({
             </div>
             <div style="text-align: center; margin: 25px 0;">
               <a href="${pdfLink}" style="background-color: #1E4D8B; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block; margin-right: 10px;">
-                📥 Télécharger le Devis PDF
+                Télécharger le Devis PDF
               </a>
               <a href="${trackingLink}" style="background-color: #2CA58D; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 14px; display: inline-block;">
-                🔍 Suivre en direct
+                Suivre en direct
               </a>
             </div>
             <p style="color: #6B7280; font-size: 12px; margin-top: 20px;">
@@ -593,7 +593,7 @@ export async function sendClientReadyForPickupEmail({
     await resend.emails.send({
       from: emailFrom,
       to: clientEmail,
-      subject: `🎉 Votre équipement est prêt pour retrait ! — Dossier ${numeroTicket}`,
+      subject: `Votre équipement est prêt pour retrait — Dossier ${numeroTicket}`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 25px;">
@@ -606,9 +606,9 @@ export async function sendClientReadyForPickupEmail({
               La réparation et tous les tests de conformité de votre <strong>${typeMateriel.replace(/_/g, " ")}</strong> (Dossier <strong>${numeroTicket}</strong>) sont terminés avec succès.
             </p>
             <div style="background-color: #F4F6F8; border-radius: 8px; padding: 18px; margin: 20px 0;">
-              <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: bold; color: #1C222B;">📍 Adresse de retrait :</p>
+              <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: bold; color: #1C222B;">Adresse de retrait :</p>
               <p style="margin: 0 0 10px 0; font-size: 13px; color: #4B5563;">Gbégamey, rue avant le collège Clé de la réussite, Cotonou, Bénin</p>
-              <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: bold; color: #1C222B;">🕒 Horaires d'ouverture :</p>
+              <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: bold; color: #1C222B;">Horaires d'ouverture :</p>
               <p style="margin: 0; font-size: 13px; color: #4B5563;">Lundi à Vendredi de 9h00 à 20h00</p>
             </div>
             <div style="text-align: center; margin: 25px 0;">

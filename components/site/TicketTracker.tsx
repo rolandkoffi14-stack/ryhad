@@ -326,14 +326,14 @@ export function TicketTracker({ initialNumero }: Props) {
 
           {/* INVITATION AU DÉVERROUILLAGE SÉCURISÉ (Si non déverrouillé) */}
           {!ticket.isUnlocked && (
-            <div className="p-5 sm:p-6 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-3">
-              <div className="flex items-center gap-2.5 text-amber-900">
-                <Lock className="w-5 h-5 text-amber-600 shrink-0" />
+            <div className="p-5 sm:p-6 rounded-2xl bg-brand-blue-light/50 border border-brand-blue/20 space-y-3">
+              <div className="flex items-center gap-2.5 text-brand-blue-dark">
+                <Lock className="w-5 h-5 text-brand-blue shrink-0" />
                 <h4 className="font-extrabold text-xs sm:text-sm">
                   Confidentialité du devis et des pièces
                 </h4>
               </div>
-              <p className="text-xs text-amber-800 leading-relaxed">
+              <p className="text-xs text-slate-700 leading-relaxed">
                 Pour des raisons de sécurité et de confidentialité, les montants chiffrés, pièces et boutons d&apos;accord sont protégés. Saisissez les 4 derniers chiffres de votre numéro de téléphone pour déverrouiller l&apos;accès complet :
               </p>
               <form onSubmit={handleUnlock} className="flex flex-col sm:flex-row items-center gap-2 pt-1 max-w-md">
@@ -343,12 +343,12 @@ export function TicketTracker({ initialNumero }: Props) {
                   value={phoneSuffix}
                   maxLength={10}
                   onChange={(e) => setPhoneSuffix(e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs font-semibold rounded-xl border border-amber-300 bg-white focus:ring-2 focus:ring-amber-500 outline-none"
+                  className="w-full px-4 py-2.5 text-xs font-semibold rounded-xl border border-brand-blue/30 bg-white focus:ring-2 focus:ring-brand-blue outline-none text-brand-dark"
                 />
                 <button
                   type="submit"
                   disabled={loading || !phoneSuffix.trim()}
-                  className="w-full sm:w-auto bg-amber-600 hover:bg-amber-700 text-white font-bold py-2.5 px-5 rounded-xl text-xs transition-all shrink-0 disabled:opacity-50"
+                  className="w-full sm:w-auto bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-2.5 px-5 rounded-xl text-xs transition-all shrink-0 disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   Déverrouiller
                 </button>

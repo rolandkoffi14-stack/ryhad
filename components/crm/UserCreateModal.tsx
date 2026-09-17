@@ -256,7 +256,7 @@ export function UserCreateModal({ isOpen, onClose, onUserCreated }: Props) {
                 <Phone className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="tel"
-                  placeholder="Numéro de téléphone"
+                  placeholder="Ex: 01 90 88 13 14"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="w-full pl-9 pr-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"

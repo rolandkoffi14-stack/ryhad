@@ -17,6 +17,7 @@ import {
   CircleDollarSign,
   ArrowLeft,
   X,
+  LogOut,
 } from "lucide-react";
 import { StaffRole } from "@prisma/client";
 
@@ -24,12 +25,14 @@ interface Props {
   userRole: StaffRole;
   isMobileOpen?: boolean;
   onMobileClose?: () => void;
+  onRequestLogout?: () => void;
 }
 
 export function CrmSidebar({
   userRole,
   isMobileOpen = false,
   onMobileClose,
+  onRequestLogout,
 }: Props) {
   const pathname = usePathname();
 
@@ -210,7 +213,7 @@ export function CrmSidebar({
       </nav>
 
       {/* Footer Sidebar */}
-      <div className="p-4 border-t border-gray-800 space-y-3 shrink-0">
+      <div className="p-4 border-t border-gray-800 space-y-2.5 shrink-0">
         <Link
           href="/"
           className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-white transition-colors"
@@ -218,6 +221,20 @@ export function CrmSidebar({
           <ArrowLeft className="w-4 h-4" />
           <span>Site public</span>
         </Link>
+
+        {onRequestLogout && (
+          <button
+            type="button"
+            onClick={() => {
+              if (onMobileClose) onMobileClose();
+              onRequestLogout();
+            }}
+            className="flex items-center gap-2 text-xs font-bold text-red-400 hover:text-red-300 hover:bg-white/5 py-1 px-1.5 -mx-1.5 rounded-lg transition-colors w-full text-left cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Déconnexion</span>
+          </button>
+        )}
       </div>
     </div>
   );

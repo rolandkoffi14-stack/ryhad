@@ -284,7 +284,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
         currentDay.setHours(0, 0, 0, 0);
 
         if (currentDay < targetDay) {
-          return `🔒 Intervention programmée pour le ${format(targetDay, "dd MMMM yyyy", {
+          return `Intervention programmée pour le ${format(targetDay, "dd MMMM yyyy", {
             locale: fr,
           })} : Démarrage verrouillé jusqu'au jour prévu`;
         }
@@ -667,15 +667,15 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
       {ticket.type === InterventionType.PONCTUEL &&
         ticket.statut === InterventionStatut.NOUVEAU &&
         !isDiagPaid && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+          <div className="p-4 sm:p-5 rounded-2xl bg-brand-blue-light/60 border border-brand-blue/20 flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0 mt-0.5">
               <CreditCard className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-xs font-extrabold text-amber-900 uppercase tracking-wide">
+              <h3 className="text-xs font-extrabold text-brand-blue-dark uppercase tracking-wide">
                 Étape 1 : Frais de diagnostic initial ({diagAmountFormatted}) — En attente d&apos;encaissement
               </h3>
-              <p className="text-[11px] text-amber-800 mt-0.5 font-medium">
+              <p className="text-[11px] text-slate-700 mt-0.5 font-medium">
                 {userRole === StaffRole.TECHNICIEN
                   ? `Le diagnostic technique débutera dès l'encaissement des ${diagAmountFormatted} par la réception.`
                   : `Encaissez les ${diagAmountFormatted} pour ouvrir l'accès au diagnostic technique.`}
@@ -726,15 +726,15 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
 
       {/* 2. Diag. Terminé : Devis généré prêt pour envoi */}
       {ticket.statut === InterventionStatut.DIAGNOSTIC_TERMINE && devisDoc && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/70 border border-blue-200 flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0 mt-0.5">
+        <div className="p-4 sm:p-5 rounded-2xl bg-brand-blue-light/50 border border-brand-blue/20 flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0 mt-0.5">
             <FileText className="w-5 h-5" />
           </div>
           <div className="flex-1">
-            <h3 className="text-xs font-extrabold text-blue-950 uppercase tracking-wide">
+            <h3 className="text-xs font-extrabold text-brand-blue-dark uppercase tracking-wide">
               Étape 3 : Devis {devisDoc.numero} ({formatFCFA(devisDoc.montant)}) prêt pour envoi
             </h3>
-            <p className="text-[11px] text-blue-800 mt-0.5 font-medium">
+            <p className="text-[11px] text-slate-700 mt-0.5 font-medium">
               {userRole === StaffRole.TECHNICIEN
                 ? "Rapport technique et devis scellés. La réception va le transmettre au client pour validation."
                 : "Transmettez le devis au client (WhatsApp, email, appel) puis cliquez sur 'Envoyer Devis'."}
@@ -762,15 +762,15 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
 
       {/* 3. Devis Envoyé : En attente réponse client */}
       {ticket.statut === InterventionStatut.DEVIS_ENVOYE && (
-        <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/70 border border-amber-300 flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+        <div className="p-4 sm:p-5 rounded-2xl bg-brand-blue-light/50 border border-brand-blue/20 flex items-start gap-3">
+          <div className="w-9 h-9 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0 mt-0.5">
             <Clock className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-xs font-extrabold text-amber-950 uppercase tracking-wide">
+            <h3 className="text-xs font-extrabold text-brand-blue-dark uppercase tracking-wide">
               Étape 4 : Devis transmis au client — En attente de décision
             </h3>
-            <p className="text-[11px] text-amber-800 mt-0.5 font-medium">
+            <p className="text-[11px] text-slate-700 mt-0.5 font-medium">
               Enregistrez la décision du client dans la barre d&apos;action dès réception de sa confirmation.
             </p>
           </div>
@@ -1085,13 +1085,13 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
               let waText = `Bonjour ${ticket.client.nom},\n\n`;
 
               if (devisDoc && (ticket.statut === InterventionStatut.DIAGNOSTIC_TERMINE || ticket.statut === InterventionStatut.DEVIS_ENVOYE)) {
-                waText += `Votre devis de réparation RyHaD Tic-Medic est disponible :\n📄 Devis N° : ${devisDoc.numero}\n💰 Montant estimé : ${formatFCFA(devisDoc.montant)}\n⚙️ Matériel : ${ticket.typeMateriel.replace(/_/g, " ")}\n\n👉 Consulter votre devis officiel :\n${appBaseUrl}/documents/${devisDoc.numero}${phoneParam}\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou`;
+                waText += `Votre devis de réparation RyHaD Tic-Medic est disponible :\n• Devis N° : ${devisDoc.numero}\n• Montant estimé : ${formatFCFA(devisDoc.montant)}\n• Matériel : ${ticket.typeMateriel.replace(/_/g, " ")}\n\nConsulter votre devis officiel :\n${appBaseUrl}/documents/${devisDoc.numero}${phoneParam}\n\nSuivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou`;
               } else if (repDoc && ticket.statut === InterventionStatut.DEVIS_ACCEPTE) {
-                waText += `Votre facture de réparation N° ${repDoc.numero} (${formatFCFA(repDoc.montant)}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} chez RyHaD Tic-Medic est disponible.\n\n👉 Consulter votre facture officielle :\n${appBaseUrl}/documents/${repDoc.numero}${phoneParam}\n\n🔍 Suivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}`;
+                waText += `Votre facture de réparation N° ${repDoc.numero} (${formatFCFA(repDoc.montant)}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} chez RyHaD Tic-Medic est disponible.\n\nConsulter votre facture officielle :\n${appBaseUrl}/documents/${repDoc.numero}${phoneParam}\n\nSuivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}`;
               } else if (ticket.statut === InterventionStatut.TERMINE) {
-                waText += `Bonne nouvelle ! Votre ${ticket.typeMateriel.replace(/_/g, " ")} (Dossier ${ticket.numero}) est réparé et disponible à notre atelier de Gbégamey pour retrait.\n\n🔍 Suivre votre dossier :\n${appBaseUrl}/suivi/${ticket.numero}`;
+                waText += `Bonne nouvelle ! Votre ${ticket.typeMateriel.replace(/_/g, " ")} (Dossier ${ticket.numero}) est réparé et disponible à notre atelier de Gbégamey pour retrait.\n\nSuivre votre dossier :\n${appBaseUrl}/suivi/${ticket.numero}`;
               } else {
-                waText += `Votre dossier (${ticket.numero}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} a bien été enregistré chez RyHaD Tic-Medic.\n\n🔍 Suivez l'avancement technique et vos documents en direct sur :\n${appBaseUrl}/suivi/${ticket.numero}`;
+                waText += `Votre dossier (${ticket.numero}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} a bien été enregistré chez RyHaD Tic-Medic.\n\nSuivez l'avancement technique et vos documents en direct sur :\n${appBaseUrl}/suivi/${ticket.numero}`;
               }
 
               return (
@@ -1267,7 +1267,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
             </div>
           )}
 
-          {/* 🛠️ BLOC 1 : MAIN D'ŒUVRE DE RÉPARATION */}
+          {/* BLOC 1 : MAIN D'ŒUVRE DE RÉPARATION */}
           {ticket.type === InterventionType.CONTRACTUEL ? (
             <div className="p-4 rounded-xl border border-brand-blue/20 bg-brand-blue/5 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -1350,7 +1350,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
             </div>
           )}
 
-          {/* 📦 BLOC 2 : PIÈCES DÉTACHÉES (FACULTATIF) */}
+          {/* BLOC 2 : PIÈCES DÉTACHÉES (FACULTATIF) */}
           <div className="space-y-3">
             <div className="flex items-center justify-between border-t border-gray-100 pt-3">
               <div className="flex items-center gap-2">
@@ -1568,7 +1568,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                           return (
                             <a
                               href={`https://wa.me/${ticket.client.telephone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                                `Bonjour ${ticket.client.nom},\n\nVoici votre ${label} RyHaD Tic-Medic :\n📄 Réf : ${doc.numero}\n💰 Montant : ${formatFCFA(doc.montant)}\n\n👉 Consulter votre document officiel :\n${docOrigin}/documents/${doc.numero}${pParam}\n\n🔍 Suivi de votre dossier : ${docOrigin}/suivi/${ticket.numero}`
+                                `Bonjour ${ticket.client.nom},\n\nVoici votre ${label} RyHaD Tic-Medic :\n• Réf : ${doc.numero}\n• Montant : ${formatFCFA(doc.montant)}\n\nConsulter votre document officiel :\n${docOrigin}/documents/${doc.numero}${pParam}\n\nSuivi de votre dossier : ${docOrigin}/suivi/${ticket.numero}`
                               )}`}
                               target="_blank"
                               rel="noreferrer"

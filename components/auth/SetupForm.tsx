@@ -177,7 +177,7 @@ export function SetupForm() {
             <Phone className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="tel"
-              placeholder="Numéro de téléphone"
+              placeholder="Ex: 01 90 88 13 14"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none"

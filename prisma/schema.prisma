@@ -51,8 +51,8 @@ model Client {
   type          ClientType   // PARTICULIER | ENTREPRISE
   nom           String       // nom complet ou raison sociale
   contactNom    String?      // personne de contact si ENTREPRISE
-  telephone     String
-  email         String?
+  telephone     String       @unique
+  email         String?      @unique
   adresse       String?
   createdAt     DateTime     @default(now())
   interventions Intervention[]
@@ -61,7 +61,6 @@ model Client {
 
   @@index([type])
   @@index([nom])
-  @@index([telephone])
 }
 
 enum ClientType {

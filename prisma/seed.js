@@ -275,7 +275,7 @@ async function main() {
     ],
   });
 
-  console.log('✅ Base de données Supabase synchronisée et alimentée avec succès !');
+  console.log('[SEED SUCCESS] Base de données synchronisée et alimentée avec succès !');
 }
 
 main()

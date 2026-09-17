@@ -23,6 +23,7 @@ import {
   Eye,
   MessageCircle,
   FileSpreadsheet,
+  X,
 } from "lucide-react";
 import { ClientType, StaffRole } from "@prisma/client";
 import { PaginationControls } from "@/components/crm/PaginationControls";
@@ -550,7 +551,7 @@ export function ClientManager({ clients, userRole }: Props) {
                 onClick={() => setShowCreateModal(false)}
                 className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors cursor-pointer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -616,21 +617,23 @@ export function ClientManager({ clients, userRole }: Props) {
                   <input
                     type="tel"
                     required
-                    placeholder="Numéro de téléphone"
+                    placeholder="Ex: 01 90 88 13 14"
                     value={formData.telephone}
                     onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-blue outline-none"
                   />
+                  <p className="text-[10px] text-gray-500 mt-1">Bénin 10 chiffres (préfixe 01)</p>
                 </div>
                 <div>
                   <label className="font-bold text-gray-700 block mb-1">Adresse Email</label>
                   <input
                     type="email"
-                    placeholder="Email"
+                    placeholder="contact@exemple.bj"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-blue outline-none"
                   />
+                  <p className="text-[10px] text-gray-500 mt-1">Optionnel (unique si renseigné)</p>
                 </div>
               </div>
 
