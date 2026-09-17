@@ -14,6 +14,45 @@ function urlBase64ToUint8Array(base64String: string) {
   return outputArray;
 }
 
+export async function syncSubscriptionWithServer(sub: PushSubscription): Promise<boolean> {
+  try {
+    const res = await fetch("/api/push/subscribe", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(sub.toJSON()),
+    });
+    return res.ok;
+  } catch (error) {
+    console.warn("[Push] Échec synchronisation souscription avec le serveur:", error);
+    return false;
+  }
+}
+
+/**
+ * Composant headless qui s'assure que le Service Worker est actif et synchronise
+ * automatiquement le token push avec la base de données dès le chargement du CRM,
+ * même si l'utilisateur n'ouvre pas le menu des notifications.
+ */
+export function PushAutoSync() {
+  useEffect(() => {
+    if (typeof window !== "undefined" && "serviceWorker" in navigator && "PushManager" in window) {
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((reg) => reg.pushManager.getSubscription())
+        .then(async (sub) => {
+          if (sub && Notification.permission === "granted") {
+            await syncSubscriptionWithServer(sub);
+          }
+        })
+        .catch((err) => {
+          console.warn("[PushAutoSync] Initialisation Service Worker:", err);
+        });
+    }
+  }, []);
+
+  return null;
+}
+
 export function PushSubscriptionManager() {
   const [isSupported, setIsSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
@@ -25,15 +64,20 @@ export function PushSubscriptionManager() {
       setIsSupported(true);
       setPermission(Notification.permission);
 
-      // Enregistrement du Service Worker
+      // Enregistrement du Service Worker et auto-synchronisation
       navigator.serviceWorker
         .register("/sw.js")
         .then((reg) => {
           return reg.pushManager.getSubscription();
         })
-        .then((sub) => {
-          if (sub) {
+        .then(async (sub) => {
+          if (sub && Notification.permission === "granted") {
             setIsSubscribed(true);
+            // Synchronisation automatique en arrière-plan avec la base de données
+            // pour garantir que l'utilisateur actuellement connecté est bien lié à ce endpoint
+            await syncSubscriptionWithServer(sub);
+          } else {
+            setIsSubscribed(false);
           }
         })
         .catch((err) => {

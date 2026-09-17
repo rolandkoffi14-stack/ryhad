@@ -15,7 +15,7 @@ import {
   PackageCheck,
 } from "lucide-react";
 import { NotificationType } from "@prisma/client";
-import { PushSubscriptionManager } from "@/components/pwa/PushSubscriptionManager";
+import { PushSubscriptionManager, PushAutoSync } from "@/components/pwa/PushSubscriptionManager";
 
 interface NotificationItem {
   id: string;
@@ -202,6 +202,7 @@ export function NotificationBell() {
 
   return (
     <div className="relative" ref={dropdownRef}>
+      <PushAutoSync />
       {/* Bouton Cloche avec Badge */}
       <button
         onClick={() => {
