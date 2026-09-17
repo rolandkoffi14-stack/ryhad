@@ -7,8 +7,9 @@ import { formatFCFA } from "@/lib/format";
 import { broadcastCrmEvent } from "@/lib/realtime/eventBus";
 
 const resendApiKey = env.RESEND_API_KEY;
-const emailFrom = env.EMAIL_FROM || "RyHaD Tic-Medic <notifications@ryhad.bj>";
-const appUrl = env.NEXT_PUBLIC_APP_URL || "https://www.ryhad.bj";
+const emailFrom = env.EMAIL_FROM || "RyHaD Tic-Medic <notifications@mail.2krdigital.online>";
+const workshopEmail = env.NOTIFICATION_EMAIL || "ryhadticmedic@gmail.com";
+const appUrl = env.NEXT_PUBLIC_APP_URL || "https://ryhad.2krdigital.online";
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 export interface StaffNotificationOptions {
@@ -92,7 +93,9 @@ export async function sendStaffNotification({
           .send({
             from: emailFrom,
             to: u.email,
+            replyTo: workshopEmail,
             subject: emailSubject,
+            text: message,
             html: emailHtml,
           })
           .catch((err) => console.error(`Erreur envoi email staff à ${u.email}:`, err))
@@ -531,7 +534,9 @@ export async function sendClientQuoteEmail({
     await resend.emails.send({
       from: emailFrom,
       to: clientEmail,
+      replyTo: workshopEmail,
       subject: `Votre devis de réparation N° ${numeroDevis} — RyHaD Tic-Medic`,
+      text: `Bonjour ${clientNom},\n\nLe diagnostic technique de votre ${typeMateriel.replace(/_/g, " ")} (Dossier ${numeroTicket}) est terminé.\n\nMontant total estimé des réparations : ${formatFCFA(montantTotal)}\nDevis Réf : ${numeroDevis}\n\nTélécharger le Devis PDF : ${pdfLink}\nSuivre en direct : ${trackingLink}\n\nPour valider ce devis ou pour toute précision, contactez notre atelier.\n\nRyHaD Tic-Medic • Gbégamey, Cotonou, Bénin • +229 01 90 88 13 14`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 25px;">
@@ -593,7 +598,9 @@ export async function sendClientReadyForPickupEmail({
     await resend.emails.send({
       from: emailFrom,
       to: clientEmail,
+      replyTo: workshopEmail,
       subject: `Votre équipement est prêt pour retrait — Dossier ${numeroTicket}`,
+      text: `Bonne nouvelle ${clientNom} !\n\nLa réparation et les tests de conformité de votre ${typeMateriel.replace(/_/g, " ")} (Dossier ${numeroTicket}) sont terminés avec succès.\n\nAdresse de retrait : Gbégamey, rue avant le collège Clé de la réussite, Cotonou, Bénin\nHoraires : Lundi à Vendredi de 9h00 à 20h00\n\nConsulter mon dossier : ${trackingLink}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou, Bénin • +229 01 90 88 13 14`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 25px;">

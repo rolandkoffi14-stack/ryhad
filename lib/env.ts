@@ -6,7 +6,7 @@ const envSchema = z.object({
   NEXTAUTH_SECRET: z.string().optional(),
   AUTH_SECRET: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
-  EMAIL_FROM: z.string().default("RyHaD Tic-Medic <notifications@ryhad.bj>"),
+  EMAIL_FROM: z.string().default("RyHaD Tic-Medic <notifications@mail.2krdigital.online>"),
   NOTIFICATION_EMAIL: z.string().default("ryhadticmedic@gmail.com"),
   NEXT_PUBLIC_APP_URL: z.string().default("https://ryhad.2krdigital.online"),
   R2_ACCOUNT_ID: z.string().optional(),

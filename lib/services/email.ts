@@ -2,9 +2,9 @@ import { Resend } from "resend";
 import { env } from "@/lib/env";
 
 const resendApiKey = env.RESEND_API_KEY;
-const emailFrom = env.EMAIL_FROM || "RyHaD Tic-Medic <notifications@ryhad.bj>";
+const emailFrom = env.EMAIL_FROM || "RyHaD Tic-Medic <notifications@mail.2krdigital.online>";
 const workshopEmail = env.NOTIFICATION_EMAIL || "ryhadticmedic@gmail.com";
-const appUrl = env.NEXT_PUBLIC_APP_URL || "https://www.ryhad.bj";
+const appUrl = env.NEXT_PUBLIC_APP_URL || "https://ryhad.2krdigital.online";
 
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
@@ -40,7 +40,9 @@ export async function sendInterventionNotification({
     const atelierRes = await resend.emails.send({
       from: emailFrom,
       to: workshopEmail,
+      replyTo: clientEmail || undefined,
       subject: `Nouveau Ticket Reçu : ${numeroTicket} (${clientNom})`,
+      text: `Nouveau dossier d'intervention déposé\n\nNuméro du Ticket : ${numeroTicket}\nClient : ${clientNom} (${clientTelephone})\nMatériel : ${typeMateriel.replace(/_/g, " ")}\nPanne déclarée : ${panneDeclaree}\n\nConsulter dans le CRM : ${appUrl}/crm`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B;">
           <h2 style="color: #1E4D8B;">Nouveau dossier d'intervention déposé</h2>
@@ -66,7 +68,9 @@ export async function sendInterventionNotification({
       const clientRes = await resend.emails.send({
         from: emailFrom,
         to: clientEmail,
+        replyTo: workshopEmail,
         subject: `Prise en charge de votre matériel — Dossier N° ${numeroTicket}`,
+        text: `Bonjour ${clientNom},\n\nNous vous confirmons l'enregistrement de votre demande d'intervention pour votre ${typeMateriel.replace(/_/g, " ")}.\n\nNuméro de dossier : ${numeroTicket}\n\nSuivez l'avancement de votre réparation en temps réel sur notre portail :\n${trackingLink}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou, Bénin • Tél : +229 01 90 88 13 14`,
         html: `
           <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B;">
             <h2 style="color: #1E4D8B;">RyHaD Tic-Medic — Votre demande a bien été reçue</h2>
@@ -121,7 +125,9 @@ export async function sendCommercialNotification(data: {
     await resend.emails.send({
       from: emailFrom,
       to: workshopEmail,
+      replyTo: data.email || undefined,
       subject: `Demande Commerciale : ${data.typeDemande.replace(/_/g, " ")} (${data.nom})`,
+      text: `Nouvelle demande commerciale reçue\n\nProspect : ${data.nom} (${data.telephone})\nEmail : ${data.email || "Non renseigné"}\nType : ${data.typeDemande.replace(/_/g, " ")}\n\nBesoin :\n${data.description}\n\nConsulter dans le CRM : ${appUrl}/crm/demandes-commerciales`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B;">
           <h2 style="color: #1E4D8B;">Nouvelle demande commerciale reçue</h2>
@@ -167,6 +173,7 @@ export async function sendContactNotification(data: {
       to: workshopEmail,
       replyTo: data.email || undefined,
       subject: `Message de Contact : ${data.sujet} (${data.nom})`,
+      text: `Nouveau message reçu depuis le site RyHaD Tic-Medic\n\nExpéditeur : ${data.nom}\nTéléphone : ${data.telephone}\nEmail : ${data.email || "Non renseigné"}\nObjet : ${data.sujet}\n\nMessage :\n${data.message}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou, Bénin • +229 01 90 88 13 14`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B;">
           <h2 style="color: #1E4D8B;">Nouveau message reçu depuis le site RyHaD Tic-Medic</h2>
@@ -213,7 +220,9 @@ export async function sendPasswordResetEmail({
     const res = await resend.emails.send({
       from: emailFrom,
       to: email,
+      replyTo: workshopEmail,
       subject: "Réinitialisation de votre mot de passe — RyHaD Tic-Medic",
+      text: `Bonjour ${firstName},\n\nUne demande de réinitialisation de votre mot de passe a été initiée pour votre compte staff RyHaD Tic-Medic.\n\nCliquez sur ce lien pour définir un nouveau mot de passe (valable 30 minutes) :\n${resetUrl}\n\nSi vous n'êtes pas à l'origine de cette demande, ignorez simplement cet email.\n\nRyHaD Tic-Medic • Gbégamey, Cotonou, Bénin • +229 01 90 88 13 14`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 25px;">
@@ -275,7 +284,9 @@ export async function sendPasswordChangedAlert({
     await resend.emails.send({
       from: emailFrom,
       to: email,
+      replyTo: workshopEmail,
       subject: "Confirmation : votre mot de passe a été modifié — RyHaD Tic-Medic",
+      text: `Bonjour ${firstName},\n\nNous vous confirmons que le mot de passe de votre compte staff ${email} a été modifié avec succès.\n\nAttention : Si vous n'avez pas modifié votre mot de passe, contactez immédiatement l'administrateur de l'atelier RyHaD.\n\nRyHaD Tic-Medic • Gbégamey, Cotonou, Bénin • +229 01 90 88 13 14`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #2CA58D;">Mot de passe mis à jour avec succès</h2>
@@ -331,7 +342,9 @@ export async function sendWelcomeUserEmail({
     const res = await resend.emails.send({
       from: emailFrom,
       to: email,
+      replyTo: workshopEmail,
       subject: "Bienvenue dans l'équipe RyHaD Tic-Medic — Vos accès CRM",
+      text: `Bienvenue ${firstName} !\n\nVotre compte collaborateur a été créé sur l'application CRM de RyHaD Tic-Medic avec le rôle : ${roleLabels[role] || role}.\n\nIdentifiant de connexion : ${email}\n\nPour activer votre compte et définir votre mot de passe, rendez-vous sur :\n${targetUrl}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou, Bénin • +229 01 90 88 13 14`,
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.5; color: #1C222B; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="text-align: center; margin-bottom: 25px;">
