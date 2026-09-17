@@ -90,7 +90,7 @@ export default function ConfidentialitePage() {
             <span>4. Suivi en Ligne Sécurisé & Accès Restreint</span>
           </h2>
           <p>
-            Le portail public de suivi des tickets de réparation utilise un numéro de référence unique (ex : <code>INT-2026-0001</code>). Pour protéger la confidentialité de nos clients, la consultation des devis chiffrés et la validation en ligne requièrent une clé de déverrouillage sécurisée (les 4 derniers chiffres du numéro de téléphone client).
+            Le portail public de suivi des tickets de réparation utilise un numéro de référence unique (ex : <code>INT-2026-XXXX</code>). Pour protéger la confidentialité de nos clients, l&apos;accès au dossier et aux devis chiffrés requiert obligatoirement une clé de déverrouillage sécurisée (les 4 derniers chiffres du numéro de téléphone client).
           </p>
         </section>
 

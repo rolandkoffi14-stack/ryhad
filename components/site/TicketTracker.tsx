@@ -153,7 +153,7 @@ export function TicketTracker({ initialNumero, initialPhone }: Props) {
     const cleanPhone = phoneSuffix.trim().replace(/\D/g, "");
 
     if (!cleanNum) {
-      setError("Veuillez saisir votre référence de dossier (ex: INT-2026-0001).");
+      setError("Veuillez saisir votre référence de dossier (ex: INT-2026-XXXX).");
       return;
     }
 
@@ -237,7 +237,7 @@ export function TicketTracker({ initialNumero, initialPhone }: Props) {
               <Search className="w-5 h-5 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="N° de dossier (ex: INT-2026-0001)"
+                placeholder="N° de dossier (ex: INT-2026-XXXX)"
                 value={numero}
                 onChange={(e) => setNumero(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 text-xs sm:text-sm font-semibold tracking-wider uppercase rounded-xl border-0 focus:ring-2 focus:ring-brand-blue outline-none text-brand-dark placeholder:text-gray-400 placeholder:normal-case"

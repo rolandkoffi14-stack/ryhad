@@ -20,7 +20,7 @@ export default function SuiviLandingPage() {
           Suivre l&apos;État de Votre Réparation
         </h1>
         <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-          Saisissez la référence unique de votre dossier (ex: <strong>INT-2026-0001</strong>) ainsi que les <strong>4 derniers chiffres</strong> de votre numéro de téléphone.
+          Saisissez la référence unique de votre dossier (ex: <strong>INT-2026-XXXX</strong>) ainsi que les <strong>4 derniers chiffres</strong> de votre numéro de téléphone.
         </p>
       </div>
 
