@@ -10,7 +10,6 @@ const montserrat = Montserrat({
 });
 
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
-import { PwaInstallPrompt } from "@/components/pwa/PwaInstallPrompt";
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://ryhad.2krdigital.online";
 
@@ -111,7 +110,6 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ServiceWorkerRegister />
-        <PwaInstallPrompt />
         {children}
       </body>
     </html>

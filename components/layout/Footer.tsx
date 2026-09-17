@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Phone, Mail, MapPin, Clock, ShieldCheck, CheckCircle2 } from "lucide-react";
-import { InstallPwaButton } from "@/components/pwa/InstallPwaButton";
 
 export function Footer() {
   return (
@@ -19,7 +18,6 @@ export function Footer() {
             </div>
           </div>
           <div className="flex items-center gap-3 flex-wrap">
-            <InstallPwaButton variant="footer" />
             <Link
               href="/demande-intervention"
               className="bg-white hover:bg-slate-100 text-brand-blue px-5 py-2.5 rounded-lg text-sm font-bold shadow-sm transition-all"
