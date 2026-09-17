@@ -377,15 +377,6 @@ export function ContractEnterpriseView({
                 <span>Nouveau ticket</span>
               </Link>
             )}
-            {isAdmin && (
-              <Link
-                href="/crm/contrats"
-                className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 px-4 py-2.5 rounded-xl text-xs font-extrabold transition-all"
-              >
-                <Plus className="w-4 h-4 text-brand-blue" />
-                <span>Nouveau contrat</span>
-              </Link>
-            )}
           </div>
         </div>
 
@@ -571,26 +562,27 @@ export function ContractEnterpriseView({
   return (
     <div className="space-y-6">
       {/* En-tête avec bouton retour */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-4 border-b border-slate-200/80 pb-5">
+        <div className="flex items-start gap-3 min-w-0 flex-1">
           <button
             type="button"
             onClick={() => setSelectedContractId(null)}
-            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors shrink-0 mt-1"
             title="Retour à la liste des entreprises"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="flex flex-wrap items-center gap-2.5">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-dark tracking-tight">
                 {selectedContract.client.nom}
               </h1>
-              <span className="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-brand-blue/10 text-brand-blue">
+              <span className="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-brand-blue/10 text-brand-blue shrink-0">
                 Contrat {selectedContract.periodicite}
               </span>
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 font-semibold mt-1">
+
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 font-semibold">
               <span>Contact : {selectedContract.client.contactNom || "—"}</span>
               <span>•</span>
               <span>Tél : {selectedContract.client.telephone}</span>
@@ -608,17 +600,27 @@ export function ContractEnterpriseView({
                   <span>WhatsApp</span>
                 </a>
               )}
-              <span>•</span>
-              <span className="text-slate-700">{selectedContract.equipementsCouverts}</span>
             </div>
+
+            {/* Équipements et périmètre couvert dédiés pour ne jamais dégrader les actions */}
+            {selectedContract.equipementsCouverts && (
+              <div className="mt-2 p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs max-w-3xl">
+                <span className="text-slate-400 font-bold uppercase text-[10px] tracking-wider block">
+                  Périmètre & Équipements couverts :
+                </span>
+                <p className="text-slate-700 font-semibold leading-relaxed break-words mt-0.5">
+                  {selectedContract.equipementsCouverts}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
           {!isTechnician && (
             <Link
               href={`/crm/tickets/contractuel?new=true&contractId=${selectedContract.id}&clientId=${selectedContract.clientId}`}
-              className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all"
+              className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-sm transition-all whitespace-nowrap shrink-0"
             >
               <Plus className="w-4 h-4 text-white" />
               <span>Déclarer une panne</span>
@@ -630,7 +632,7 @@ export function ContractEnterpriseView({
             <button
               type="button"
               onClick={handleOpenGenerateModal}
-              className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-xs transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-xs transition-all cursor-pointer whitespace-nowrap shrink-0"
             >
               <Sparkles className="w-4 h-4 text-brand-blue" />
               <span>{preventifTickets.length === 0 ? "Configurer" : "Reconfigurer"}</span>
@@ -913,7 +915,7 @@ export function ContractEnterpriseView({
               {!isTechnician && (
                 <Link
                   href={`/crm/tickets/contractuel?new=true&contractId=${selectedContract.id}&clientId=${selectedContract.clientId}`}
-                  className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-sm transition-all"
+                  className="inline-flex items-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white px-3.5 py-2 rounded-xl text-xs font-extrabold shadow-sm transition-all whitespace-nowrap shrink-0 ml-4"
                 >
                   <Plus className="w-4 h-4 text-white" />
                   <span>Déclarer une panne</span>
@@ -1201,11 +1203,12 @@ export function ContractEnterpriseView({
       {/* MODAL CONFIGURATION / RECONFIGURATION DES INTERVENTIONS DU CONTRAT */}
       {/* ------------------------------------------------------------- */}
       {showGenerateModal && selectedContract && mounted && createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-lg w-full overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden animate-in zoom-in-95 duration-150">
+            {/* Header fixe */}
+            <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-brand-blue/10 text-brand-blue flex items-center justify-center">
+                <div className="w-10 h-10 rounded-2xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0">
                   <Sparkles className="w-5 h-5 text-brand-blue" />
                 </div>
                 <div>
@@ -1222,187 +1225,190 @@ export function ContractEnterpriseView({
               <button
                 type="button"
                 onClick={() => setShowGenerateModal(false)}
-                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl cursor-pointer"
+                className="p-2 text-slate-400 hover:text-slate-600 rounded-xl cursor-pointer shrink-0"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleGenerateTickets} className="p-6 space-y-4 text-xs">
-              {generateError && (
-                <div className="p-3 rounded-xl bg-red-50 text-red-700 font-bold border border-red-200">
-                  {generateError}
-                </div>
-              )}
-              {generateSuccess && (
-                <div className="p-3 rounded-xl bg-brand-blue/10 text-brand-blue-dark font-bold border border-brand-blue/20">
-                  {generateSuccess}
-                </div>
-              )}
+            {/* Formulaire défilable avec footer fixe */}
+            <form onSubmit={handleGenerateTickets} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+              <div className="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto flex-1 overscroll-contain">
+                {generateError && (
+                  <div className="p-3 rounded-xl bg-red-50 text-red-700 font-bold border border-red-200">
+                    {generateError}
+                  </div>
+                )}
+                {generateSuccess && (
+                  <div className="p-3 rounded-xl bg-brand-blue/10 text-brand-blue-dark font-bold border border-brand-blue/20">
+                    {generateSuccess}
+                  </div>
+                )}
 
-              {/* Clause contractuelle fixe (lecture seule) */}
-              <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
-                <div className="space-y-0.5">
-                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                    Clause contractuelle fixe
-                  </span>
-                  <p className="font-extrabold text-slate-800">
-                    {selectedContract.frequenceVisites || 1} intervention(s) par mois • {formatFCFA(selectedContract.montantMainOeuvre)} / {selectedContract.periodicite.toLowerCase()}
-                  </p>
-                  <p className="text-[11px] text-slate-500">
-                    {selectedContract.dateFin
-                      ? `Contrat CDD jusqu'au ${format(new Date(selectedContract.dateFin), "dd/MM/yyyy", { locale: fr })}`
-                      : "Contrat CDI (Reconduction tacite)"}
-                  </p>
-                </div>
-                <div className="w-8 h-8 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0">
-                  <ShieldCheck className="w-4 h-4" />
-                </div>
-              </div>
-
-              {/* Sélecteur d'opération si reconfiguration */}
-              {preventifTickets.length > 0 && (
-                <div className="space-y-2">
-                  <label className="font-extrabold text-slate-700 block">Type d&apos;opération</label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => setGenerateForm({ ...generateForm, actionType: "AJUSTER" })}
-                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                        generateForm.actionType === "AJUSTER"
-                          ? "border-brand-blue bg-blue-50/70 ring-2 ring-brand-blue/20"
-                          : "border-slate-200 bg-white hover:bg-slate-50"
-                      }`}
-                    >
-                      <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                        <RotateCcw className="w-4 h-4 text-brand-blue shrink-0" />
-                        <span>Réajuster le planning</span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                        Reprogramme les visites futures non démarrées du cycle en cours. Les factures sont préservées.
-                      </p>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setGenerateForm({ ...generateForm, actionType: "PROLONGER" })}
-                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                        generateForm.actionType === "PROLONGER"
-                          ? "border-brand-blue bg-blue-50/70 ring-2 ring-brand-blue/20"
-                          : "border-slate-200 bg-white hover:bg-slate-50"
-                      }`}
-                    >
-                      <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
-                        <CalendarPlus className="w-4 h-4 text-brand-blue shrink-0" />
-                        <span>Prolonger le contrat</span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 mt-1 leading-snug">
-                        Ajoute un nouveau cycle ({selectedContract.dateFin ? "prolongation CDD" : "+12 mois CDI"}) à la suite du calendrier.
-                      </p>
-                    </button>
+                {/* Clause contractuelle fixe (lecture seule) */}
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                      Clause contractuelle fixe
+                    </span>
+                    <p className="font-extrabold text-slate-800">
+                      {selectedContract.frequenceVisites || 1} intervention(s) par mois • {formatFCFA(selectedContract.montantMainOeuvre)} / {selectedContract.periodicite.toLowerCase()}
+                    </p>
+                    <p className="text-[11px] text-slate-500">
+                      {selectedContract.dateFin
+                        ? `Contrat CDD jusqu'au ${format(new Date(selectedContract.dateFin), "dd/MM/yyyy", { locale: fr })}`
+                        : "Contrat CDI (Reconduction tacite)"}
+                    </p>
+                  </div>
+                  <div className="w-8 h-8 rounded-xl bg-brand-blue/10 text-brand-blue flex items-center justify-center shrink-0">
+                    <ShieldCheck className="w-4 h-4" />
                   </div>
                 </div>
-              )}
 
-              {/* Jours convenus */}
-              <div className="space-y-1.5">
-                <label className="font-extrabold text-slate-700">Jours / Périodes de passage</label>
-                <input
-                  type="text"
-                  value={generateForm.jourPassage}
-                  onChange={(e) =>
-                    setGenerateForm({ ...generateForm, jourPassage: e.target.value })
-                  }
-                  placeholder="Ex: 1er et 15 du mois, ou 5 et 20..."
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-blue"
-                />
-              </div>
+                {/* Sélecteur d'opération si reconfiguration */}
+                {preventifTickets.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="font-extrabold text-slate-700 block">Type d&apos;opération</label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setGenerateForm({ ...generateForm, actionType: "AJUSTER" })}
+                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                          generateForm.actionType === "AJUSTER"
+                            ? "border-brand-blue bg-blue-50/70 ring-2 ring-brand-blue/20"
+                            : "border-slate-200 bg-white hover:bg-slate-50"
+                        }`}
+                      >
+                        <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                          <RotateCcw className="w-4 h-4 text-brand-blue shrink-0" />
+                          <span>Réajuster le planning</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+                          Reprogramme les visites futures non démarrées du cycle en cours. Les factures sont préservées.
+                        </p>
+                      </button>
 
-              {/* Technicien référent */}
-              <div className="space-y-1.5">
-                <label className="font-extrabold text-slate-700">
-                  Technicien Référent assigné
-                </label>
-                <select
-                  value={generateForm.technicienAssigneId}
-                  onChange={(e) =>
-                    setGenerateForm({ ...generateForm, technicienAssigneId: e.target.value })
-                  }
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-blue"
-                >
-                  <option value="">Non assigné (assigner plus tard)</option>
-                  {technicians.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.firstName} {t.lastName}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                      <button
+                        type="button"
+                        onClick={() => setGenerateForm({ ...generateForm, actionType: "PROLONGER" })}
+                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                          generateForm.actionType === "PROLONGER"
+                            ? "border-brand-blue bg-blue-50/70 ring-2 ring-brand-blue/20"
+                            : "border-slate-200 bg-white hover:bg-slate-50"
+                        }`}
+                      >
+                        <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
+                          <CalendarPlus className="w-4 h-4 text-brand-blue shrink-0" />
+                          <span>Prolonger le contrat</span>
+                        </div>
+                        <p className="text-[11px] text-slate-500 mt-1 leading-snug">
+                          Ajoute un nouveau cycle ({selectedContract.dateFin ? "prolongation CDD" : "+12 mois CDI"}) à la suite du calendrier.
+                        </p>
+                      </button>
+                    </div>
+                  </div>
+                )}
 
-              {/* Terme de facturation */}
-              <div className="space-y-1.5">
-                <label className="font-extrabold text-slate-700">Clause de Facturation</label>
-                <select
-                  value={generateForm.termeFacturation}
-                  onChange={(e) =>
-                    setGenerateForm({ ...generateForm, termeFacturation: e.target.value })
-                  }
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-blue"
-                >
-                  <option value="ECHU">À terme échu (fin de période après visites)</option>
-                  <option value="A_ECHOIR">À terme à échoir (début de période)</option>
-                </select>
-              </div>
-
-              {/* Checklist / Consignes */}
-              <div className="space-y-1.5">
-                <label className="font-extrabold text-slate-700">
-                  Checklist préventive convenue
-                </label>
-                <textarea
-                  rows={3}
-                  value={generateForm.checklistPrevue}
-                  onChange={(e) =>
-                    setGenerateForm({ ...generateForm, checklistPrevue: e.target.value })
-                  }
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-xs text-slate-800 outline-none focus:ring-2 focus:ring-brand-blue"
-                />
-              </div>
-
-              {/* Section Factures : Masquée en réajustement, disponible en initial ou prolongation */}
-              {preventifTickets.length > 0 && generateForm.actionType === "AJUSTER" ? (
-                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-[11px] flex items-center gap-2">
-                  <Receipt className="w-4 h-4 text-slate-400 shrink-0" />
-                  <span>Les factures existantes sont sanctuarisées et ne subissent aucune modification lors d&apos;un réajustement.</span>
-                </div>
-              ) : (
-                <label className="flex items-center gap-2 pt-1 font-bold text-slate-700 cursor-pointer">
+                {/* Jours convenus */}
+                <div className="space-y-1.5">
+                  <label className="font-extrabold text-slate-700">Jours / Périodes de passage</label>
                   <input
-                    type="checkbox"
-                    checked={generateForm.genererFactures}
+                    type="text"
+                    value={generateForm.jourPassage}
                     onChange={(e) =>
-                      setGenerateForm({ ...generateForm, genererFactures: e.target.checked })
+                      setGenerateForm({ ...generateForm, jourPassage: e.target.value })
                     }
-                    className="w-4 h-4 rounded text-brand-blue"
+                    placeholder="Ex: 1er et 15 du mois, ou 5 et 20..."
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-semibold text-slate-800 outline-none focus:ring-2 focus:ring-brand-blue"
                   />
-                  <span>Générer automatiquement les échéances de facturation associées</span>
-                </label>
-              )}
+                </div>
 
-              {/* Footer avec boutons explicites */}
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+                {/* Technicien référent */}
+                <div className="space-y-1.5">
+                  <label className="font-extrabold text-slate-700">
+                    Technicien Référent assigné
+                  </label>
+                  <select
+                    value={generateForm.technicienAssigneId}
+                    onChange={(e) =>
+                      setGenerateForm({ ...generateForm, technicienAssigneId: e.target.value })
+                    }
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-blue"
+                  >
+                    <option value="">Non assigné (assigner plus tard)</option>
+                    {technicians.map((t) => (
+                      <option key={t.id} value={t.id}>
+                        {t.firstName} {t.lastName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Terme de facturation */}
+                <div className="space-y-1.5">
+                  <label className="font-extrabold text-slate-700">Clause de Facturation</label>
+                  <select
+                    value={generateForm.termeFacturation}
+                    onChange={(e) =>
+                      setGenerateForm({ ...generateForm, termeFacturation: e.target.value })
+                    }
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:ring-2 focus:ring-brand-blue"
+                  >
+                    <option value="ECHU">À terme échu (fin de période après visites)</option>
+                    <option value="A_ECHOIR">À terme à échoir (début de période)</option>
+                  </select>
+                </div>
+
+                {/* Checklist / Consignes */}
+                <div className="space-y-1.5">
+                  <label className="font-extrabold text-slate-700">
+                    Checklist préventive convenue
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={generateForm.checklistPrevue}
+                    onChange={(e) =>
+                      setGenerateForm({ ...generateForm, checklistPrevue: e.target.value })
+                    }
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-xs text-slate-800 outline-none focus:ring-2 focus:ring-brand-blue"
+                  />
+                </div>
+
+                {/* Section Factures : Masquée en réajustement, disponible en initial ou prolongation */}
+                {preventifTickets.length > 0 && generateForm.actionType === "AJUSTER" ? (
+                  <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-[11px] flex items-center gap-2">
+                    <Receipt className="w-4 h-4 text-slate-400 shrink-0" />
+                    <span>Les factures existantes sont sanctuarisées et ne subissent aucune modification lors d&apos;un réajustement.</span>
+                  </div>
+                ) : (
+                  <label className="flex items-center gap-2 pt-1 font-bold text-slate-700 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={generateForm.genererFactures}
+                      onChange={(e) =>
+                        setGenerateForm({ ...generateForm, genererFactures: e.target.checked })
+                      }
+                      className="w-4 h-4 rounded text-brand-blue"
+                    />
+                    <span>Générer automatiquement les échéances de facturation associées</span>
+                  </label>
+                )}
+              </div>
+
+              {/* Footer fixe avec boutons explicites */}
+              <div className="p-4 sm:p-5 border-t border-slate-100 flex items-center justify-end gap-3 bg-slate-50/50 shrink-0">
                 <button
                   type="button"
                   onClick={() => setShowGenerateModal(false)}
                   disabled={generateLoading || Boolean(generateSuccess)}
-                  className="px-4 py-2 font-bold text-slate-500 hover:text-slate-800 disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2 font-bold text-slate-500 hover:text-slate-800 disabled:opacity-50 cursor-pointer text-xs"
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   disabled={generateLoading || Boolean(generateSuccess)}
-                  className="bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2.5 rounded-xl font-extrabold shadow-sm disabled:opacity-50 transition-all flex items-center gap-2 cursor-pointer"
+                  className="bg-brand-blue hover:bg-brand-blue-dark text-white px-5 py-2.5 rounded-xl font-extrabold shadow-sm disabled:opacity-50 transition-all flex items-center gap-2 cursor-pointer text-xs"
                 >
                   {generateLoading && <Clock className="w-4 h-4 animate-spin text-white" />}
                   <span>
