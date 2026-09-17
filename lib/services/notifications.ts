@@ -513,6 +513,7 @@ export async function notifyNewCommercialRequestToStaff(demande: {
 export async function sendClientQuoteEmail({
   clientEmail,
   clientNom,
+  clientTelephone,
   numeroTicket,
   numeroDevis,
   montantTotal,
@@ -520,6 +521,7 @@ export async function sendClientQuoteEmail({
 }: {
   clientEmail: string;
   clientNom: string;
+  clientTelephone?: string;
   numeroTicket: string;
   numeroDevis: string;
   montantTotal: number;
@@ -528,8 +530,11 @@ export async function sendClientQuoteEmail({
   if (!resend || !clientEmail) return;
 
   try {
-    const trackingLink = `${appUrl}/suivi/${numeroTicket}`;
-    const pdfLink = `${appUrl}/documents/${numeroDevis}`;
+    const cleanPhone = (clientTelephone || "").replace(/\D/g, "");
+    const phoneParam = cleanPhone.length >= 4 ? `?t=${cleanPhone.slice(-4)}` : "";
+    const trackingLink = `${appUrl}/suivi/${numeroTicket}${phoneParam}`;
+    const docPhoneParam = cleanPhone.length >= 4 ? `?phone=${cleanPhone.slice(-4)}` : "";
+    const pdfLink = `${appUrl}/documents/${numeroDevis}${docPhoneParam}`;
 
     await resend.emails.send({
       from: emailFrom,
@@ -582,18 +587,22 @@ export async function sendClientQuoteEmail({
 export async function sendClientReadyForPickupEmail({
   clientEmail,
   clientNom,
+  clientTelephone,
   numeroTicket,
   typeMateriel,
 }: {
   clientEmail: string;
   clientNom: string;
+  clientTelephone?: string;
   numeroTicket: string;
   typeMateriel: string;
 }) {
   if (!resend || !clientEmail) return;
 
   try {
-    const trackingLink = `${appUrl}/suivi/${numeroTicket}`;
+    const cleanPhone = (clientTelephone || "").replace(/\D/g, "");
+    const phoneParam = cleanPhone.length >= 4 ? `?t=${cleanPhone.slice(-4)}` : "";
+    const trackingLink = `${appUrl}/suivi/${numeroTicket}${phoneParam}`;
 
     await resend.emails.send({
       from: emailFrom,

@@ -156,8 +156,12 @@ export function InterventionRequestForm({ initialType }: Props) {
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
           <button
-            onClick={() => router.push(`/suivi/${successData.numero}`)}
-            className="inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs sm:text-sm shadow-sm transition-all"
+            onClick={() => {
+              const cleanP = (formData.telephone || "").replace(/\D/g, "");
+              const pParam = cleanP.length >= 4 ? `?t=${cleanP.slice(-4)}` : "";
+              router.push(`/suivi/${successData.numero}${pParam}`);
+            }}
+            className="inline-flex items-center justify-center gap-2 bg-brand-blue hover:bg-brand-blue-dark text-white font-bold py-3 px-6 rounded-xl text-xs sm:text-sm shadow-sm transition-all cursor-pointer"
           >
             <span>Accéder au suivi en direct</span>
             <ArrowRight className="w-4 h-4 text-white" />

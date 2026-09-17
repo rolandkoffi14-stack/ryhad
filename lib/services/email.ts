@@ -34,7 +34,9 @@ export async function sendInterventionNotification({
   }
 
   try {
-    const trackingLink = `${appUrl}/suivi/${numeroTicket}`;
+    const cleanPhone = (clientTelephone || "").replace(/\D/g, "");
+    const phoneParam = cleanPhone.length >= 4 ? `?t=${cleanPhone.slice(-4)}` : "";
+    const trackingLink = `${appUrl}/suivi/${numeroTicket}${phoneParam}`;
 
     // 1. Notification à l'atelier RyHaD Tic-Medic
     const atelierRes = await resend.emails.send({

@@ -638,6 +638,7 @@ export async function PATCH(
           sendClientQuoteEmail({
             clientEmail: currentTicket.client.email,
             clientNom: currentTicket.client.nom,
+            clientTelephone: currentTicket.client.telephone,
             numeroTicket: currentTicket.numero,
             numeroDevis: createdDocNumero || devisDoc?.numero || "DEV-DEVIS",
             montantTotal: montantDevis,
@@ -651,6 +652,7 @@ export async function PATCH(
         sendClientReadyForPickupEmail({
           clientEmail: currentTicket.client.email,
           clientNom: currentTicket.client.nom,
+          clientTelephone: currentTicket.client.telephone,
           numeroTicket: currentTicket.numero,
           typeMateriel: currentTicket.typeMateriel,
         }).catch((err) => console.error("Erreur envoi email retrait client:", err));

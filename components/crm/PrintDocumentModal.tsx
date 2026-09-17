@@ -125,7 +125,7 @@ export function PrintDocumentModal({
 
     waText = `Bonjour ${clientNom},\n\nVoici votre ${typeLibelle} officiel RyHaD Tic-Medic :\n• Référence : ${data.numero}\n• Montant : ${formatFCFA(data.montant)}\n\nConsulter et télécharger votre document officiel :\n${docUrl}`;
     if (data.intervention?.numero) {
-      waText += `\n\nSuivi de votre matériel en direct :\n${appOrigin}/suivi/${data.intervention.numero}`;
+      waText += `\n\nSuivi de votre matériel en direct :\n${appOrigin}/suivi/${data.intervention.numero}${phoneParam}`;
     }
     waText += `\n\nRyHaD Tic-Medic • Gbégamey, Cotonou\nTél : +229 01 90 88 13 14`;
   }

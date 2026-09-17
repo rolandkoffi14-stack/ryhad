@@ -37,7 +37,12 @@ export async function GET(
 
     const { numero } = await params;
     const url = new URL(request.url);
-    const phoneInput = url.searchParams.get("phone") || url.searchParams.get("phoneSuffix") || "";
+    const phoneInput =
+      url.searchParams.get("phone") ||
+      url.searchParams.get("phoneSuffix") ||
+      url.searchParams.get("t") ||
+      url.searchParams.get("code") ||
+      "";
 
     if (!numero) {
       return NextResponse.json({ success: false, message: "Numéro de ticket requis" }, { status: 400 });
@@ -53,6 +58,7 @@ export async function GET(
           },
         },
         piecesUtilisees: true,
+        piecesJointes: true,
         documents: {
           orderBy: { dateEmission: "desc" },
         },
@@ -66,20 +72,46 @@ export async function GET(
       );
     }
 
+    // Contrôle propriétaire : les 4 derniers chiffres du téléphone sont OBLIGATOIRES dès l'entrée
+    const cleanClientPhone = (intervention.client.telephone || "").replace(/\D/g, "");
+    const cleanInputPhone = phoneInput.replace(/\D/g, "");
+
+    // Cas 1 : Absence des 4 chiffres dans la requête
+    if (!cleanInputPhone || cleanInputPhone.length < 4) {
+      return NextResponse.json(
+        {
+          success: false,
+          requiresPhone: true,
+          numero: intervention.numero,
+          message: "Veuillez saisir les 4 derniers chiffres du numéro de téléphone associé à ce dossier pour y accéder.",
+        },
+        { status: 401 }
+      );
+    }
+
+    // Cas 2 : Les 4 chiffres ne correspondent pas au propriétaire
+    if (
+      cleanClientPhone.length < 4 ||
+      !cleanClientPhone.endsWith(cleanInputPhone.slice(-4))
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          invalidPhone: true,
+          numero: intervention.numero,
+          message: "Les 4 chiffres du numéro de téléphone ne correspondent pas à ce dossier.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Cas 3 : VALIDATION RÉUSSIE — Accès direct au dossier complet
     const repDoc = intervention.documents.find(
       (d) => d.type === DocumentType.FACTURE && d.typeFacture === FactureType.REPARATION
     );
     const isRepPaid = !repDoc || repDoc.statutPaiement === StatutPaiement.PAYE;
 
     const statusInfo = getPublicStatusInfo(intervention.statut, { isPaid: isRepPaid });
-
-    // Vérification du contrôle propriétaire par les 4 derniers chiffres du téléphone
-    const cleanClientPhone = (intervention.client.telephone || "").replace(/\D/g, "");
-    const cleanInputPhone = phoneInput.replace(/\D/g, "");
-    const isUnlocked =
-      cleanInputPhone.length >= 4 &&
-      cleanClientPhone.length >= 4 &&
-      cleanClientPhone.endsWith(cleanInputPhone.slice(-4));
 
     // Trouver le devis actif si existant
     const devisDoc = intervention.documents.find((d) => d.type === DocumentType.DEVIS);
@@ -91,29 +123,35 @@ export async function GET(
         numero: intervention.numero,
         type: intervention.type,
         typeMateriel: intervention.typeMateriel,
-        isUnlocked,
-        // Données protégées uniquement disponibles après confirmation du téléphone
-        panneDeclaree: isUnlocked ? intervention.panneDeclaree : "Description protégée (saisissez votre téléphone)",
+        panneDeclaree: intervention.panneDeclaree,
+        diagnosticTechnicien: intervention.diagnosticTechnicien,
         modeIntervention: intervention.modeIntervention,
-        clientNom: maskClientName(intervention.client.nom),
+        clientNom: intervention.client.nom,
+        clientTelephoneMasque:
+          cleanClientPhone.length >= 4
+            ? `•••• •• ${cleanClientPhone.slice(-4)}`
+            : "Numéro protégé",
         dateCreation: intervention.dateCreation,
         dateCloture: intervention.dateCloture,
         statut: intervention.statut,
         statusInfo,
-        devis: isUnlocked && devisDoc
+        devis: devisDoc
           ? {
               numero: devisDoc.numero,
               montant: devisDoc.montant,
               statutPaiement: devisDoc.statutPaiement,
             }
           : null,
-        pieces: isUnlocked
-          ? intervention.piecesUtilisees.map((p) => ({
-              designation: p.designation,
-              quantite: p.quantite,
-              prixUnitaire: p.prixUnitaire,
-            }))
-          : [],
+        pieces: intervention.piecesUtilisees.map((p) => ({
+          designation: p.designation,
+          quantite: p.quantite,
+          prixUnitaire: p.prixUnitaire,
+        })),
+        photos: intervention.piecesJointes.map((pj) => ({
+          id: pj.id,
+          url: pj.url,
+          type: pj.type,
+        })),
       },
     });
   } catch (error) {
@@ -143,7 +181,7 @@ export async function POST(
     const body = await request.json();
     const { action, phoneSuffix, phone } = body;
 
-    const phoneInput = (phoneSuffix || phone || "").replace(/\D/g, "");
+    const phoneInput = (phoneSuffix || phone || body.t || body.code || "").replace(/\D/g, "");
 
     const intervention = await db.intervention.findUnique({
       where: { numero: numero.toUpperCase().trim() },

@@ -9,10 +9,14 @@ export const metadata = {
 
 export default async function SuiviDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ numero: string }>;
+  searchParams?: Promise<{ t?: string; phone?: string; phoneSuffix?: string }>;
 }) {
   const { numero } = await params;
+  const sParams = searchParams ? await searchParams : {};
+  const phoneParam = sParams?.t || sParams?.phone || sParams?.phoneSuffix || "";
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-8">
@@ -29,7 +33,7 @@ export default async function SuiviDetailPage({
         </h1>
       </div>
 
-      <TicketTracker initialNumero={numero} />
+      <TicketTracker initialNumero={numero} initialPhone={phoneParam} />
     </div>
   );
 }

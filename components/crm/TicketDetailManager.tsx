@@ -1085,13 +1085,13 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
               let waText = `Bonjour ${ticket.client.nom},\n\n`;
 
               if (devisDoc && (ticket.statut === InterventionStatut.DIAGNOSTIC_TERMINE || ticket.statut === InterventionStatut.DEVIS_ENVOYE)) {
-                waText += `Votre devis de réparation RyHaD Tic-Medic est disponible :\n• Devis N° : ${devisDoc.numero}\n• Montant estimé : ${formatFCFA(devisDoc.montant)}\n• Matériel : ${ticket.typeMateriel.replace(/_/g, " ")}\n\nConsulter votre devis officiel :\n${appBaseUrl}/documents/${devisDoc.numero}${phoneParam}\n\nSuivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou`;
+                waText += `Votre devis de réparation RyHaD Tic-Medic est disponible :\n• Devis N° : ${devisDoc.numero}\n• Montant estimé : ${formatFCFA(devisDoc.montant)}\n• Matériel : ${ticket.typeMateriel.replace(/_/g, " ")}\n\nConsulter votre devis officiel :\n${appBaseUrl}/documents/${devisDoc.numero}${phoneParam}\n\nSuivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}${phoneParam}\n\nRyHaD Tic-Medic • Gbégamey, Cotonou`;
               } else if (repDoc && ticket.statut === InterventionStatut.DEVIS_ACCEPTE) {
-                waText += `Votre facture de réparation N° ${repDoc.numero} (${formatFCFA(repDoc.montant)}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} chez RyHaD Tic-Medic est disponible.\n\nConsulter votre facture officielle :\n${appBaseUrl}/documents/${repDoc.numero}${phoneParam}\n\nSuivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}`;
+                waText += `Votre facture de réparation N° ${repDoc.numero} (${formatFCFA(repDoc.montant)}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} chez RyHaD Tic-Medic est disponible.\n\nConsulter votre facture officielle :\n${appBaseUrl}/documents/${repDoc.numero}${phoneParam}\n\nSuivre votre dossier en direct :\n${appBaseUrl}/suivi/${ticket.numero}${phoneParam}`;
               } else if (ticket.statut === InterventionStatut.TERMINE) {
-                waText += `Bonne nouvelle ! Votre ${ticket.typeMateriel.replace(/_/g, " ")} (Dossier ${ticket.numero}) est réparé et disponible à notre atelier de Gbégamey pour retrait.\n\nSuivre votre dossier :\n${appBaseUrl}/suivi/${ticket.numero}`;
+                waText += `Bonne nouvelle ! Votre ${ticket.typeMateriel.replace(/_/g, " ")} (Dossier ${ticket.numero}) est réparé et disponible à notre atelier de Gbégamey pour retrait.\n\nSuivre votre dossier :\n${appBaseUrl}/suivi/${ticket.numero}${phoneParam}`;
               } else {
-                waText += `Votre dossier (${ticket.numero}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} a bien été enregistré chez RyHaD Tic-Medic.\n\nSuivez l'avancement technique et vos documents en direct sur :\n${appBaseUrl}/suivi/${ticket.numero}`;
+                waText += `Votre dossier (${ticket.numero}) pour votre ${ticket.typeMateriel.replace(/_/g, " ")} a bien été enregistré chez RyHaD Tic-Medic.\n\nSuivez l'avancement technique et vos documents en direct sur :\n${appBaseUrl}/suivi/${ticket.numero}${phoneParam}`;
               }
 
               return (
@@ -1568,7 +1568,7 @@ export function TicketDetailManager({ ticket, technicians, userRole, currentUser
                           return (
                             <a
                               href={`https://wa.me/${ticket.client.telephone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
-                                `Bonjour ${ticket.client.nom},\n\nVoici votre ${label} RyHaD Tic-Medic :\n• Réf : ${doc.numero}\n• Montant : ${formatFCFA(doc.montant)}\n\nConsulter votre document officiel :\n${docOrigin}/documents/${doc.numero}${pParam}\n\nSuivi de votre dossier : ${docOrigin}/suivi/${ticket.numero}`
+                                `Bonjour ${ticket.client.nom},\n\nVoici votre ${label} RyHaD Tic-Medic :\n• Réf : ${doc.numero}\n• Montant : ${formatFCFA(doc.montant)}\n\nConsulter votre document officiel :\n${docOrigin}/documents/${doc.numero}${pParam}\n\nSuivi de votre dossier : ${docOrigin}/suivi/${ticket.numero}${pParam}`
                               )}`}
                               target="_blank"
                               rel="noreferrer"

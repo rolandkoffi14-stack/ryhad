@@ -20,7 +20,7 @@ export default function SuiviLandingPage() {
           Suivre l&apos;État de Votre Réparation
         </h1>
         <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
-          Saisissez la référence unique de votre dossier (ex: <strong>INT-2026-0001</strong>) reçue lors de votre dépôt en atelier ou par SMS/Email.
+          Saisissez la référence unique de votre dossier (ex: <strong>INT-2026-0001</strong>) ainsi que les <strong>4 derniers chiffres</strong> de votre numéro de téléphone.
         </p>
       </div>
 
@@ -32,8 +32,8 @@ export default function SuiviLandingPage() {
         <div className="p-4 rounded-xl bg-brand-slate border border-gray-100 flex items-start gap-3">
           <ShieldCheck className="w-5 h-5 text-brand-blue shrink-0 mt-0.5" />
           <div>
-            <span className="font-bold text-brand-dark block">Accès Simple & Sécurisé</span>
-            <p className="text-gray-500 mt-0.5">Pas besoin de mot de passe, votre numéro de ticket suffit.</p>
+            <span className="font-bold text-brand-dark block">Accès Sécurisé & Confidentiel</span>
+            <p className="text-gray-500 mt-0.5">Votre numéro de ticket et vos 4 chiffres protègent vos devis et diagnostics.</p>
           </div>
         </div>
 
