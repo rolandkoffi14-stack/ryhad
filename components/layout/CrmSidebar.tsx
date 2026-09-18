@@ -127,7 +127,7 @@ export function CrmSidebar({
     <div className="flex flex-col h-full bg-slate-900 text-slate-300 select-none">
       {/* Brand Header */}
       <div className="p-5 border-b border-slate-800 flex items-center justify-between shrink-0">
-        <Link href="/crm" className="flex items-center gap-2.5" onClick={onMobileClose}>
+        <Link href="/crm" prefetch={false} className="flex items-center gap-2.5" onClick={onMobileClose}>
           <div className="relative w-9 h-9 rounded-xl bg-white flex items-center justify-center p-0.5 border border-slate-700 shadow-xs">
             <Image
               src="/images/logo.jpg"
@@ -182,6 +182,7 @@ export function CrmSidebar({
             <Link
               key={item.href}
               href={item.href}
+              prefetch={false}
               onClick={onMobileClose}
               className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                 isActive
@@ -214,6 +215,7 @@ export function CrmSidebar({
       <div className="p-4 border-t border-gray-800 space-y-2.5 shrink-0">
         <Link
           href="/"
+          prefetch={false}
           className="flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

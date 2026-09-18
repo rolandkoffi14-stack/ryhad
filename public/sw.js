@@ -1,7 +1,6 @@
 // Service Worker — RyHaD Tic-Medic PWA & Web Push Notifications
-const CACHE_NAME = "ryhad-crm-pwa-v1";
+const CACHE_NAME = "ryhad-crm-pwa-v2";
 const PRECACHE_ASSETS = [
-  "/crm",
   "/manifest.webmanifest",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
@@ -33,14 +32,29 @@ self.addEventListener("activate", (event) => {
 
 // Événement fetch requis pour la conformité PWA dans Chrome/Edge
 self.addEventListener("fetch", (event) => {
-  // Ignorer les requêtes non GET ou vers les API dynamiques
-  if (event.request.method !== "GET" || event.request.url.includes("/api/")) {
+  const url = new URL(event.request.url);
+
+  // Ne JAMAIS intercepter :
+  // 1. Les requêtes non GET
+  // 2. Les appels API (/api/)
+  // 3. Les requêtes de navigation et composants serveur Next.js (RSC, _rsc, headers Next.js)
+  // 4. Les pages dynamiques (/crm)
+  if (
+    event.request.method !== "GET" ||
+    url.pathname.startsWith("/api/") ||
+    url.pathname.startsWith("/crm") ||
+    url.searchParams.has("_rsc") ||
+    event.request.headers.get("RSC") === "1" ||
+    event.request.headers.get("Next-Router-State-Tree")
+  ) {
     return;
   }
 
+  // Pour les assets statiques uniquement (images, manifest, favicons)
   event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+      return fetch(event.request);
     })
   );
 });

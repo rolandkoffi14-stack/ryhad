@@ -47,11 +47,29 @@ export default async function TicketsContractuelPage({
             where: isTechnician
               ? { technicienAssigneId: user.id }
               : undefined,
-            include: {
+            select: {
+              id: true,
+              numero: true,
+              type: true,
+              typeMateriel: true,
+              panneDeclaree: true,
+              statut: true,
+              dateCreation: true,
+              dateProgrammee: true,
+              checklistPrevue: true,
+              technicienAssigneId: true,
               technicienAssigne: {
                 select: { id: true, firstName: true, lastName: true },
               },
-              documents: true,
+              documents: {
+                select: {
+                  id: true,
+                  numero: true,
+                  type: true,
+                  montant: true,
+                  statutPaiement: true,
+                },
+              },
             },
             orderBy: [
               { dateProgrammee: "asc" },
@@ -61,6 +79,16 @@ export default async function TicketsContractuelPage({
           facturesPeriodiques: isTechnician
             ? false
             : {
+                select: {
+                  id: true,
+                  numero: true,
+                  type: true,
+                  typeFacture: true,
+                  montant: true,
+                  statutPaiement: true,
+                  modePaiement: true,
+                  dateEmission: true,
+                },
                 orderBy: { dateEmission: "desc" },
               },
         },
