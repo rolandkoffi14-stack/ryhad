@@ -20,12 +20,14 @@ import {
   CreditCard,
   Download,
   X,
+  UserPlus,
 } from "lucide-react";
-import { Periodicite, ContractStatus } from "@prisma/client";
+import { Periodicite, ContractStatus, ClientType } from "@prisma/client";
 import { formatFCFA } from "@/lib/format";
 import { PaginationControls } from "@/components/crm/PaginationControls";
 import { QuickViewModal, QuickViewData } from "@/components/crm/QuickViewModal";
 import { PaymentConfirmationModal } from "@/components/crm/PaymentConfirmationModal";
+import { QuickCreateClientModal } from "@/components/crm/QuickCreateClientModal";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -88,6 +90,14 @@ export function ContractManager({ contracts, clients }: Props) {
     montant: 0,
   });
 
+  // Gestion dynamique des clients disponibles
+  const [clientsList, setClientsList] = useState(clients);
+  const [showQuickClientModal, setShowQuickClientModal] = useState(false);
+
+  useEffect(() => {
+    setClientsList(clients);
+  }, [clients]);
+
   // Clients possédant déjà un contrat actif (règle : 1 seul contrat actif simultané par client)
   const clientsWithActiveContract = useMemo(() => {
     const activeIds = new Set<string>();
@@ -100,8 +110,8 @@ export function ContractManager({ contracts, clients }: Props) {
   }, [contracts]);
 
   const availableClients = useMemo(() => {
-    return clients.filter((cl) => !clientsWithActiveContract.has(cl.id));
-  }, [clients, clientsWithActiveContract]);
+    return clientsList.filter((cl) => !clientsWithActiveContract.has(cl.id));
+  }, [clientsList, clientsWithActiveContract]);
 
   const [formData, setFormData] = useState<{
     clientId: string;
@@ -113,7 +123,7 @@ export function ContractManager({ contracts, clients }: Props) {
     equipementsCouverts: string;
   }>({
     clientId: availableClients[0]?.id || clients[0]?.id || "",
-    dateDebut: new Date().toISOString().split("T")[0],
+    dateDebut: format(new Date(), "yyyy-MM-dd"),
     dateFin: "",
     periodicite: Periodicite.MENSUEL,
     montantMainOeuvre: 150000,
@@ -132,7 +142,7 @@ export function ContractManager({ contracts, clients }: Props) {
     const firstAvailable = availableClients[0]?.id || "";
     setFormData({
       clientId: firstAvailable,
-      dateDebut: new Date().toISOString().split("T")[0],
+      dateDebut: format(new Date(), "yyyy-MM-dd"),
       dateFin: "",
       periodicite: Periodicite.MENSUEL,
       montantMainOeuvre: 150000,
@@ -218,6 +228,14 @@ export function ContractManager({ contracts, clients }: Props) {
     setLoading(true);
     setError(null);
     setSuccessMsg(null);
+
+    // Contrôle date dans le passé
+    const todayStr = format(new Date(), "yyyy-MM-dd");
+    if (formData.dateDebut < todayStr) {
+      setError("La date d'effet (début) du contrat ne peut pas être située dans le passé.");
+      setLoading(false);
+      return;
+    }
 
     // Règle d'unicité : un seul contrat actif par client
     if (clientsWithActiveContract.has(formData.clientId)) {
@@ -631,6 +649,19 @@ export function ContractManager({ contracts, clients }: Props) {
         loading={loading}
       />
 
+      {/* Modale d'ajout rapide d'un client */}
+      <QuickCreateClientModal
+        isOpen={showQuickClientModal}
+        onClose={() => setShowQuickClientModal(false)}
+        onSuccess={({ client }) => {
+          setClientsList((prev) => [client, ...prev]);
+          setFormData((prev) => ({ ...prev, clientId: client.id }));
+          setSuccessMsg(`Client « ${client.nom} » créé et sélectionné avec succès.`);
+        }}
+        includeContract={false}
+        defaultClientType={ClientType.ENTREPRISE}
+      />
+
       {/* Modale de création d'un contrat */}
       {showModal && mounted && createPortal(
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-200">
@@ -666,7 +697,7 @@ export function ContractManager({ contracts, clients }: Props) {
                 </div>
               )}
 
-              {/* Règle client unique */}
+              {/* Règle client unique avec bouton de création rapide */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="font-extrabold text-gray-800 flex items-center gap-1.5">
@@ -674,9 +705,14 @@ export function ContractManager({ contracts, clients }: Props) {
                     <span>Client / Entreprise partenaire</span>
                     <span className="text-brand-red">*</span>
                   </label>
-                  <span className="text-[10px] text-gray-500 font-medium">
-                    1 seul contrat actif par client
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowQuickClientModal(true)}
+                    className="inline-flex items-center gap-1 text-[11px] font-extrabold text-brand-blue hover:text-brand-blue-dark bg-brand-blue/10 hover:bg-brand-blue/20 px-2.5 py-1 rounded-lg transition-all border border-brand-blue/20 cursor-pointer"
+                  >
+                    <UserPlus className="w-3.5 h-3.5" />
+                    <span>Nouveau client</span>
+                  </button>
                 </div>
 
                 <select
@@ -690,7 +726,7 @@ export function ContractManager({ contracts, clients }: Props) {
                       Aucun client sans contrat actif disponible
                     </option>
                   )}
-                  {clients.map((cl) => {
+                  {clientsList.map((cl) => {
                     const hasActive = clientsWithActiveContract.has(cl.id);
                     return (
                       <option
@@ -707,7 +743,7 @@ export function ContractManager({ contracts, clients }: Props) {
 
                 {availableClients.length === 0 ? (
                   <p className="text-[11px] text-amber-700 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
-                    Tous vos clients enregistrés possèdent déjà un contrat actif. Vous devez créer un nouveau client ou résilier/renouveler un contrat expiré.
+                    Tous vos clients enregistrés possèdent déjà un contrat actif. Vous pouvez cliquer sur &ldquo;Nouveau client&rdquo; ci-dessus pour en ajouter un.
                   </p>
                 ) : (
                   <p className="text-[10px] text-gray-500">
@@ -812,6 +848,7 @@ export function ContractManager({ contracts, clients }: Props) {
                   <input
                     type="date"
                     required
+                    min={format(new Date(), "yyyy-MM-dd")}
                     value={formData.dateDebut}
                     onChange={(e) => setFormData({ ...formData, dateDebut: e.target.value })}
                     className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-blue outline-none font-medium text-gray-800"

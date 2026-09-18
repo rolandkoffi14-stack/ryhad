@@ -9,8 +9,6 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
-import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
-
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://ryhad.2krdigital.online";
 
 export const metadata: Metadata = {
@@ -32,7 +30,6 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "RyHaD Tic-Medic" }],
   metadataBase: new URL(appUrl),
-  manifest: "/manifest.webmanifest",
   icons: {
     icon: [
       { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
@@ -109,7 +106,6 @@ export default function RootLayout({
         className={`${montserrat.className} bg-white text-brand-dark min-h-screen flex flex-col`}
         suppressHydrationWarning
       >
-        <ServiceWorkerRegister />
         {children}
       </body>
     </html>

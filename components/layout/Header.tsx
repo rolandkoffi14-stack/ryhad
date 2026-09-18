@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { Menu, X, Search, ArrowRight } from "lucide-react";
-import { InstallPwaButton } from "@/components/pwa/InstallPwaButton";
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,7 +26,6 @@ export function Header() {
           </div>
 
           <div className="flex items-center gap-3 font-medium">
-            <InstallPwaButton variant="public-topbar" />
             <Link
               href="/suivi"
               className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors"

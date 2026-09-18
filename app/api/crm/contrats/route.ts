@@ -13,15 +13,30 @@ export async function POST(request: Request) {
     }
 
     const role = (session.user as any).role as StaffRole;
-    if (role !== StaffRole.ADMIN) {
+    if (role === StaffRole.TECHNICIEN) {
       return NextResponse.json(
-        { success: false, message: "Action réservée exclusivement à la Direction (Administrateur)." },
+        { success: false, message: "Action réservée à la réception ou à la direction." },
         { status: 403 }
       );
     }
 
     const body = await request.json();
     const validated = contractFormSchema.parse(body);
+
+    // Contrôle strict : la date de début ne peut pas être dans le passé
+    const now = new Date();
+    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const [y, m, d] = (validated.dateDebut || "").split("-").map(Number);
+    const startMidnight = new Date(y, (m || 1) - 1, d || 1).getTime();
+    if (isNaN(startMidnight) || startMidnight < todayMidnight) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "La date d'effet (début) du contrat ne peut pas être située dans le passé.",
+        },
+        { status: 400 }
+      );
+    }
 
     // Règle d'unicité stricte : un client ne peut pas avoir plus d'un contrat actif
     const existingActiveContract = await db.contract.findFirst({

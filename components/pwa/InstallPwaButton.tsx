@@ -107,9 +107,7 @@ export function InstallPwaButton({
 
   const getButtonLabel = () => {
     if (label) return label;
-    if (variant === "public-topbar") return "Installer l'app";
-    if (variant === "footer") return "Installer l'application RyHaD";
-    return "Installer l'application";
+    return "Installer le CRM";
   };
 
   return (
@@ -117,7 +115,7 @@ export function InstallPwaButton({
       <button
         type="button"
         onClick={handleInstallClick}
-        title="Installer l'application RyHaD sur votre appareil"
+        title="Installer l'application CRM RyHaD sur votre appareil"
         className={getButtonStyles()}
       >
         <Download className="w-3.5 h-3.5 shrink-0" />

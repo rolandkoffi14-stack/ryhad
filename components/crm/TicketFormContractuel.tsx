@@ -1,9 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { TypeMateriel, ModeIntervention } from "@prisma/client";
-import { ClipboardList, Save, ArrowLeft, ShieldCheck, AlertCircle, Wrench } from "lucide-react";
+import { TypeMateriel, ModeIntervention, ClientType } from "@prisma/client";
+import {
+  ClipboardList,
+  Save,
+  ArrowLeft,
+  ShieldCheck,
+  AlertCircle,
+  Wrench,
+  UserPlus,
+  CheckCircle2,
+} from "lucide-react";
+import { QuickCreateClientModal } from "@/components/crm/QuickCreateClientModal";
 
 interface ContractOption {
   id: string;
@@ -29,11 +39,19 @@ export function TicketFormContractuel({ contracts, technicians, initialContractI
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  const [contractsList, setContractsList] = useState<ContractOption[]>(contracts);
+  const [showClientModal, setShowClientModal] = useState(false);
+
+  useEffect(() => {
+    setContractsList(contracts);
+  }, [contracts]);
 
   const [selectedContractId, setSelectedContractId] = useState(
     (initialContractId && contracts.find((c) => c.id === initialContractId)?.id) || contracts[0]?.id || ""
   );
-  const currentContract = contracts.find((c) => c.id === selectedContractId);
+  const currentContract = contractsList.find((c) => c.id === selectedContractId);
 
   const [formData, setFormData] = useState<{
     typeMateriel: TypeMateriel;
@@ -101,27 +119,53 @@ export function TicketFormContractuel({ contracts, technicians, initialContractI
         </div>
       )}
 
-      {/* Sélection Contrat Actif */}
+      {successMsg && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 font-bold animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+          <span>{successMsg}</span>
+        </div>
+      )}
+
+      {/* Sélection Contrat Actif avec option Nouveau Client */}
       <div className="space-y-2">
-        <label className="block text-xs font-bold text-gray-700">
-          Entreprise & Contrat de maintenance actif *
-        </label>
-        {contracts.length > 0 ? (
+        <div className="flex items-center justify-between">
+          <label className="block text-xs font-bold text-gray-700">
+            Entreprise & Contrat de maintenance actif *
+          </label>
+          <button
+            type="button"
+            onClick={() => setShowClientModal(true)}
+            className="inline-flex items-center gap-1 text-[11px] font-extrabold text-brand-blue hover:text-brand-blue-dark bg-brand-blue/10 hover:bg-brand-blue/20 px-2.5 py-1 rounded-lg transition-all border border-brand-blue/20 cursor-pointer"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>Nouveau client</span>
+          </button>
+        </div>
+
+        {contractsList.length > 0 ? (
           <select
             value={selectedContractId}
             onChange={(e) => setSelectedContractId(e.target.value)}
             required
             className="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none bg-white font-medium"
           >
-            {contracts.map((ctr) => (
+            {contractsList.map((ctr) => (
               <option key={ctr.id} value={ctr.id}>
                 {ctr.clientNom} — Périodicité : {ctr.periodicite}
               </option>
             ))}
           </select>
         ) : (
-          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-medium">
-            Aucun contrat de maintenance actif n&apos;est actuellement enregistré. Seul l&apos;administrateur peut créer des contrats dans le menu &ldquo;Contrats&rdquo;.
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-medium flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <span>Aucun contrat de maintenance actif n&apos;est enregistré. Vous pouvez en créer un directement.</span>
+            <button
+              type="button"
+              onClick={() => setShowClientModal(true)}
+              className="inline-flex items-center gap-1.5 bg-brand-blue text-white px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 hover:bg-brand-blue-dark transition-colors cursor-pointer"
+            >
+              <UserPlus className="w-3.5 h-3.5" />
+              <span>Nouveau client & contrat</span>
+            </button>
           </div>
         )}
 
@@ -228,6 +272,28 @@ export function TicketFormContractuel({ contracts, technicians, initialContractI
           <span>{loading ? "Création..." : "Créer"}</span>
         </button>
       </div>
+
+      {/* Modale d'ajout rapide client entreprise & contrat */}
+      <QuickCreateClientModal
+        isOpen={showClientModal}
+        onClose={() => setShowClientModal(false)}
+        includeContract={true}
+        defaultClientType={ClientType.ENTREPRISE}
+        onSuccess={({ client, contract }) => {
+          if (contract) {
+            const newOption: ContractOption = {
+              id: contract.id,
+              clientId: client.id,
+              clientNom: client.nom,
+              equipementsCouverts: contract.equipementsCouverts,
+              periodicite: contract.periodicite,
+            };
+            setContractsList((prev) => [newOption, ...prev]);
+            setSelectedContractId(contract.id);
+            setSuccessMsg(`Client entreprise « ${client.nom} » et son contrat créés avec succès.`);
+          }
+        }}
+      />
     </form>
   );
 }

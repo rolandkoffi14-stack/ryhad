@@ -1,7 +1,7 @@
 // Service Worker — RyHaD Tic-Medic PWA & Web Push Notifications
-const CACHE_NAME = "ryhad-pwa-v1";
+const CACHE_NAME = "ryhad-crm-pwa-v1";
 const PRECACHE_ASSETS = [
-  "/",
+  "/crm",
   "/manifest.webmanifest",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",

@@ -105,6 +105,20 @@ export const contractFormSchema = z
     equipementsCouverts: z.string().min(3, "Description des équipements requise"),
   })
   .superRefine((data, ctx) => {
+    // Vérification que dateDebut n'est pas dans le passé
+    const now = new Date();
+    const todayMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    const [y, m, d] = (data.dateDebut || "").split("-").map(Number);
+    const startMidnight = new Date(y, (m || 1) - 1, d || 1).getTime();
+    if (isNaN(startMidnight) || startMidnight < todayMidnight) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "La date d'effet (début) ne peut pas être antérieure à aujourd'hui.",
+        path: ["dateDebut"],
+      });
+      return;
+    }
+
     if (!data.dateFin || data.dateFin.trim() === "") return;
     const start = new Date(data.dateDebut);
     const end = new Date(data.dateFin);
