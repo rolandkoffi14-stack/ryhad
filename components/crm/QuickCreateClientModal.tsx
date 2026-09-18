@@ -286,11 +286,7 @@ export function QuickCreateClientModal({
             <input
               type="text"
               required
-              placeholder={
-                clientData.type === ClientType.PARTICULIER
-                  ? "Ex: KOFFI Roland"
-                  : "Ex: Cabinet Médical Saint-Luc"
-              }
+              placeholder="Nom et prénom ou Raison sociale"
               value={clientData.nom}
               onChange={(e) => setClientData({ ...clientData, nom: e.target.value })}
               className="w-full px-3 py-2 rounded-xl border border-gray-300 text-xs focus:ring-2 focus:ring-brand-blue outline-none font-medium"
@@ -305,7 +301,7 @@ export function QuickCreateClientModal({
               </label>
               <input
                 type="text"
-                placeholder="Ex: M. Jean DOSSO (DSI / Responsable)"
+                placeholder="Nom et prénoms"
                 value={clientData.contactNom}
                 onChange={(e) =>
                   setClientData({ ...clientData, contactNom: e.target.value })
@@ -319,11 +315,11 @@ export function QuickCreateClientModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="block text-[11px] font-bold text-gray-700 mb-1">
-                Adresse / Quartier
+                Adresse
               </label>
               <input
                 type="text"
-                placeholder="Ex: Gbégamey, Cotonou"
+                placeholder="Adresse"
                 value={clientData.adresse}
                 onChange={(e) =>
                   setClientData({ ...clientData, adresse: e.target.value })
@@ -334,11 +330,11 @@ export function QuickCreateClientModal({
 
             <div>
               <label className="block text-[11px] font-bold text-gray-700 mb-1">
-                Email (optionnel)
+                Email
               </label>
               <input
                 type="email"
-                placeholder="contact@entreprise.bj"
+                placeholder="Email"
                 value={clientData.email}
                 onChange={(e) =>
                   setClientData({ ...clientData, email: e.target.value })

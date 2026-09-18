@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { TypeMateriel, ModeIntervention, ClientType } from "@prisma/client";
+import Link from "next/link";
+import { TypeMateriel, ModeIntervention } from "@prisma/client";
 import {
   ClipboardList,
   Save,
@@ -10,10 +11,8 @@ import {
   ShieldCheck,
   AlertCircle,
   Wrench,
-  UserPlus,
   CheckCircle2,
 } from "lucide-react";
-import { QuickCreateClientModal } from "@/components/crm/QuickCreateClientModal";
 
 interface ContractOption {
   id: string;
@@ -42,7 +41,6 @@ export function TicketFormContractuel({ contracts, technicians, initialContractI
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const [contractsList, setContractsList] = useState<ContractOption[]>(contracts);
-  const [showClientModal, setShowClientModal] = useState(false);
 
   useEffect(() => {
     setContractsList(contracts);
@@ -126,21 +124,11 @@ export function TicketFormContractuel({ contracts, technicians, initialContractI
         </div>
       )}
 
-      {/* Sélection Contrat Actif avec option Nouveau Client */}
+      {/* Sélection Contrat Actif */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <label className="block text-xs font-bold text-gray-700">
-            Entreprise & Contrat de maintenance actif *
-          </label>
-          <button
-            type="button"
-            onClick={() => setShowClientModal(true)}
-            className="inline-flex items-center gap-1 text-[11px] font-extrabold text-brand-blue hover:text-brand-blue-dark bg-brand-blue/10 hover:bg-brand-blue/20 px-2.5 py-1 rounded-lg transition-all border border-brand-blue/20 cursor-pointer"
-          >
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>Nouveau client</span>
-          </button>
-        </div>
+        <label className="block text-xs font-bold text-gray-700">
+          Entreprise & Contrat de maintenance actif *
+        </label>
 
         {contractsList.length > 0 ? (
           <select
@@ -157,15 +145,14 @@ export function TicketFormContractuel({ contracts, technicians, initialContractI
           </select>
         ) : (
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 font-medium flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <span>Aucun contrat de maintenance actif n&apos;est enregistré. Vous pouvez en créer un directement.</span>
-            <button
-              type="button"
-              onClick={() => setShowClientModal(true)}
-              className="inline-flex items-center gap-1.5 bg-brand-blue text-white px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 hover:bg-brand-blue-dark transition-colors cursor-pointer"
+            <span>Aucun contrat de maintenance actif n&apos;est enregistré. Veuillez d&apos;abord souscrire un contrat actif depuis la section Contrats.</span>
+            <Link
+              href="/crm/contrats"
+              prefetch={false}
+              className="inline-flex items-center gap-1.5 bg-brand-blue hover:bg-brand-blue-dark text-white px-3 py-1.5 rounded-lg text-xs font-bold shrink-0 transition-colors"
             >
-              <UserPlus className="w-3.5 h-3.5" />
-              <span>Nouveau client & contrat</span>
-            </button>
+              <span>Créer un contrat</span>
+            </Link>
           </div>
         )}
 
@@ -272,28 +259,6 @@ export function TicketFormContractuel({ contracts, technicians, initialContractI
           <span>{loading ? "Création..." : "Créer"}</span>
         </button>
       </div>
-
-      {/* Modale d'ajout rapide client entreprise & contrat */}
-      <QuickCreateClientModal
-        isOpen={showClientModal}
-        onClose={() => setShowClientModal(false)}
-        includeContract={true}
-        defaultClientType={ClientType.ENTREPRISE}
-        onSuccess={({ client, contract }) => {
-          if (contract) {
-            const newOption: ContractOption = {
-              id: contract.id,
-              clientId: client.id,
-              clientNom: client.nom,
-              equipementsCouverts: contract.equipementsCouverts,
-              periodicite: contract.periodicite,
-            };
-            setContractsList((prev) => [newOption, ...prev]);
-            setSelectedContractId(contract.id);
-            setSuccessMsg(`Client entreprise « ${client.nom} » et son contrat créés avec succès.`);
-          }
-        }}
-      />
     </form>
   );
 }
