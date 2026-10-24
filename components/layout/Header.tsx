@@ -16,31 +16,33 @@ export function Header() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm transition-all">
-      {/* Top bar fine, allégée et sobre */}
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-xs transition-all">
+      {/* 1. BARRE UTILITAIRE (au-dessus du header) */}
       <div className="bg-brand-dark text-gray-300 text-[11px] py-1.5 px-4 sm:px-6 border-b border-white/5">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+          {/* Horaires à gauche */}
           <div className="flex items-center gap-2 font-medium">
-            <span className="inline-block w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse"></span>
-            <span>Atelier Gbégamey : Lun - Ven (9h - 20h)</span>
+            <span>Lundi – Vendredi, 9h – 20h · Gbégamey, Cotonou</span>
           </div>
 
+          {/* Suivi réparation à droite (icône recherche) -> page /suivi */}
+          {/* C'est le SEUL endroit où l'action "suivre sa réparation" apparaît avant le pli */}
           <div className="flex items-center gap-3 font-medium">
             <Link
               href="/suivi"
-              className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 text-gray-300 hover:text-white transition-colors"
             >
-              <Search className="w-3 h-3 text-gray-400" />
+              <Search className="w-3.5 h-3.5 text-brand-green" />
               <span>Suivi réparation</span>
             </Link>
           </div>
         </div>
       </div>
 
-      {/* Main Navigation */}
+      {/* 2. HEADER PRINCIPAL */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
         <div className="flex items-center justify-between">
-          {/* Logo & Marque - Lien complet vers Accueil */}
+          {/* Logo RyHaD Tic-Medic à gauche */}
           <Link href="/" className="flex items-center gap-3 group" title="RyHaD Tic-Medic - Accueil">
             <div className="relative w-11 h-11 rounded-xl bg-white flex items-center justify-center p-1 border border-gray-100 shadow-xs group-hover:scale-105 transition-transform">
               <Image
@@ -62,12 +64,12 @@ export function Header() {
                 </span>
               </div>
               <p className="text-[10px] text-gray-500 font-medium tracking-wide uppercase">
-                Maintenance & Ingénierie Tech
+                Maintenance &amp; Solutions Tech
               </p>
             </div>
           </Link>
 
-          {/* Desktop Nav */}
+          {/* Desktop Nav - Liens vers de vraies pages */}
           <nav className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
@@ -80,11 +82,11 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Actions */}
+          {/* CTA à droite, plein Bleu Confiance */}
           <div className="hidden sm:flex items-center gap-3">
             <Link
               href="/demande-intervention"
-              className="inline-flex items-center gap-2 bg-brand-blue text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-brand-blue-dark active:scale-[0.98] transition-all"
+              className="inline-flex items-center gap-2 bg-brand-blue text-white px-5 py-2.5 rounded-xl font-bold text-sm shadow-sm hover:bg-brand-blue-dark active:scale-[0.98] transition-all"
             >
               <span>Demander une intervention</span>
               <ArrowRight className="w-4 h-4 text-white" />
@@ -102,7 +104,7 @@ export function Header() {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Menu mobile */}
       {isOpen && (
         <div className="lg:hidden border-t border-gray-100 bg-white px-4 py-4 space-y-3 shadow-lg">
           <nav className="flex flex-col space-y-2">
@@ -127,11 +129,11 @@ export function Header() {
               <ArrowRight className="w-4 h-4 text-white" />
             </Link>
             <Link
-              href="/devis"
+              href="/vente-location"
               onClick={() => setIsOpen(false)}
               className="flex items-center justify-center gap-2 border border-gray-200 text-brand-dark hover:bg-brand-slate py-2.5 rounded-xl font-semibold text-sm transition-colors"
             >
-              <span>Devis & Vente / Location</span>
+              <span>Vente &amp; Location</span>
             </Link>
           </div>
         </div>

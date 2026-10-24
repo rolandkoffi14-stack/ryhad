@@ -450,7 +450,6 @@ export function TicketTracker({ initialNumero, initialPhone }: Props) {
           {/* Statut actuel & Explication */}
           <div className="p-6 rounded-2xl bg-brand-blue-light/50 border border-brand-blue/20 space-y-2">
             <div className="flex items-center gap-2.5">
-              <div className="w-3 h-3 rounded-full bg-brand-green animate-ping"></div>
               <span className="text-xs font-bold uppercase tracking-wider text-brand-blue">
                 État actuel du dossier
               </span>
